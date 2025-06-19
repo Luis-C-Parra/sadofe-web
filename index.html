@@ -1,0 +1,223 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <title>SADOFE - Registro de Novedades</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background-color: #eef2f5;
+      padding: 20px;
+    }
+    h1, h2 {
+      text-align: center;
+    }
+    .form-container {
+      background: #fff;
+      padding: 20px;
+      max-width: 95%;
+      margin: auto;
+      border-radius: 10px;
+      box-shadow: 0 0 10px rgba(0,0,0,0.1);
+    }
+    select, input[type="text"], textarea {
+      padding: 5px;
+      border: 1px solid #ccc;
+      border-radius: 4px;
+      width: 100%;
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 20px;
+    }
+    th, td {
+      border: 1px solid #aaa;
+      padding: 6px;
+      text-align: center;
+    }
+    th {
+      background-color: #0a3d62;
+      color: white;
+    }
+    button {
+      margin-top: 20px;
+      background-color: #0a3d62;
+      color: white;
+      padding: 10px 20px;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+    }
+    .checkbox-group {
+      display: flex;
+      flex-direction: column;
+      align-items: start;
+      gap: 5px;
+    }
+  </style>
+</head>
+<body>
+
+  <h1>SADOFE</h1>
+  <h2>Registro de Novedades por Piso</h2>
+
+  <div class="form-container">
+    <label for="enfermero">Nombre del Enfermero/a:</label>
+    <input type="text" id="enfermero" required>
+
+    <label for="piso">Seleccione el piso:</label>
+    <select id="piso" onchange="generarTabla()" required>
+      <option value="">-- Seleccionar --</option>
+      <option value="1B">1B</option>
+      <option value="2B">2B</option>
+      <option value="1C">1C</option>
+      <option value="2C">2C</option>
+      <option value="3C">3C</option>
+      <option value="4C">4C</option>
+    </select>
+
+    <table id="tablaNovedades" style="display:none;">
+      <thead>
+        <tr>
+          <th>Cama</th>
+          <th>Apellido y Nombre</th>
+          <th>Aislamiento</th>
+          <th>Novedades clínicas + Observaciones</th>
+        </tr>
+      </thead>
+      <tbody></tbody>
+    </table>
+
+    <button onclick="registrar()">Registrar novedades del piso</button>
+  </div>
+
+  <script>
+    const camasPorPiso = {
+      "1B": generarCamas(101, 110, [110], 3),
+      "2B": generarCamas(201, 210, [210], 3),
+      "1C": generarCamas(116, 129),
+      "2C": generarCamas(216, 229),
+      "3C": generarCamas(316, 322),
+      "4C": generarCamas(422, 429, [], 2)
+    };
+
+    function generarCamas(desde, hasta, especiales = [], camasEspecial = 2) {
+      let lista = [];
+      for (let i = desde; i <= hasta; i++) {
+        let camas = especiales.includes(i) ? camasEspecial : 2;
+        for (let j = 1; j <= camas; j++) {
+          lista.push(`${i}-${j}`);
+        }
+      }
+      return lista;
+    }
+
+    function generarTabla() {
+      const piso = document.getElementById("piso").value;
+      const tbody = document.querySelector("#tablaNovedades tbody");
+      const tabla = document.getElementById("tablaNovedades");
+      tbody.innerHTML = "";
+
+      if (!piso || !camasPorPiso[piso]) {
+        tabla.style.display = "none";
+        return;
+      }
+
+      camasPorPiso[piso].forEach(cama => {
+        const row = document.createElement("tr");
+
+        // Cama
+        const tdCama = document.createElement("td");
+        tdCama.textContent = cama;
+
+        // Apellido y Nombre
+        const tdNombre = document.createElement("td");
+        const inputNombre = document.createElement("input");
+        inputNombre.type = "text";
+        inputNombre.placeholder = "Apellido y Nombre";
+        tdNombre.appendChild(inputNombre);
+
+        // Aislamiento
+        const tdAislamiento = document.createElement("td");
+        const selectAislamiento = document.createElement("select");
+        ["Ninguno", "Respiratorio", "Contacto", "Neutropénico"].forEach(opt => {
+          const o = document.createElement("option");
+          o.value = opt;
+          o.textContent = opt;
+          selectAislamiento.appendChild(o);
+        });
+        tdAislamiento.appendChild(selectAislamiento);
+
+        // Novedades + Observaciones
+        const tdNovedades = document.createElement("td");
+
+        const checkGroup = document.createElement("div");
+        checkGroup.className = "checkbox-group";
+        const novedades = ["Sonda vesical", "Drenaje", "Acceso periférico", "Deambula", "Usa pañales", "Lúcido", "Desorientado", "Somnoliento"];
+        novedades.forEach(nov => {
+          const label = document.createElement("label");
+          const checkbox = document.createElement("input");
+          checkbox.type = "checkbox";
+          checkbox.value = nov;
+          label.appendChild(checkbox);
+          label.appendChild(document.createTextNode(" " + nov));
+          checkGroup.appendChild(label);
+        });
+
+        const textarea = document.createElement("textarea");
+        textarea.placeholder = "Observaciones adicionales...";
+        textarea.rows = 3;
+        textarea.style.marginTop = "5px";
+
+        tdNovedades.appendChild(checkGroup);
+        tdNovedades.appendChild(textarea);
+
+        row.appendChild(tdCama);
+        row.appendChild(tdNombre);
+        row.appendChild(tdAislamiento);
+        row.appendChild(tdNovedades);
+
+        tbody.appendChild(row);
+      });
+
+      tabla.style.display = "table";
+    }
+
+    function registrar() {
+      const enfermero = document.getElementById("enfermero").value;
+      const piso = document.getElementById("piso").value;
+      if (!enfermero || !piso) {
+        alert("Por favor, complete el nombre del enfermero y seleccione el piso.");
+        return;
+      }
+
+      const filas = document.querySelectorAll("#tablaNovedades tbody tr");
+      const datos = [];
+
+      filas.forEach(fila => {
+        const cama = fila.cells[0].textContent;
+        const nombre = fila.cells[1].querySelector("input").value;
+        const aislamiento = fila.cells[2].querySelector("select").value;
+        const checks = fila.cells[3].querySelectorAll("input[type='checkbox']");
+        const observaciones = fila.cells[3].querySelector("textarea").value;
+        const novedades = [];
+        checks.forEach(chk => {
+          if (chk.checked) novedades.push(chk.value);
+        });
+
+        if (nombre.trim() !== "") {
+          datos.push({
+            cama, nombre, aislamiento, novedades, observaciones
+          });
+        }
+      });
+
+      console.log(`Registro por ${enfermero} en piso ${piso}:`);
+      console.table(datos);
+      alert("Novedades registradas correctamente. Ver consola para datos.");
+    }
+  </script>
+
+</body>
+</html>
