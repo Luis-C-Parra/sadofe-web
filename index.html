@@ -131,7 +131,7 @@
         const tdCama = document.createElement("td");
         tdCama.textContent = cama;
 
-        // Apellido y Nombre
+        // Nombre
         const tdNombre = document.createElement("td");
         const inputNombre = document.createElement("input");
         inputNombre.type = "text";
@@ -151,7 +151,6 @@
 
         // Novedades + Observaciones
         const tdNovedades = document.createElement("td");
-
         const checkGroup = document.createElement("div");
         checkGroup.className = "checkbox-group";
         const novedades = ["Sonda vesical", "Drenaje", "Acceso periférico", "Deambula", "Usa pañales", "Lúcido", "Desorientado", "Somnoliento"];
@@ -185,7 +184,7 @@
     }
 
     function registrar() {
-      const enfermero = document.getElementById("enfermero").value;
+      const enfermero = document.getElementById("enfermero").value.trim();
       const piso = document.getElementById("piso").value;
       if (!enfermero || !piso) {
         alert("Por favor, complete el nombre del enfermero y seleccione el piso.");
@@ -197,25 +196,42 @@
 
       filas.forEach(fila => {
         const cama = fila.cells[0].textContent;
-        const nombre = fila.cells[1].querySelector("input").value;
+        const nombre = fila.cells[1].querySelector("input").value.trim();
         const aislamiento = fila.cells[2].querySelector("select").value;
         const checks = fila.cells[3].querySelectorAll("input[type='checkbox']");
-        const observaciones = fila.cells[3].querySelector("textarea").value;
+        const observaciones = fila.cells[3].querySelector("textarea").value.trim();
         const novedades = [];
         checks.forEach(chk => {
           if (chk.checked) novedades.push(chk.value);
         });
 
-        if (nombre.trim() !== "") {
+        if (nombre !== "") {
           datos.push({
-            cama, nombre, aislamiento, novedades, observaciones
+            fecha: new Date().toLocaleString("es-AR"),
+            piso,
+            cama,
+            nombre,
+            aislamiento,
+            novedades: novedades.join(", "),
+            observaciones,
+            enfermero
           });
         }
       });
 
-      console.log(`Registro por ${enfermero} en piso ${piso}:`);
-      console.table(datos);
-      alert("Novedades registradas correctamente. Ver consola para datos.");
+      if (datos.length === 0) {
+        alert("No se ha completado ningún registro con nombre.");
+        return;
+      }
+
+      // Enviar a Google Sheets
+      fetch("https://script.google.com/macros/s/AKfycbyZZxN9giCVtLu0MrcrPqVsY8K3R3NlHk524Z_uOrK7kjqmq6LexbKUdU3dFprKNA/exec", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(datos)
+      })
+      .then(() => alert("✅ Novedades enviadas correctamente."))
+      .catch(err => alert("❌ Error al enviar: " + err.message));
     }
   </script>
 
