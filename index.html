@@ -9,9 +9,7 @@
       background-color: #eef2f5;
       padding: 20px;
     }
-    h1, h2 {
-      text-align: center;
-    }
+    h1, h2 { text-align: center; }
     .form-container {
       background: #fff;
       padding: 20px;
@@ -213,12 +211,14 @@
         });
       });
 
-      fetch("https://script.google.com/macros/s/AKfycbzkEDvo_S8GGjp-tE27u1i9Trjni_6rJHPjFNU30wHc6J6PzJXURexxeGLibNAKzrGghA/exec", {
+      fetch("https://script.google.com/macros/s/AKfycbznONc4J-i6p4yuEfW5hcR8hgnbotrqJZVCrMtACl1YS7sKP7vB2BA39lXBLYBSJ6uUxQ/exec", {
         method: "POST",
+	mode: "no-cors",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(datos)
       })
-      .then(() => alert("✅ Novedades enviadas correctamente."))
+      .then(res => res.text())
+      .then(msg => alert(msg))
       .catch(err => alert("❌ Error al enviar: " + err.message));
     }
   </script>
