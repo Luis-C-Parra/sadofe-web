@@ -127,18 +127,15 @@
       camasPorPiso[piso].forEach(cama => {
         const row = document.createElement("tr");
 
-        // Cama
         const tdCama = document.createElement("td");
         tdCama.textContent = cama;
 
-        // Nombre
         const tdNombre = document.createElement("td");
         const inputNombre = document.createElement("input");
         inputNombre.type = "text";
         inputNombre.placeholder = "Apellido y Nombre";
         tdNombre.appendChild(inputNombre);
 
-        // Aislamiento
         const tdAislamiento = document.createElement("td");
         const selectAislamiento = document.createElement("select");
         ["Ninguno", "Respiratorio", "Contacto", "Neutropénico"].forEach(opt => {
@@ -149,7 +146,6 @@
         });
         tdAislamiento.appendChild(selectAislamiento);
 
-        // Novedades + Observaciones
         const tdNovedades = document.createElement("td");
         const checkGroup = document.createElement("div");
         checkGroup.className = "checkbox-group";
@@ -205,27 +201,19 @@
           if (chk.checked) novedades.push(chk.value);
         });
 
-        if (nombre !== "") {
-          datos.push({
-            fecha: new Date().toLocaleString("es-AR"),
-            piso,
-            cama,
-            nombre,
-            aislamiento,
-            novedades: novedades.join(", "),
-            observaciones,
-            enfermero
-          });
-        }
+        datos.push({
+          fecha: new Date().toLocaleString("es-AR"),
+          piso,
+          cama,
+          nombre,
+          aislamiento,
+          novedades: novedades.join(", "),
+          observaciones,
+          enfermero
+        });
       });
 
-      if (datos.length === 0) {
-        alert("No se ha completado ningún registro con nombre.");
-        return;
-      }
-
-      // Enviar a Google Sheets
-      fetch("https://script.google.com/macros/s/AKfycbycOIUWKa6mm2ehqgxV4ulBxHIEdLgvQaW0nLFm8oviQzvakhLgfkUWH0-Fp1a3v0GB/exec", {
+      fetch("https://script.google.com/macros/s/AKfycbzkEDvo_S8GGjp-tE27u1i9Trjni_6rJHPjFNU30wHc6J6PzJXURexxeGLibNAKzrGghA/exec", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(datos)
