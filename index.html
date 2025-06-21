@@ -2,38 +2,44 @@
 <html lang="es">
 <head>
   <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>SADOFE - Registro de Novedades</title>
   <style>
     body {
       font-family: Arial, sans-serif;
       background-color: #eef2f5;
-      padding: 20px;
+      padding: 10px;
+      margin: 0;
     }
     h1, h2 {
       text-align: center;
+      font-size: 1.5em;
     }
     .form-container {
       background: #fff;
-      padding: 20px;
-      max-width: 95%;
+      padding: 15px;
+      max-width: 100%;
       margin: auto;
       border-radius: 10px;
       box-shadow: 0 0 10px rgba(0,0,0,0.1);
     }
     select, input[type="text"], textarea {
-      padding: 5px;
+      padding: 8px;
       border: 1px solid #ccc;
       border-radius: 4px;
       width: 100%;
+      font-size: 1em;
+      box-sizing: border-box;
     }
     table {
       width: 100%;
       border-collapse: collapse;
-      margin-top: 20px;
+      margin-top: 15px;
+      font-size: 0.9em;
     }
     th, td {
       border: 1px solid #aaa;
-      padding: 6px;
+      padding: 5px;
       text-align: center;
     }
     th {
@@ -41,19 +47,32 @@
       color: white;
     }
     button {
-      margin-top: 20px;
+      margin-top: 15px;
       background-color: #0a3d62;
       color: white;
-      padding: 10px 20px;
+      padding: 10px;
       border: none;
       border-radius: 5px;
       cursor: pointer;
+      width: 100%;
+      font-size: 1em;
     }
     .checkbox-group {
       display: flex;
       flex-direction: column;
       align-items: start;
       gap: 5px;
+    }
+    @media (max-width: 600px) {
+      table, thead, tbody, th, td, tr {
+        display: block;
+      }
+      th {
+        text-align: left;
+      }
+      td {
+        margin-bottom: 10px;
+      }
     }
   </style>
 </head>
@@ -138,10 +157,10 @@
 
         const tdAislamiento = document.createElement("td");
         const selectAislamiento = document.createElement("select");
-        ["Ninguno", "Respiratorio", "Contacto", "Neutropénico"].forEach(opt => {
+        ["", "Respiratorio", "Contacto", "Neutropénico"].forEach(opt => {
           const o = document.createElement("option");
           o.value = opt;
-          o.textContent = opt;
+          o.textContent = opt || "Ninguno";
           selectAislamiento.appendChild(o);
         });
         tdAislamiento.appendChild(selectAislamiento);
@@ -193,7 +212,7 @@
       filas.forEach(fila => {
         const cama = fila.cells[0].textContent;
         const nombre = fila.cells[1].querySelector("input").value.trim();
-        const aislamiento = fila.cells[2].querySelector("select").value;
+        const aislamiento = fila.cells[2].querySelector("select").value.trim();
         const checks = fila.cells[3].querySelectorAll("input[type='checkbox']");
         const observaciones = fila.cells[3].querySelector("textarea").value.trim();
         const novedades = [];
@@ -201,17 +220,25 @@
           if (chk.checked) novedades.push(chk.value);
         });
 
-        datos.push({
-          fecha: new Date().toLocaleString("es-AR"),
-          piso,
-          cama,
-          nombre,
-          aislamiento,
-          novedades: novedades.join(", "),
-          observaciones,
-          enfermero
-        });
+        // Guardar solo si hay nombre u otra novedad
+        if (nombre || aislamiento || novedades.length > 0 || observaciones) {
+          datos.push({
+            fecha: new Date().toLocaleString("es-AR"),
+            piso,
+            cama,
+            nombre,
+            aislamiento,
+            novedades: novedades.join(", "),
+            observaciones,
+            enfermero
+          });
+        }
       });
+
+      if (datos.length === 0) {
+        alert("No hay datos válidos para enviar.");
+        return;
+      }
 
       fetch("https://script.google.com/macros/s/AKfycbznONc4J-i6p4yuEfW5hcR8hgnbotrqJZVCrMtACl1YS7sKP7vB2BA39lXBLYBSJ6uUxQ/exec", {
         method: "POST",
@@ -219,12 +246,8 @@
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(datos)
       })
-      .then(() => {
-        alert("✅ Novedades enviadas correctamente.");
-      })
-      .catch(err => {
-        alert("❌ Error al enviar: " + err.message);
-      });
+      .then(() => alert("✅ Novedades enviadas correctamente."))
+      .catch(err => alert("❌ Error al enviar: " + err.message));
     }
   </script>
 
