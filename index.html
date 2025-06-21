@@ -1,242 +1,194 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>SADOFE - Registro de Novedades</title>
   <style>
+    * { box-sizing: border-box; }
     body {
-      font-family: Arial, sans-serif;
-      background-color: #eef2f5;
-      padding: 10px;
+      font-family: 'Segoe UI', sans-serif;
+      background-color: #f0f2f5;
       margin: 0;
+      padding: 10px;
     }
     h1, h2 {
       text-align: center;
-      font-size: 1.5em;
+      color: #0a3d62;
     }
     .form-container {
-      background: #fff;
-      padding: 15px;
-      max-width: 100%;
-      margin: auto;
+      background: #ffffff;
       border-radius: 10px;
-      box-shadow: 0 0 10px rgba(0,0,0,0.1);
+      padding: 20px;
+      max-width: 800px;
+      margin: auto;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.1);
     }
-    select, input[type="text"], textarea {
+    .input-group, select, textarea {
+      width: 100%;
+      margin-bottom: 10px;
+      font-size: 16px;
+    }
+    input, select, textarea {
       padding: 8px;
       border: 1px solid #ccc;
-      border-radius: 4px;
-      width: 100%;
-      font-size: 1em;
-      box-sizing: border-box;
+      border-radius: 6px;
     }
-    table {
-      width: 100%;
-      border-collapse: collapse;
-      margin-top: 15px;
-      font-size: 0.9em;
-    }
-    th, td {
-      border: 1px solid #aaa;
-      padding: 5px;
-      text-align: center;
-    }
-    th {
-      background-color: #0a3d62;
-      color: white;
-    }
-    button {
-      margin-top: 15px;
-      background-color: #0a3d62;
-      color: white;
+    .card {
+      background-color: #f9f9f9;
+      border-left: 6px solid #0a3d62;
       padding: 10px;
-      border: none;
-      border-radius: 5px;
-      cursor: pointer;
-      width: 100%;
-      font-size: 1em;
+      margin-bottom: 15px;
+      border-radius: 8px;
+    }
+    .card h3 {
+      margin: 0 0 10px;
+      color: #0a3d62;
     }
     .checkbox-group {
       display: flex;
-      flex-direction: column;
-      align-items: start;
-      gap: 5px;
+      flex-wrap: wrap;
+      gap: 10px;
     }
-    @media (max-width: 600px) {
-      table, thead, tbody, th, td, tr {
-        display: block;
-      }
-      th {
-        text-align: left;
-      }
-      td {
-        margin-bottom: 10px;
-      }
+    .checkbox-group label {
+      display: flex;
+      align-items: center;
+      font-size: 14px;
+    }
+    .checkbox-group input {
+      margin-right: 5px;
+    }
+    button {
+      background-color: #0a3d62;
+      color: #fff;
+      font-size: 18px;
+      padding: 12px;
+      width: 100%;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+    }
+    button:hover {
+      background-color: #07406e;
     }
   </style>
 </head>
 <body>
 
   <h1>SADOFE</h1>
-  <h2>Registro de Novedades por Piso</h2>
+  <h2>Registro de Novedades</h2>
 
   <div class="form-container">
-    <label for="enfermero">Nombre del Enfermero/a:</label>
-    <input type="text" id="enfermero" required>
+    <div class="input-group">
+      <label for="enfermero">Nombre del Enfermero/a:</label>
+      <input type="text" id="enfermero" placeholder="Ej: Pérez Ana">
+    </div>
 
-    <label for="piso">Seleccione el piso:</label>
-    <select id="piso" onchange="generarTabla()" required>
-      <option value="">-- Seleccionar --</option>
-      <option value="1B">1B</option>
-      <option value="2B">2B</option>
-      <option value="1C">1C</option>
-      <option value="2C">2C</option>
-      <option value="3C">3C</option>
-      <option value="4C">4C</option>
-    </select>
+    <div class="input-group">
+      <label for="piso">Piso:</label>
+      <select id="piso" onchange="generarTarjetas()">
+        <option value="">-- Seleccionar --</option>
+        <option value="1B">1B</option>
+        <option value="2B">2B</option>
+        <option value="1C">1C</option>
+        <option value="2C">2C</option>
+        <option value="3C">3C</option>
+        <option value="4C">4C</option>
+      </select>
+    </div>
 
-    <table id="tablaNovedades" style="display:none;">
-      <thead>
-        <tr>
-          <th>Cama</th>
-          <th>Apellido y Nombre</th>
-          <th>Aislamiento</th>
-          <th>Novedades clínicas + Observaciones</th>
-        </tr>
-      </thead>
-      <tbody></tbody>
-    </table>
+    <div id="tarjetasContainer"></div>
 
-    <button onclick="registrar()">Registrar novedades del piso</button>
+    <button onclick="registrar()">Registrar Novedades</button>
   </div>
 
   <script>
-    const camasPorPiso = {
-      "1B": generarCamas(101, 110, [110], 3),
-      "2B": generarCamas(201, 210, [210], 3),
-      "1C": generarCamas(116, 129),
-      "2C": generarCamas(216, 229),
-      "3C": generarCamas(316, 322),
-      "4C": generarCamas(422, 429, [], 2)
-    };
-
     function generarCamas(desde, hasta, especiales = [], camasEspecial = 2) {
       let lista = [];
       for (let i = desde; i <= hasta; i++) {
-        let camas = especiales.includes(i) ? camasEspecial : 2;
-        for (let j = 1; j <= camas; j++) {
+        const cantidad = especiales.includes(i) ? camasEspecial : 2;
+        for (let j = 1; j <= cantidad; j++) {
           lista.push(`${i}-${j}`);
         }
       }
       return lista;
     }
 
-    function generarTabla() {
-      const piso = document.getElementById("piso").value;
-      const tbody = document.querySelector("#tablaNovedades tbody");
-      const tabla = document.getElementById("tablaNovedades");
-      tbody.innerHTML = "";
+    const camasPorPiso = {
+      "1B": generarCamas(101, 110, [110], 3),
+      "2B": generarCamas(201, 210, [210], 3),
+      "4B": generarCamas(402, 409),
+      "1C": generarCamas(116, 129),
+      "2C": generarCamas(216, 229),
+      "3C": generarCamas(316, 322),
+      "4C": generarCamas(422, 429, [], 2)
+    };
 
-      if (!piso || !camasPorPiso[piso]) {
-        tabla.style.display = "none";
-        return;
-      }
+    function generarTarjetas() {
+      const piso = document.getElementById("piso").value;
+      const contenedor = document.getElementById("tarjetasContainer");
+      contenedor.innerHTML = "";
+
+      if (!piso || !camasPorPiso[piso]) return;
 
       camasPorPiso[piso].forEach(cama => {
-        const row = document.createElement("tr");
-
-        const tdCama = document.createElement("td");
-        tdCama.textContent = cama;
-
-        const tdNombre = document.createElement("td");
-        const inputNombre = document.createElement("input");
-        inputNombre.type = "text";
-        inputNombre.placeholder = "Apellido y Nombre";
-        tdNombre.appendChild(inputNombre);
-
-        const tdAislamiento = document.createElement("td");
-        const selectAislamiento = document.createElement("select");
-        ["", "Respiratorio", "Contacto", "Neutropénico"].forEach(opt => {
-          const o = document.createElement("option");
-          o.value = opt;
-          o.textContent = opt || "Ninguno";
-          selectAislamiento.appendChild(o);
-        });
-        tdAislamiento.appendChild(selectAislamiento);
-
-        const tdNovedades = document.createElement("td");
-        const checkGroup = document.createElement("div");
-        checkGroup.className = "checkbox-group";
-        const novedades = ["Sonda vesical", "Drenaje", "Acceso periférico", "Deambula", "Usa pañales", "Lúcido", "Desorientado", "Somnoliento"];
-        novedades.forEach(nov => {
-          const label = document.createElement("label");
-          const checkbox = document.createElement("input");
-          checkbox.type = "checkbox";
-          checkbox.value = nov;
-          label.appendChild(checkbox);
-          label.appendChild(document.createTextNode(" " + nov));
-          checkGroup.appendChild(label);
-        });
-
-        const textarea = document.createElement("textarea");
-        textarea.placeholder = "Observaciones adicionales...";
-        textarea.rows = 3;
-        textarea.style.marginTop = "5px";
-
-        tdNovedades.appendChild(checkGroup);
-        tdNovedades.appendChild(textarea);
-
-        row.appendChild(tdCama);
-        row.appendChild(tdNombre);
-        row.appendChild(tdAislamiento);
-        row.appendChild(tdNovedades);
-
-        tbody.appendChild(row);
+        const card = document.createElement("div");
+        card.className = "card";
+        card.innerHTML = `
+          <h3>Cama ${cama}</h3>
+          <input type="text" placeholder="Apellido y Nombre" class="nombre">
+          <select class="aislamiento">
+            <option value="Ninguno">Ninguno</option>
+            <option value="Respiratorio">Respiratorio</option>
+            <option value="Contacto">Contacto</option>
+            <option value="Neutropénico">Neutropénico</option>
+          </select>
+          <div class="checkbox-group">
+            ${["Sonda vesical", "Drenaje", "Acceso periférico", "Deambula", "Usa pañales", "Lúcido", "Desorientado", "Somnoliento"]
+              .map(nov => `<label><input type="checkbox" value="${nov}">${nov}</label>`).join("")}
+          </div>
+          <textarea rows="2" placeholder="Observaciones adicionales..." class="observaciones"></textarea>
+        `;
+        contenedor.appendChild(card);
       });
-
-      tabla.style.display = "table";
     }
 
     function registrar() {
       const enfermero = document.getElementById("enfermero").value.trim();
       const piso = document.getElementById("piso").value;
       if (!enfermero || !piso) {
-        alert("Por favor, complete el nombre del enfermero y seleccione el piso.");
+        alert("Complete el nombre del enfermero y seleccione un piso.");
         return;
       }
 
-      const filas = document.querySelectorAll("#tablaNovedades tbody tr");
+      const tarjetas = document.querySelectorAll(".card");
       const datos = [];
 
-      filas.forEach(fila => {
-        const cama = fila.cells[0].textContent;
-        const nombre = fila.cells[1].querySelector("input").value.trim();
-        const aislamiento = fila.cells[2].querySelector("select").value.trim();
-        const checks = fila.cells[3].querySelectorAll("input[type='checkbox']");
-        const observaciones = fila.cells[3].querySelector("textarea").value.trim();
-        const novedades = [];
-        checks.forEach(chk => {
-          if (chk.checked) novedades.push(chk.value);
-        });
+      tarjetas.forEach(card => {
+        const cama = card.querySelector("h3").textContent.replace("Cama ", "");
+        const nombre = card.querySelector(".nombre").value.trim();
+        const aislamiento = card.querySelector(".aislamiento").value;
+        const observaciones = card.querySelector(".observaciones").value.trim();
+        const novedades = [...card.querySelectorAll("input[type=checkbox]")]
+          .filter(chk => chk.checked).map(chk => chk.value).join(", ");
 
-        // Guardar solo si hay nombre u otra novedad
-        if (nombre || aislamiento || novedades.length > 0 || observaciones) {
-          datos.push({
-            fecha: new Date().toLocaleString("es-AR"),
-            piso,
-            cama,
-            nombre,
-            aislamiento,
-            novedades: novedades.join(", "),
-            observaciones,
-            enfermero
-          });
-        }
+        // ⚠️ No guardar si está completamente vacío
+        if (!nombre && !observaciones && !novedades) return;
+
+        datos.push({
+          fecha: new Date().toLocaleString("es-AR"),
+          piso,
+          cama,
+          nombre,
+          aislamiento,
+          novedades,
+          observaciones,
+          enfermero
+        });
       });
 
       if (datos.length === 0) {
-        alert("No hay datos válidos para enviar.");
+        alert("No se completaron datos para enviar.");
         return;
       }
 
@@ -245,9 +197,11 @@
         mode: "no-cors",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(datos)
-      })
-      .then(() => alert("✅ Novedades enviadas correctamente."))
-      .catch(err => alert("❌ Error al enviar: " + err.message));
+      }).then(() => {
+        alert("✅ Novedades enviadas correctamente.");
+      }).catch(err => {
+        alert("❌ Error al enviar: " + err.message);
+      });
     }
   </script>
 
