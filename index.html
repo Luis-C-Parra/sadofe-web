@@ -90,6 +90,7 @@
         <option value="">-- Seleccionar --</option>
         <option value="1B">1B</option>
         <option value="2B">2B</option>
+	<option value="4B">4B</option>
         <option value="1C">1C</option>
         <option value="2C">2C</option>
         <option value="3C">3C</option>
@@ -136,13 +137,22 @@
         card.className = "card";
         card.innerHTML = `
           <h3>Cama ${cama}</h3>
-          <input type="text" placeholder="Apellido y Nombre" class="nombre">
-          <select class="aislamiento">
-            <option value="Ninguno">Ninguno</option>
-            <option value="Respiratorio">Respiratorio</option>
-            <option value="Contacto">Contacto</option>
-            <option value="Neutropénico">Neutropénico</option>
-          </select>
+         <div class="input-group">
+  <label><strong>Apellido y Nombre:</strong></label>
+  <input type="text" placeholder="Ej: González, Marta" class="nombre" style="width:100%;">
+</div>
+
+
+<div class="input-group">
+  <label for="aislamiento"><strong>¿Aislamiento?</strong></label>
+  <select class="aislamiento">
+    <option value="Ninguno">Ninguno</option>
+    <option value="Respiratorio">Respiratorio</option>
+    <option value="Contacto">Contacto</option>
+    <option value="Neutropénico">Neutropénico</option>
+  </select>
+</div>
+
           <div class="checkbox-group">
             ${["Sonda vesical", "Drenaje", "Acceso periférico", "Deambula", "Usa pañales", "Lúcido", "Desorientado", "Somnoliento"]
               .map(nov => `<label><input type="checkbox" value="${nov}">${nov}</label>`).join("")}
@@ -207,3 +217,4 @@
 
 </body>
 </html>
+
