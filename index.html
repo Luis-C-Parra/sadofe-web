@@ -4,6 +4,7 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>SADOFE - Registro de Novedades</title>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
   <style>
     * { box-sizing: border-box; }
     body {
@@ -17,7 +18,7 @@
       color: #0a3d62;
     }
     .form-container {
-      background: #ffffff;
+      background: #fff;
       border-radius: 10px;
       padding: 20px;
       max-width: 800px;
@@ -58,12 +59,17 @@
     .checkbox-group input {
       margin-right: 5px;
     }
+    .button-group {
+      display: flex;
+      gap: 10px;
+      margin-top: 10px;
+    }
     button {
       background-color: #0a3d62;
       color: #fff;
       font-size: 18px;
       padding: 12px;
-      width: 100%;
+      flex: 1;
       border: none;
       border-radius: 6px;
       cursor: pointer;
@@ -71,26 +77,65 @@
     button:hover {
       background-color: #07406e;
     }
+    #modalImagen {
+      display: none;
+      position: fixed;
+      z-index: 999;
+      left: 0;
+      top: 0;
+      width: 100%;
+      height: 100%;
+      overflow: auto;
+      background-color: rgba(0,0,0,0.5);
+    }
+    .modal-content {
+      background-color: #fff;
+      margin: 10% auto;
+      padding: 20px;
+      border-radius: 10px;
+      max-width: 500px;
+    }
+    #imagenGenerada {
+      display: block;
+      margin-top: 10px;
+      max-width: 100%;
+    }
+    #resumenImagen {
+      background: white;
+      padding: 15px;
+      border-radius: 8px;
+      color: #333;
+      font-size: 14px;
+      line-height: 1.3;
+      max-width: 700px;
+      margin: 20px auto 0;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+      white-space: pre-wrap;
+      word-wrap: break-word;
+    }
+    #listaCamas label {
+      display: block;
+      margin-bottom: 5px;
+      font-size: 14px;
+    }
   </style>
 </head>
 <body>
-
   <h1>SADOFE</h1>
   <h2>Registro de Novedades</h2>
 
-  <div class="form-container">
+  <div class="form-container" id="formulario">
     <div class="input-group">
-      <label for="enfermero">Nombre del Enfermero/a:</label>
-      <input type="text" id="enfermero" placeholder="Ej: Pérez Ana">
+      <label for="enfermero">Nombres del personal:</label>
+      <input type="text" id="enfermero" placeholder="Ej: Pérez Ana" />
     </div>
-
     <div class="input-group">
       <label for="piso">Piso:</label>
       <select id="piso" onchange="generarTarjetas()">
         <option value="">-- Seleccionar --</option>
         <option value="1B">1B</option>
         <option value="2B">2B</option>
-	<option value="4B">4B</option>
+        <option value="4B">4B</option>
         <option value="1C">1C</option>
         <option value="2C">2C</option>
         <option value="3C">3C</option>
@@ -100,8 +145,28 @@
 
     <div id="tarjetasContainer"></div>
 
-    <button onclick="registrar()">Registrar Novedades</button>
+    <div class="button-group">
+      <button onclick="registrar()">Datos al servidor</button>
+      <button onclick="abrirModal()">Generar Novedades</button>
+    </div>
+
+    <a id="descargarImagen" download="novedades.png" style="display:none; margin-top:10px;">📥 Descargar Imagen</a>
+    <button id="compartirBtn" style="display:none; margin-top:10px;">📤 Compartir Imagen</button>
+    <img id="imagenGenerada" style="display:none;" />
   </div>
+
+  <!-- Modal para seleccionar camas -->
+  <div id="modalImagen">
+    <div class="modal-content">
+      <h3>Seleccionar camas para incluir en la imagen</h3>
+      <div id="listaCamas"></div>
+      <button onclick="generarImagen()">Generar Imagen</button>
+      <button onclick="cerrarModal()">Cancelar</button>
+    </div>
+  </div>
+
+  <!-- Contenedor oculto para el resumen que se convertirá en imagen -->
+  <div id="resumenImagen" style="display:none;"></div>
 
   <script>
     function generarCamas(desde, hasta, especiales = [], camasEspecial = 2) {
@@ -125,6 +190,12 @@
       "4C": generarCamas(422, 429, [], 2)
     };
 
+    const opcionesNovedades = [
+      "Sonda vesical", "Drenaje pleural", "Acceso Venoso Periférico", "Acceso Venoso Central",
+      "Drenaje aspirativo", "Drenaje percutáneo", "Contención física", "Rechazo terapéutico",
+      "Deambula", "Usa pañales", "Lúcido", "Desorientado", "Somnoliento"
+    ];
+
     function generarTarjetas() {
       const piso = document.getElementById("piso").value;
       const contenedor = document.getElementById("tarjetasContainer");
@@ -137,25 +208,21 @@
         card.className = "card";
         card.innerHTML = `
           <h3>Cama ${cama}</h3>
-         <div class="input-group">
-  <label><strong>Apellido y Nombre:</strong></label>
-  <input type="text" placeholder="Ej: González, Marta" class="nombre" style="width:100%;">
-</div>
-
-
-<div class="input-group">
-  <label for="aislamiento"><strong>¿Aislamiento?</strong></label>
-  <select class="aislamiento">
-    <option value="Ninguno">Ninguno</option>
-    <option value="Respiratorio">Respiratorio</option>
-    <option value="Contacto">Contacto</option>
-    <option value="Neutropénico">Neutropénico</option>
-  </select>
-</div>
-
+          <div class="input-group">
+            <label><strong>Apellido y Nombre:</strong></label>
+            <input type="text" placeholder="Ej: González, Marta" class="nombre" />
+          </div>
+          <div class="input-group">
+            <label><strong>¿Aislamiento?</strong></label>
+            <select class="aislamiento">
+              <option value="Ninguno">Ninguno</option>
+              <option value="Respiratorio">Respiratorio</option>
+              <option value="Contacto">Contacto</option>
+              <option value="Neutropénico">Neutropénico</option>
+            </select>
+          </div>
           <div class="checkbox-group">
-            ${["Sonda vesical", "Drenaje", "Acceso periférico", "Deambula", "Usa pañales", "Lúcido", "Desorientado", "Somnoliento"]
-              .map(nov => `<label><input type="checkbox" value="${nov}">${nov}</label>`).join("")}
+            ${opcionesNovedades.map(nov => `<label><input type="checkbox" value="${nov}">${nov}</label>`).join("")}
           </div>
           <textarea rows="2" placeholder="Observaciones adicionales..." class="observaciones"></textarea>
         `;
@@ -182,7 +249,6 @@
         const novedades = [...card.querySelectorAll("input[type=checkbox]")]
           .filter(chk => chk.checked).map(chk => chk.value).join(", ");
 
-        // ⚠️ No guardar si está completamente vacío
         if (!nombre && !observaciones && !novedades) return;
 
         datos.push({
@@ -213,7 +279,109 @@
         alert("❌ Error al enviar: " + err.message);
       });
     }
-  </script>
 
-</body>
-</html>
+    // Modal abrir y cerrar
+    function abrirModal() {
+      const modal = document.getElementById("modalImagen");
+      const lista = document.getElementById("listaCamas");
+      lista.innerHTML = "";
+      const piso = document.getElementById("piso").value;
+      if (!piso || !camasPorPiso[piso]) return;
+
+      camasPorPiso[piso].forEach(cama => {
+        lista.innerHTML += `<label><input type='checkbox' value='${cama}'> Cama ${cama}</label>`;
+      });
+
+      modal.style.display = "block";
+    }
+    function cerrarModal() {
+      document.getElementById("modalImagen").style.display = "none";
+    }
+
+    // Generar imagen compacta con solo las camas seleccionadas y con datos
+    function generarImagen() {
+      const enfermero = document.getElementById("enfermero").value.trim();
+      const piso = document.getElementById("piso").value;
+      if (!enfermero || !piso) {
+        alert("Complete el nombre del enfermero y seleccione un piso.");
+        return;
+      }
+
+      const camasSeleccionadas = [...document.querySelectorAll("#listaCamas input[type=checkbox]")]
+        .filter(chk => chk.checked)
+        .map(chk => chk.value);
+
+      if (camasSeleccionadas.length === 0) {
+        alert("Seleccione al menos una cama para generar la imagen.");
+        return;
+      }
+
+      // Construir texto resumen compacto
+      let resumenText = `Novedades SADOFE\nEnfermero/a: ${enfermero}\nPiso: ${piso}\nFecha: ${new Date().toLocaleString("es-AR")}\n\n`;
+
+      const tarjetas = document.querySelectorAll(".card");
+
+      camasSeleccionadas.forEach(camaSel => {
+        const card = [...tarjetas].find(c => c.querySelector("h3").textContent.replace("Cama ", "") === camaSel);
+        if (!card) return;
+
+        const nombre = card.querySelector(".nombre").value.trim();
+        const aislamiento = card.querySelector(".aislamiento").value;
+        const observaciones = card.querySelector(".observaciones").value.trim();
+        const novedades = [...card.querySelectorAll("input[type=checkbox]")]
+          .filter(chk => chk.checked).map(chk => chk.value);
+
+        // Saltar si no hay datos
+        if (!nombre && !observaciones && novedades.length === 0) return;
+
+        resumenText += `Cama ${camaSel}:\n`;
+
+        if (nombre) resumenText += `  Paciente: ${nombre}\n`;
+        resumenText += `  Aislamiento: ${aislamiento}\n`;
+        if (novedades.length) resumenText += `  Novedades: ${novedades.join(", ")}\n`;
+        if (observaciones) resumenText += `  Observaciones: ${observaciones}\n`;
+
+        resumenText += "\n";
+      });
+
+      if (resumenText.trim() === `Novedades SADOFE\nEnfermero/a: ${enfermero}\nPiso: ${piso}\nFecha: ${new Date().toLocaleString("es-AR")}`) {
+        alert("No hay datos para las camas seleccionadas.");
+        return;
+      }
+
+      // Poner texto en contenedor oculto
+      const contenedorResumen = document.getElementById("resumenImagen");
+      contenedorResumen.textContent = resumenText;
+      contenedorResumen.style.display = "block";
+
+      // Generar imagen
+      html2canvas(contenedorResumen, { scale: 2 }).then(canvas => {
+        const img = document.getElementById("imagenGenerada");
+        img.src = canvas.toDataURL("image/png");
+        img.style.display = "block";
+
+        const enlace = document.getElementById("descargarImagen");
+        enlace.href = canvas.toDataURL("image/png");
+        enlace.style.display = "inline-block";
+
+        canvas.toBlob(blob => {
+          const file = new File([blob], "novedades.png", { type: "image/png" });
+          const shareBtn = document.getElementById("compartirBtn");
+          if (navigator.canShare && navigator.canShare({ files: [file] })) {
+            shareBtn.style.display = "inline-block";
+            shareBtn.onclick = () => {
+              navigator.share({
+                title: "Novedades SADOFE",
+                text: "Resumen generado",
+                files: [file]
+              });
+            };
+          } else {
+            shareBtn.style.display = "none";
+          }
+        });
+
+        cerrarModal();
+      });
+    }
+  </script>
