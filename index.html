@@ -114,13 +114,24 @@
       box-shadow: 0 2px 12px rgba(0,0,0,0.12);
       font-size: 16px;
       line-height: 1.7;
-      white-space: pre-wrap;
       color: #000;
     }
     #resumenImagen h3 {
       text-align: center;
       color: #0a3d62;
       margin-bottom: 18px;
+    }
+    #resumenImagen p {
+      margin: 10px 0;
+    }
+    .cama {
+      font-weight: bold;
+      color: #0a3d62;
+      font-size: 1.1em;
+    }
+    .separador {
+      border-top: 1px dashed #aaa;
+      margin: 15px 0;
     }
     #imagenGenerada {
       display: block;
@@ -150,7 +161,6 @@
       max-height: 90vh;
       overflow-y: auto;
     }
-    /* Notas de piso */
     .notas-piso {
       background: #f0f8ff;
       border-left: 6px solid #0a3d62;
@@ -193,15 +203,15 @@
 
     <div id="tarjetasContainer"></div>
 
-    <!-- ✅ NUEVO: Cuadro de Notas de Piso -->
+    <!-- Notas del piso -->
     <div class="notas-piso">
       <h3>📌 Notas del Piso</h3>
-      <textarea id="notasPiso" placeholder="Escriba observaciones generales del piso, novedades de equipo, pendientes, etc..."></textarea>
+      <textarea id="notasPiso" placeholder="Escriba observaciones generales del piso..."></textarea>
     </div>
 
     <div class="botones">
-      <button onclick="generarTarjetas()"><span>📝</span> Ver Piso Seleccionado</button>
-      <button onclick="registrar()"><span>📤</span> Enviar Datos al Servidor</button>
+      <button onclick="generarTarjetas()"><span>📝</span> Ver Piso Selecionado</button>
+      <button onclick="registrar()"><span>📤</span> Enviar datos al Servidor</button>
       <button onclick="abrirModal()"><span>📷</span> Generar Novedades</button>
       <button onclick="descargarImagen()" style="display:none;" id="btnDescargar"><span>📥</span> Descargar Imagen</button>
       <button onclick="compartirImagen()" style="display:none;" id="btnCompartir"><span>📤</span> Compartir</button>
@@ -220,7 +230,7 @@
     </div>
   </div>
 
-  <!-- Contenedor oculto para el resumen que se convertirá en imagen -->
+  <!-- Contenedor del resumen con formato HTML -->
   <div id="resumenImagen" style="display:none;"></div>
 
   <script>
@@ -251,7 +261,6 @@
       if (savedEnfermero) {
         document.getElementById('enfermero').value = savedEnfermero;
       }
-      // 🔁 Recuperar notas del piso
       const savedNotas = localStorage.getItem('sadofe_notas_piso');
       if (savedNotas) {
         document.getElementById('notasPiso').value = savedNotas;
@@ -276,7 +285,6 @@
 
       if (!piso || !camasPorPiso[piso]) return;
 
-      // 🔁 Guardar piso seleccionado
       localStorage.setItem('sadofe_piso', piso);
 
       camasPorPiso[piso].forEach(cama => {
@@ -286,7 +294,7 @@
           <h3>Cama ${cama}</h3>
           <div class="input-group">
             <label><strong>🛏️ Apellido y Nombre:</strong></label>
-            <input type="text" placeholder="Ej: González, Marta" class="nombre" />
+            <input type="text" placeholder="Ej: GONZÁLEZ, MARTA" class="nombre" />
           </div>
           <div class="input-group">
             <label><strong>🧪 ¿Aislamiento?</strong></label>
@@ -307,7 +315,7 @@
         `;
         contenedor.appendChild(card);
 
-        // 🔁 Recuperar datos de esta cama
+        // 🔁 Recuperar datos
         const savedData = localStorage.getItem(`sadofe_cama_${cama}`);
         if (savedData) {
           const data = JSON.parse(savedData);
@@ -321,7 +329,7 @@
           });
         }
 
-        // 🔁 Guardar datos al cambiar
+        // 🔁 Guardar datos
         card.querySelectorAll('input, select, textarea').forEach(input => {
           input.addEventListener('change', () => {
             const inputs = card.querySelectorAll('input, select, textarea');
@@ -337,21 +345,35 @@
             localStorage.setItem(`sadofe_cama_${cama}`, JSON.stringify(data));
           });
         });
+
+        // ✅ Convertir a mayúsculas
+        const nombreInput = card.querySelector('.nombre');
+        nombreInput.addEventListener('input', () => {
+          nombreInput.value = nombreInput.value.toUpperCase();
+        });
       });
 
-      // 🔁 Recuperar notas del piso después de generar tarjetas
+      // ✅ Convertir nombre del enfermero a mayúsculas
+      const enfermeroInput = document.getElementById('enfermero');
+      enfermeroInput.addEventListener('input', () => {
+        enfermeroInput.value = enfermeroInput.value.toUpperCase();
+      });
+
+      const savedEnfermero = localStorage.getItem('sadofe_enfermero');
+      if (savedEnfermero) {
+        enfermeroInput.value = savedEnfermero;
+      }
+
       const savedNotas = localStorage.getItem('sadofe_notas_piso');
       if (savedNotas) {
         document.getElementById('notasPiso').value = savedNotas;
       }
     }
 
-    // 🔁 Guardar nombre del enfermero
     document.getElementById('enfermero').addEventListener('input', function() {
       localStorage.setItem('sadofe_enfermero', this.value);
     });
 
-    // 🔁 Guardar notas del piso
     document.getElementById('notasPiso').addEventListener('input', function() {
       localStorage.setItem('sadofe_notas_piso', this.value);
     });
@@ -389,7 +411,6 @@
         });
       });
 
-      // ✅ Agregar notas del piso al envío
       const notasPiso = document.getElementById("notasPiso").value.trim();
       if (notasPiso) {
         datos.push({
@@ -453,10 +474,14 @@
         return;
       }
 
-      let resumenText = `Novedades SADOFE\n`;
-      resumenText += `Enfermero/a: ${enfermero}\n`;
-      resumenText += `Piso: ${piso}\n`;
-      resumenText += `Fecha: ${new Date().toLocaleString("es-AR")}\n\n`;
+      // ✅ Crear resumen con HTML para formato
+      let contenido = `
+        <h3>📋 Resumen de Novedades - SADOFE</h3>
+        <p><strong>📅 Fecha:</strong> ${new Date().toLocaleString("es-AR")}</p>
+        <p><strong>🏢 Piso:</strong> ${piso}</p>
+        <p><strong>👨‍⚕️ Enfermero:</strong> ${enfermero}</p>
+        <hr class="separador">
+      `;
 
       const tarjetas = document.querySelectorAll(".card");
       let datosIncluidos = false;
@@ -474,18 +499,19 @@
 
         datosIncluidos = true;
 
-        resumenText += `Cama ${camaSel}: `;
-        if (nombre) resumenText += `${nombre}`;
-        if (aislamiento !== "Ninguno") resumenText += ` | Aislamiento: ${aislamiento}`;
-        if (novedades) resumenText += ` | ${novedades}`;
-        if (observaciones) resumenText += ` | Obs: ${observaciones}`;
-        resumenText += `\n`;
+        contenido += `
+          <p><strong class="cama">🛏️ Cama ${camaSel}</strong>: ${nombre}`;
+        if (aislamiento !== "Ninguno") contenido += ` | 🧪 Aislamiento: ${aislamiento}`;
+        if (novedades) contenido += ` | 📌 ${novedades}`;
+        if (observaciones) contenido += ` | 📝 Obs: ${observaciones}`;
+        contenido += `</p>`;
+        contenido += `<div class="separador"></div>`;
       });
 
-      // ✅ Agregar notas del piso al resumen
+      // ✅ Agregar notas del piso
       const notasPiso = document.getElementById("notasPiso").value.trim();
       if (notasPiso) {
-        resumenText += `\n📌 Notas del Piso:\n${notasPiso}\n`;
+        contenido += `<p><strong>📌 Notas del Piso:</strong><br>${notasPiso}</p>`;
       }
 
       if (!datosIncluidos && !notasPiso) {
@@ -494,7 +520,7 @@
       }
 
       const contenedorResumen = document.getElementById("resumenImagen");
-      contenedorResumen.innerText = resumenText;
+      contenedorResumen.innerHTML = contenido;
       contenedorResumen.style.display = "block";
 
       html2canvas(contenedorResumen, { backgroundColor: "#ffffff", scale: 2 }).then(canvas => {
@@ -529,9 +555,7 @@
       link.click();
     }
 
-    function compartirImagen() {
-      // Esta función se reasigna en generarImagen()
-    }
+    function compartirImagen() {}
   </script>
 </body>
 </html>
