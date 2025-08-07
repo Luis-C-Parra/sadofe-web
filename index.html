@@ -6,6 +6,111 @@
   <title>🏥 Registro SADOFE</title>
   <script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
   <style>
+    /* === SPLASH SCREEN === */
+    #splash {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: #f0f8ff;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      z-index: 9999;
+      transition: opacity 0.8s ease-out;
+      font-family: 'Segoe UI', Arial, sans-serif;
+    }
+    #splash.fade-out {
+      opacity: 0;
+    }
+    #splash .icono {
+      font-size: 90px;
+      color: #e74c3c;
+      margin-bottom: 20px;
+    }
+    #splash h1 {
+      font-size: 42px;
+      color: #0a3d62;
+      text-align: center;
+      margin: 0 30px 15px;
+      line-height: 1.3;
+      font-weight: bold;
+    }
+    #splash p {
+      font-size: 16px;
+      color: #555;
+      margin: 0;
+      position: absolute;
+      bottom: 40px;
+      left: 0;
+      width: 100%;
+      text-align: center;
+    }
+
+    /* === LOGIN SCREEN === */
+    #login {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: #f8f9fa;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      z-index: 9998;
+      padding: 20px;
+    }
+    #login form {
+      background: white;
+      padding: 30px;
+      border-radius: 12px;
+      box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+      width: 100%;
+      max-width: 400px;
+    }
+    #login h3 {
+      text-align: center;
+      color: #0a3d62;
+      margin-bottom: 20px;
+    }
+    #login input {
+      width: 100%;
+      padding: 12px;
+      margin-bottom: 16px;
+      border: 1px solid #ccc;
+      border-radius: 8px;
+      font-size: 16px;
+    }
+    #login button {
+      background: #0a3d62;
+      color: white;
+      border: none;
+      padding: 12px;
+      width: 100%;
+      border-radius: 8px;
+      font-size: 16px;
+      cursor: pointer;
+    }
+    #login button:hover {
+      background: #072f49;
+    }
+
+#login .cargando {
+      text-align: center;
+      color: #0a3d62;
+      margin-top: 15px;
+      font-style: italic;
+    }
+    #login .cargando .mate {
+      font-size: 24px;
+      margin-right: 8px;
+    }
+
+    /* === ESTILO PRINCIPAL === */
     * {
       box-sizing: border-box;
     }
@@ -101,35 +206,35 @@
     }
     button:nth-child(1) { background: #0a3d62; color: white; }
     button:nth-child(2) { background: #007BFF; color: white; }
-    button:nth-child(3) { background: #28a745; color: white; }
-    button:nth-child(4) { background: #fd7e14; color: white; }
+    button:nth-child(3) { background: #9fd6ab; color: black; }
+    button:nth-child(4) { background: #f2ab6f; color: black; }
     button:hover {
       opacity: 0.9;
       transform: translateY(-1px);
     }
+    /* ✅ Estilo del resumen para la imagen */
     #resumenImagen {
       background: white;
       padding: 30px;
       border-radius: 10px;
       box-shadow: 0 2px 12px rgba(0,0,0,0.12);
+      font-family: 'Segoe UI', sans-serif;
       font-size: 16px;
-      line-height: 1.7;
       color: #000;
+      max-width: 700px;
+      margin: 0 auto;
     }
     #resumenImagen h3 {
       text-align: center;
       color: #0a3d62;
       margin-bottom: 18px;
+      font-size: 20px;
     }
-    #resumenImagen p {
-      margin: 10px 0;
-    }
-    .cama {
+    #resumenImagen .cama {
       font-weight: bold;
       color: #0a3d62;
-      font-size: 1.1em;
     }
-    .separador {
+    #resumenImagen .separador {
       border-top: 1px dashed #aaa;
       margin: 15px 0;
     }
@@ -180,12 +285,34 @@
   </style>
 </head>
 <body>
+
+  <!-- ✅ VENTANA SPLASH -->
+  <div id="splash">
+    <div class="icono">🩺</div>
+    <h1>Registro de Novedades<br><br> Enfermería</h1>
+    <p>© Lic. Luis C. Parra</p>
+  </div>
+
+  <!-- ✅ VENTANA LOGIN -->
+  <div id="login">
+    <form id="formLogin">
+      <h3>🔐 Inicio de Sesión</h3>
+      <label for="dni">DNI (Usuario y Contraseña):</label>
+      <input type="text" id="dni" placeholder="Ej: 30123456" required />
+      <button type="submit">Ingresar</button>
+      <div id="cargando" style="display: none;" class="cargando">
+        <span class="mate">🧉</span> Verificando... Mientras, tomate un mate
+      </div>
+    </form>
+  </div>
+
+  <!-- ✅ CONTENIDO PRINCIPAL -->
   <div class="container">
     <h2>👩‍⚕️ Registro de Novedades - SADOFE</h2>
 
     <div class="form-group">
       <label for="enfermero">👨‍⚕️ Nombre del Enfermero/a:</label>
-      <input type="text" id="enfermero" placeholder="Apellido y Nombre" />
+      <input type="text" id="enfermero" readonly />
     </div>
 
     <div class="form-group">
@@ -210,8 +337,8 @@
     </div>
 
     <div class="botones">
-      <button onclick="generarTarjetas()"><span>📝</span> Ver Piso Selecionado</button>
-      <button onclick="registrar()"><span>📤</span> Enviar datos al Servidor</button>
+      <button onclick="generarTarjetas()"><span>📝</span> Ver Camas de Piso Elegido</button>
+      <button onclick="registrar()"><span>📤</span> Datos al Servidor</button>
       <button onclick="abrirModal()"><span>📷</span> Generar Novedades</button>
       <button onclick="descargarImagen()" style="display:none;" id="btnDescargar"><span>📥</span> Descargar Imagen</button>
       <button onclick="compartirImagen()" style="display:none;" id="btnCompartir"><span>📤</span> Compartir</button>
@@ -223,17 +350,81 @@
   <!-- Modal para seleccionar camas -->
   <div id="modalImagen">
     <div class="modal-content">
-      <h3>Seleccionar camas para incluir en la imagen</h3>
+      <h3>Seleccionar camas para incluir en la imagen de novedades</h3>
       <div id="listaCamas"></div>
-      <button onclick="generarImagen()">Generar Imagen</button>
-      <button onclick="cerrarModal()">Cancelar</button>
+      <button onclick="generarImagen()">📝Generar Imagen</button>
+      <button onclick="cerrarModal()">❌Cancelar</button>
     </div>
   </div>
 
-  <!-- Contenedor del resumen con formato HTML -->
+  <!-- Contenedor oculto para el resumen -->
   <div id="resumenImagen" style="display:none;"></div>
 
   <script>
+    // ✅ Mostrar splash por 3 segundos
+    window.onload = function() {
+      setTimeout(() => {
+        document.getElementById('splash').classList.add('fade-out');
+        setTimeout(() => {
+          document.getElementById('splash').style.display = 'none';
+          // Mostrar login después del splash
+          document.getElementById('login').style.display = 'flex';
+        }, 800);
+      }, 3000);
+    };
+
+    // ✅ Autenticación con Google Sheets
+    document.getElementById('formLogin').addEventListener('submit', function(e) {
+      e.preventDefault();
+      const dni = document.getElementById('dni').value.trim();
+      if (!dni) return;
+
+const btn = e.target.querySelector('button');
+      const cargando = document.getElementById('cargando');
+
+      // ✅ Mostrar mensaje amable
+      btn.style.display = 'none';
+      cargando.style.display = 'block';
+
+      // Llamar a tu Google Apps Script
+      fetch(`https://script.google.com/macros/s/AKfycbwBqfRagEUrSM9f9x1WvgLDKByfvfp-VPsDdUjuCNLKiUBcLO1Xb3pYlJ-qDxO_keFY3A/exec?dni=${dni}`)
+        .then(res => res.json())
+        .then(data => {
+          if (data.valido) {
+            document.getElementById('enfermero').value = data.nombre;
+            document.getElementById('login').style.display = 'none';
+
+            // Preguntar si hay otros enfermeros
+            const otros = confirm(`¿Hay otros enfermeros en el piso?\n${data.nombre} (Ud.)`);
+            if (otros) {
+              const nombres = prompt("Ingrese los nombres de los otros enfermeros, separados por coma:");
+              if (nombres) {
+                localStorage.setItem('enfermerosPiso', nombres.trim());
+              }
+            } else {
+              localStorage.removeItem('enfermerosPiso');
+            }
+
+            // Recuperar datos guardados
+            const savedPiso = localStorage.getItem('sadofe_piso');
+            if (savedPiso) {
+              document.getElementById('piso').value = savedPiso;
+              generarTarjetas();
+            }
+            const savedNotas = localStorage.getItem('sadofe_notas_piso');
+            if (savedNotas) {
+              document.getElementById('notasPiso').value = savedNotas;
+            }
+          } else {
+            alert("❌ DNI no válido o no autorizado.");
+          }
+        })
+        .catch(err => {
+          alert("❌ Error al verificar credenciales. Intente nuevamente.");
+          console.error(err);
+        });
+    });
+
     const camasPorPiso = {
       "1B": generarCamas(101, 110, [110], 3),
       "2B": generarCamas(201, 210, [210], 3),
@@ -249,23 +440,6 @@
       "Drenaje aspirativo", "Drenaje percutáneo", "Contención física", "Rechazo terapéutico",
       "Deambula", "Usa pañales", "Lúcido", "Desorientado", "Somnoliento"
     ];
-
-    // 🔁 Recuperar datos al cargar
-    window.onload = function() {
-      const savedPiso = localStorage.getItem('sadofe_piso');
-      if (savedPiso) {
-        document.getElementById('piso').value = savedPiso;
-        generarTarjetas();
-      }
-      const savedEnfermero = localStorage.getItem('sadofe_enfermero');
-      if (savedEnfermero) {
-        document.getElementById('enfermero').value = savedEnfermero;
-      }
-      const savedNotas = localStorage.getItem('sadofe_notas_piso');
-      if (savedNotas) {
-        document.getElementById('notasPiso').value = savedNotas;
-      }
-    };
 
     function generarCamas(desde, hasta, especiales = [], camasEspecial = 2) {
       let lista = [];
@@ -315,7 +489,6 @@
         `;
         contenedor.appendChild(card);
 
-        // 🔁 Recuperar datos
         const savedData = localStorage.getItem(`sadofe_cama_${cama}`);
         if (savedData) {
           const data = JSON.parse(savedData);
@@ -329,7 +502,6 @@
           });
         }
 
-        // 🔁 Guardar datos
         card.querySelectorAll('input, select, textarea').forEach(input => {
           input.addEventListener('change', () => {
             const inputs = card.querySelectorAll('input, select, textarea');
@@ -346,33 +518,17 @@
           });
         });
 
-        // ✅ Convertir a mayúsculas
         const nombreInput = card.querySelector('.nombre');
         nombreInput.addEventListener('input', () => {
           nombreInput.value = nombreInput.value.toUpperCase();
         });
       });
 
-      // ✅ Convertir nombre del enfermero a mayúsculas
-      const enfermeroInput = document.getElementById('enfermero');
-      enfermeroInput.addEventListener('input', () => {
-        enfermeroInput.value = enfermeroInput.value.toUpperCase();
-      });
-
-      const savedEnfermero = localStorage.getItem('sadofe_enfermero');
-      if (savedEnfermero) {
-        enfermeroInput.value = savedEnfermero;
-      }
-
       const savedNotas = localStorage.getItem('sadofe_notas_piso');
       if (savedNotas) {
         document.getElementById('notasPiso').value = savedNotas;
       }
     }
-
-    document.getElementById('enfermero').addEventListener('input', function() {
-      localStorage.setItem('sadofe_enfermero', this.value);
-    });
 
     document.getElementById('notasPiso').addEventListener('input', function() {
       localStorage.setItem('sadofe_notas_piso', this.value);
@@ -443,110 +599,178 @@
     }
 
     function abrirModal() {
-      const modal = document.getElementById("modalImagen");
-      const lista = document.getElementById("listaCamas");
-      lista.innerHTML = "";
-      const piso = document.getElementById("piso").value;
-      if (!piso || !camasPorPiso[piso]) return;
-      camasPorPiso[piso].forEach(cama => {
-        lista.innerHTML += `<label><input type='checkbox' value='${cama}'> Cama ${cama}</label><br>`;
-      });
-      modal.style.display = "block";
+  const modal = document.getElementById("modalImagen");
+  const lista = document.getElementById("listaCamas");
+  lista.innerHTML = "";
+
+  const piso = document.getElementById("piso").value;
+  if (!piso || !camasPorPiso[piso]) return;
+
+  const camas = camasPorPiso[piso];
+
+  // Agrupar por habitación
+  const habitaciones = {};
+  camas.forEach(cama => {
+    const num = cama.split('-')[0];
+    if (!habitaciones[num]) habitaciones[num] = [];
+    habitaciones[num].push(cama);
+  });
+
+  // Ordenar habitaciones
+  const habitacionesOrdenadas = Object.keys(habitaciones).sort((a, b) => a - b);
+
+  habitacionesOrdenadas.forEach(num => {
+    const camasHab = habitaciones[num];
+    const fila = document.createElement("div");
+    fila.style.display = "flex";
+    fila.style.justifyContent = "space-between";
+    fila.style.gap = "20px";
+    fila.style.margin = "8px 0";
+    fila.style.width = "100%";
+
+    camasHab.forEach(cama => {
+      const card = [...document.querySelectorAll('.card')]
+        .find(c => c.querySelector('h3')?.textContent.trim() === `Cama ${cama}`);
+      const nombre = card ? card.querySelector('.nombre').value.trim() || '___' : '___';
+
+      const contenedor = document.createElement("div");
+      contenedor.style.flex = "1";
+      contenedor.style.minWidth = "200px";
+
+      contenedor.innerHTML = `
+        <label style="display: flex; align-items: center; font-size: 14px; cursor: pointer;">
+          <input type='checkbox' value='${cama}' style="margin-right: 8px;">
+          <strong>${cama}:</strong> ${nombre}
+        </label>
+      `;
+      fila.appendChild(contenedor);
+    });
+
+    if (camasHab.length === 1) {
+      const vacio = document.createElement("div");
+      vacio.style.flex = "1";
+      fila.appendChild(vacio);
     }
+
+    lista.appendChild(fila);
+  });
+
+  modal.style.display = "block";
+}
 
     function cerrarModal() {
       document.getElementById("modalImagen").style.display = "none";
     }
 
     function generarImagen() {
-      const enfermero = document.getElementById("enfermero").value.trim();
-      const piso = document.getElementById("piso").value;
-      if (!enfermero || !piso) {
-        alert("👩‍⚕️ Complete el nombre del enfermero y seleccione un piso.");
-        return;
-      }
+  const enfermero = document.getElementById("enfermero").value.trim();
+  const piso = document.getElementById("piso").value;
+  if (!enfermero || !piso) {
+    alert("👩‍⚕️ Complete el nombre del enfermero (a) y seleccione un piso.");
+    return;
+  }
 
-      const checkboxes = document.querySelectorAll("#listaCamas input[type='checkbox']:checked");
-      const camasSeleccionadas = Array.from(checkboxes).map(cb => cb.value);
+  const checkboxes = document.querySelectorAll("#listaCamas input[type='checkbox']:checked");
+  const camasSeleccionadas = Array.from(checkboxes).map(cb => cb.value);
 
-      if (camasSeleccionadas.length === 0) {
-        alert("Seleccione al menos una cama para generar la imagen.");
-        return;
-      }
+  if (camasSeleccionadas.length === 0) {
+    alert("Seleccione al menos una cama para generar la imagen.");
+    return;
+  }
 
-      // ✅ Crear resumen con HTML para formato
-      let contenido = `
-        <h3>📋 Resumen de Novedades - SADOFE</h3>
-        <p><strong>📅 Fecha:</strong> ${new Date().toLocaleString("es-AR")}</p>
-        <p><strong>🏢 Piso:</strong> ${piso}</p>
-        <p><strong>👨‍⚕️ Enfermero:</strong> ${enfermero}</p>
-        <hr class="separador">
-      `;
+  // ✅ HTML bien estructurado y centrado
+  let contenido = `
+    <h3>📋 Resumen de Novedades</h3>
+    <p><strong>📅 Fecha:</strong> ${new Date().toLocaleString("es-AR")}</p>
+    <p><strong>🏢 Piso:</strong> ${piso}</p>
+    <p><strong>👨‍⚕️ Enfermero (a):</strong> ${enfermero}</p>
+  `;
 
-      const tarjetas = document.querySelectorAll(".card");
-      let datosIncluidos = false;
+  // Agregar otros enfermeros si los hay
+  const otrosEnfermeros = localStorage.getItem('enfermerosPiso');
+  if (otrosEnfermeros) {
+    contenido += `<p><strong>👥 Otros enfermeros (as):</strong> ${otrosEnfermeros}</p>`;
+  }
 
-      camasSeleccionadas.forEach(camaSel => {
-        const card = [...tarjetas].find(c => c.querySelector("h3").textContent.replace("Cama ", "") === camaSel);
-        if (!card) return;
-        const nombre = card.querySelector(".nombre").value.trim();
-        const aislamiento = card.querySelector(".aislamiento").value;
-        const observaciones = card.querySelector(".observaciones").value.trim();
-        const novedades = [...card.querySelectorAll("input[type=checkbox]")]
-          .filter(chk => chk.checked).map(chk => chk.value).join(", ");
+  contenido += `<div class="separador"></div>`;
 
-        if (!nombre && !observaciones && !novedades) return;
+  const tarjetas = document.querySelectorAll(".card");
+  let datosIncluidos = false;
 
-        datosIncluidos = true;
+  camasSeleccionadas.forEach(camaSel => {
+    const card = [...tarjetas].find(c => c.querySelector("h3").textContent.replace("Cama ", "") === camaSel);
+    if (!card) return;
+    const nombre = card.querySelector(".nombre").value.trim();
+    const aislamiento = card.querySelector(".aislamiento").value;
+    const observaciones = card.querySelector(".observaciones").value.trim();
+    const novedades = [...card.querySelectorAll("input[type=checkbox]")]
+      .filter(chk => chk.checked).map(chk => chk.value).join(", ");
 
-        contenido += `
-          <p><strong class="cama">🛏️ Cama ${camaSel}</strong>: ${nombre}`;
-        if (aislamiento !== "Ninguno") contenido += ` | 🧪 Aislamiento: ${aislamiento}`;
-        if (novedades) contenido += ` | 📌 ${novedades}`;
-        if (observaciones) contenido += ` | 📝 Obs: ${observaciones}`;
-        contenido += `</p>`;
-        contenido += `<div class="separador"></div>`;
-      });
+    if (!nombre && !observaciones && !novedades) return;
 
-      // ✅ Agregar notas del piso
-      const notasPiso = document.getElementById("notasPiso").value.trim();
-      if (notasPiso) {
-        contenido += `<p><strong>📌 Notas del Piso:</strong><br>${notasPiso}</p>`;
-      }
+    datosIncluidos = true;
 
-      if (!datosIncluidos && !notasPiso) {
-        alert("No hay datos para las camas seleccionadas ni notas del piso.");
-        return;
-      }
+    contenido += `
+      <p><strong class="cama">🛏️ Cama ${camaSel}</strong>: ${nombre}`;
+    if (aislamiento !== "Ninguno") contenido += ` | 🧪 Aislamiento: ${aislamiento}`;
+    if (novedades) contenido += ` | 📌 ${novedades}`;
+    if (observaciones) contenido += ` | 📝 Obs: ${observaciones}`;
+    contenido += `</p>
+      <div class="separador"></div>`;
+  });
 
-      const contenedorResumen = document.getElementById("resumenImagen");
-      contenedorResumen.innerHTML = contenido;
-      contenedorResumen.style.display = "block";
+  const notasPiso = document.getElementById("notasPiso").value.trim();
+  if (notasPiso) {
+    contenido += `<p><strong>📌 Notas del Piso:</strong><br>${notasPiso}</p>`;
+  }
 
-      html2canvas(contenedorResumen, { backgroundColor: "#ffffff", scale: 2 }).then(canvas => {
-        const img = document.getElementById("imagenGenerada");
-        img.src = canvas.toDataURL("image/png");
-        img.style.display = "block";
+  if (!datosIncluidos && !notasPiso) {
+    alert("No hay datos para las camas seleccionadas ni notas del piso.");
+    return;
+  }
 
-        const btnDescargar = document.getElementById("btnDescargar");
-        btnDescargar.style.display = "inline-flex";
+  const contenedorResumen = document.getElementById("resumenImagen");
+  contenedorResumen.innerHTML = contenido;
+  contenedorResumen.style.display = "block";
+  contenedorResumen.style.width = "600px"; // ✅ Ancho fijo
+  contenedorResumen.style.margin = "0 auto";
+  contenedorResumen.style.boxSizing = "border-box";
 
-        const btnCompartir = document.getElementById("btnCompartir");
-        btnCompartir.style.display = "inline-flex";
+  // ✅ Captura con configuración fija
+  html2canvas(contenedorResumen, {
+    backgroundColor: "#ffffff",
+    scale: 2,
+    useCORS: true,
+    width: 600,
+    height: contenedorResumen.scrollHeight + 40,
+    scrollY: 0,
+    windowWidth: 600,
+    windowHeight: contenedorResumen.scrollHeight + 100,
+    logging: false
+  }).then(canvas => {
+    const img = document.getElementById("imagenGenerada");
+    img.src = canvas.toDataURL("image/png");
+    img.style.display = "block";
 
-        canvas.toBlob(blob => {
-          const file = new File([blob], "novedades.png", { type: "image/png" });
-          btnCompartir.onclick = () => {
-            if (navigator.canShare && navigator.canShare({ files: [file] })) {
-              navigator.share({ files: [file] }).catch(() => alert("Error al compartir"));
-            } else {
-              alert("Tu navegador no soporta compartir archivos.");
-            }
-          };
-        });
-        cerrarModal();
-      });
-    }
+    const btnDescargar = document.getElementById("btnDescargar");
+    btnDescargar.style.display = "inline-flex";
+
+    const btnCompartir = document.getElementById("btnCompartir");
+    btnCompartir.style.display = "inline-flex";
+
+    canvas.toBlob(blob => {
+      const file = new File([blob], "novedades.png", { type: "image/png" });
+      btnCompartir.onclick = () => {
+        if (navigator.canShare && navigator.canShare({ files: [file] })) {
+          navigator.share({ files: [file] }).catch(() => alert("Error al compartir"));
+        } else {
+          alert("Tu navegador no soporta compartir archivos.");
+        }
+      };
+    });
+    cerrarModal();
+  });
+}
 
     function descargarImagen() {
       const link = document.createElement("a");
