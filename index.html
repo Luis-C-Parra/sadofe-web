@@ -431,6 +431,26 @@
         .fade-out {
             opacity: 0 !important;
         }
+
+.resumen-imagen {
+    display: none;
+    background: white;
+    padding: 0;
+    font-family: 'Segoe UI', sans-serif;
+    color: #000;
+    font-size: 14px;
+    line-height: 1.5;
+    max-width: 400px;
+    margin: 0 auto;
+    box-sizing: border-box;
+    word-wrap: break-word;
+    overflow-wrap: break-word;
+}
+.resumen-imagen * {
+    max-width: 100%;
+    word-break: break-word;
+}
+
     </style>
 </head>
 <body>
@@ -865,73 +885,201 @@
         }
 
         function generarImagen() {
-            const selected = Array.from(document.querySelectorAll('#camaSelection input:checked')).map(cb => cb.id.replace('sel-', ''));
-            if (selected.length === 0) {
-                alert('Seleccione al menos una cama');
-                return;
-            }
-            const resumen = document.getElementById('resumenImagen');
-            resumen.innerHTML = `
-                <div class="resumen-header">
-                    <h1>📋 Novedades</h1>
-                    <p>${new Date().toLocaleString('es-AR')}</p>
-                </div>
-                <div class="resumen-info">
-                    <div class="info-item"><span class="info-label">Piso:</span> ${userData.currentFloor}</div>
-                    <div class="info-item"><span class="info-label">Enfermera/o:</span> ${userData.nurseName}</div>
-                    ${userData.otherNurses ? `<div class="info-item"><span class="info-label">Otros:</span> ${userData.otherNurses}</div>` : ''}
-                </div>
+    const selected = Array.from(document.querySelectorAll('#camaSelection input:checked')).map(cb => cb.id.replace('sel-', ''));
+    if (selected.length === 0) {
+        alert('Seleccione al menos una cama');
+        return;
+    }
+
+    const resumen = document.getElementById('resumenImagen');
+    
+    // Limpiar contenido previo
+    resumen.innerHTML = '';
+    
+    // Header
+    resumen.innerHTML = `
+        <div class="resumen-header">
+            <h1>📋 Novedades</h1>
+            <p style="font-size: 12px; color: #666; margin: 5px 0;">${new Date().toLocaleString('es-AR')}</p>
+        </div>
+        <div class="resumen-info">
+            <div class="info-item"><span class="info-label">Piso:</span> ${userData.currentFloor}</div>
+            <div class="info-item"><span class="info-label">Enfermera/o:</span> ${userData.nurseName}</div>
+            ${userData.otherNurses ? `<div class="info-item"><span class="info-label">Otros:</span> ${userData.otherNurses}</div>` : ''}
+        </div>
+        <div style="margin: 15px 0; border-top: 1px solid #ddd;"></div>
+    `;
+
+    let hayDatos = false;
+
+    // Procesar cada cama seleccionada
+    selected.forEach(camaId => {
+        const data = userData.camasData[camaId] || {};
+        if (!data.paciente && !data.observaciones && (!data.novedades || data.novedades.length === 0)) return;
+
+        hayDatos = true;
+
+        let contenidoCama = `
+            <div class="cama-resumen" style="margin-bottom: 15px; padding: 12px; border: 1px solid #e0e0e0; border-radius: 8px; background: #fafafa;">
+                <h3 style="color: #0a3d62; margin: 0 0 8px 0; font-size: 14px; font-weight: bold;">
+                    🛏️ Cama ${camaId}
+                </h3>
+        `;
+
+        // Nombre del paciente
+        if (data.paciente) {
+            contenidoCama += `
+                <p style="margin: 4px 0; font-size: 13px; line-height: 1.4;">
+                    <strong>👤 Paciente:</strong> ${data.paciente}
+                </p>
             `;
-            selected.forEach(camaId => {
-                const data = userData.camasData[camaId] || {};
-                if (!data.paciente && !data.observaciones && (!data.novedades || !data.novedades.length)) return;
-                resumen.innerHTML += `
-                    <div class="cama-resumen">
-                        <h3>Cama ${camaId}: ${data.paciente || 'Sin nombre'}</h3>
-                        ${data.aislamiento !== 'Ninguno' ? `<p><strong>🧪 ${data.aislamiento}</strong></p>` : ''}
-                        ${data.novedades?.length ? `<div class="novedades-list">${data.novedades.map(n => `<span class="novedad-tag">${n}</span>`).join('')}</div>` : ''}
-                        ${data.observaciones ? `<p><strong>📝 Obs:</strong> ${data.observaciones}</p>` : ''}
-                    </div>
+        }
+
+        // Aislamiento (solo si no es "Ninguno")
+        if (data.aislamiento && data.aislamiento !== 'Ninguno') {
+            contenidoCama += `
+                <p style="margin: 4px 0; font-size: 13px; line-height: 1.4;">
+                    <strong>🧪 Aislamiento:</strong> ${data.aislamiento}
+                </p>
+            `;
+        }
+
+        // Novedades (cada una en párrafo separado)
+        if (data.novedades && data.novedades.length > 0) {
+            contenidoCama += `
+                <div style="margin: 6px 0;">
+                    <strong style="font-size: 13px;">📌 Novedades:</strong>
+            `;
+            
+            data.novedades.forEach(novedad => {
+                contenidoCama += `
+                    <p style="margin: 2px 0 2px 15px; font-size: 12px; line-height: 1.3;">
+                        • ${novedad}
+                    </p>
                 `;
             });
-            if (userData.floorNotes) {
-                resumen.innerHTML += `<div class="notas-piso"><h3>📌 Notas del Piso</h3><p>${userData.floorNotes}</p></div>`;
-            }
-            resumen.style.display = 'block';
-            html2canvas(resumen, { 
-                scale: 2, 
-                backgroundColor: '#ffffff',
-                width: 400,
-                useCORS: true,
-                logging: false
-            }).then(canvas => {
-                const img = document.getElementById('canvasImagen');
-                img.width = canvas.width;
-                img.height = canvas.height;
-                img.getContext('2d').drawImage(canvas, 0, 0);
-                document.getElementById('imagenGenerada').style.display = 'block';
-                cerrarModal();
-            });
+            
+            contenidoCama += `</div>`;
         }
 
-        function descargarImagen() {
-            const link = document.createElement('a');
-            link.download = 'novedades.png';
-            link.href = document.getElementById('canvasImagen').toDataURL('image/png');
-            link.click();
+        // Observaciones
+        if (data.observaciones) {
+            contenidoCama += `
+                <p style="margin: 6px 0 4px 0; font-size: 13px; line-height: 1.4;">
+                    <strong>📝 Observaciones:</strong> ${data.observaciones}
+                </p>
+            `;
         }
 
-        function compartirImagen() {
-            const canvas = document.getElementById('canvasImagen');
-            canvas.toBlob(blob => {
-                const file = new File([blob], 'novedades.png', { type: 'image/png' });
-                if (navigator.canShare && navigator.canShare({ files: [file] })) {
-                    navigator.share({ files: [file] });
-                } else {
-                    alert('Compartir no soportado en este navegador.');
-                }
+        contenidoCama += `</div>`;
+        resumen.innerHTML += contenidoCama;
+    });
+
+    // Notas del piso
+    if (userData.floorNotes) {
+        hayDatos = true;
+        resumen.innerHTML += `
+            <div class="notas-piso" style="background: #fff3cd; border: 1px solid #ffeaa7; border-radius: 8px; padding: 12px; margin-top: 15px;">
+                <h3 style="color: #856404; margin: 0 0 6px 0; font-size: 14px; font-weight: bold;">
+                    📌 Notas del Piso
+                </h3>
+                <p style="margin: 0; font-size: 13px; line-height: 1.4; color: #856404;">
+                    ${userData.floorNotes}
+                </p>
+            </div>
+        `;
+    }
+
+    if (!hayDatos) {
+        alert('No hay datos para generar');
+        return;
+    }
+
+    // Configurar estilos para la imagen
+    resumen.style.display = 'block';
+    resumen.style.position = 'absolute';
+    resumen.style.left = '-9999px';
+    resumen.style.top = '0';
+    resumen.style.width = '380px';
+    resumen.style.padding = '20px';
+    resumen.style.backgroundColor = '#ffffff';
+    resumen.style.fontFamily = "'Segoe UI', Arial, sans-serif";
+    resumen.style.fontSize = '13px';
+    resumen.style.lineHeight = '1.4';
+    resumen.style.color = '#000';
+    resumen.style.border = '1px solid #ddd';
+
+    // Esperar a que se rendericen los estilos
+    setTimeout(() => {
+        html2canvas(resumen, {
+            scale: 3, // Aumentamos la escala para mejor calidad
+            backgroundColor: '#ffffff',
+            width: 380,
+            height: resumen.scrollHeight,
+            useCORS: true,
+            allowTaint: false,
+            logging: false,
+            letterRendering: true,
+            foreignObjectRendering: false,
+            imageTimeout: 15000,
+            removeContainer: true
+        }).then(canvas => {
+            // Restaurar posición del elemento
+            resumen.style.position = 'static';
+            resumen.style.left = 'auto';
+            resumen.style.display = 'none';
+            
+            // Configurar el canvas de destino
+            const displayCanvas = document.getElementById('canvasImagen');
+            displayCanvas.width = canvas.width;
+            displayCanvas.height = canvas.height;
+            displayCanvas.style.maxWidth = '100%';
+            displayCanvas.style.height = 'auto';
+            displayCanvas.style.border = '1px solid #ddd';
+            displayCanvas.style.borderRadius = '8px';
+            
+            // Dibujar la imagen
+            const ctx = displayCanvas.getContext('2d');
+            ctx.clearRect(0, 0, displayCanvas.width, displayCanvas.height);
+            ctx.drawImage(canvas, 0, 0);
+            
+            // Mostrar la imagen generada
+            document.getElementById('imagenGenerada').style.display = 'block';
+            document.getElementById('imagenGenerada').scrollIntoView({ behavior: 'smooth' });
+            cerrarModal();
+        }).catch(err => {
+            console.error('Error en html2canvas:', err);
+            resumen.style.position = 'static';
+            resumen.style.left = 'auto';
+            resumen.style.display = 'none';
+            alert('❌ Error al generar imagen: ' + err.message);
+        });
+    }, 200);
+}
+
+function descargarImagen() {
+    const canvas = document.getElementById('canvasImagen');
+    const link = document.createElement('a');
+    link.download = 'novedades.png';
+    link.href = canvas.toDataURL('image/png');
+    link.click();
+}
+
+function compartirImagen() {
+    const canvas = document.getElementById('canvasImagen');
+    canvas.toBlob(blob => {
+        const file = new File([blob], 'novedades.png', { type: 'image/png' });
+        if (navigator.canShare) {
+            navigator.share({
+                files: [file],
+                title: 'Novedades de Piso',
+                text: 'Novedades generadas con SADOFE'
             });
+        } else {
+            alert('Compartir no soportado en este navegador.');
         }
+    });
+}
     </script>
 </body>
 </html>
