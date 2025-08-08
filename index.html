@@ -1,785 +1,916 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>🏥 Registro SADOFE</title>
-  <script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
-  <style>
-    /* === SPLASH SCREEN === */
-    #splash {
-      position: fixed;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
-      background: #f0f8ff;
-      display: flex;
-      flex-direction: column;
-      justify-content: center;
-      align-items: center;
-      z-index: 9999;
-      transition: opacity 0.8s ease-out;
-      font-family: 'Segoe UI', Arial, sans-serif;
-    }
-    #splash.fade-out {
-      opacity: 0;
-    }
-    #splash .icono {
-      font-size: 90px;
-      color: #e74c3c;
-      margin-bottom: 20px;
-    }
-    #splash h1 {
-      font-size: 42px;
-      color: #0a3d62;
-      text-align: center;
-      margin: 0 30px 15px;
-      line-height: 1.3;
-      font-weight: bold;
-    }
-    #splash p {
-      font-size: 16px;
-      color: #555;
-      margin: 0;
-      position: absolute;
-      bottom: 40px;
-      left: 0;
-      width: 100%;
-      text-align: center;
-    }
-
-    /* === LOGIN SCREEN === */
-    #login {
-      position: fixed;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
-      background: #f8f9fa;
-      display: flex;
-      flex-direction: column;
-      justify-content: center;
-      align-items: center;
-      z-index: 9998;
-      padding: 20px;
-    }
-    #login form {
-      background: white;
-      padding: 30px;
-      border-radius: 12px;
-      box-shadow: 0 4px 15px rgba(0,0,0,0.1);
-      width: 100%;
-      max-width: 400px;
-    }
-    #login h3 {
-      text-align: center;
-      color: #0a3d62;
-      margin-bottom: 20px;
-    }
-    #login input {
-      width: 100%;
-      padding: 12px;
-      margin-bottom: 16px;
-      border: 1px solid #ccc;
-      border-radius: 8px;
-      font-size: 16px;
-    }
-    #login button {
-      background: #0a3d62;
-      color: white;
-      border: none;
-      padding: 12px;
-      width: 100%;
-      border-radius: 8px;
-      font-size: 16px;
-      cursor: pointer;
-    }
-    #login button:hover {
-      background: #072f49;
-    }
-
-#login .cargando {
-      text-align: center;
-      color: #0a3d62;
-      margin-top: 15px;
-      font-style: italic;
-    }
-    #login .cargando .mate {
-      font-size: 24px;
-      margin-right: 8px;
-    }
-
-    /* === ESTILO PRINCIPAL === */
-    * {
-      box-sizing: border-box;
-    }
-    body {
-      font-family: 'Segoe UI', Arial, sans-serif;
-      background-color: #f0f2f5;
-      margin: 0;
-      padding: 20px;
-    }
-    .container {
-      max-width: 900px;
-      margin: 0 auto;
-      background: #ffffff;
-      border-radius: 12px;
-      box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
-      padding: 25px;
-    }
-    h2 {
-      text-align: center;
-      color: #0a3d62;
-      margin-bottom: 20px;
-      font-size: 26px;
-    }
-    .form-group {
-      margin-bottom: 18px;
-    }
-    label {
-      display: block;
-      font-weight: 600;
-      margin-bottom: 6px;
-      color: #0a3d62;
-    }
-    input[type="text"], select, textarea {
-      width: 100%;
-      padding: 10px;
-      border: 1px solid #ccc;
-      border-radius: 8px;
-      font-size: 16px;
-      transition: border 0.3s;
-    }
-    input:focus, select:focus, textarea:focus {
-      outline: none;
-      border-color: #0a3d62;
-    }
-    .card {
-      border: 1px solid #e0e0e0;
-      padding: 18px;
-      margin-bottom: 18px;
-      background-color: #f9f9f9;
-      border-radius: 10px;
-      box-shadow: 0 1px 5px rgba(0,0,0,0.08);
-    }
-    .input-group {
-      margin-bottom: 12px;
-    }
-    .checkbox-group {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 10px;
-      margin-top: 6px;
-    }
-    .checkbox-group label {
-      background: #e3f2fd;
-      padding: 7px 10px;
-      border-radius: 20px;
-      font-size: 14px;
-      border: 1px solid #90caf9;
-      font-weight: 500;
-    }
-    .checkbox-group input {
-      margin-right: 5px;
-    }
-    .botones {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 12px;
-      margin: 25px 0 15px;
-      justify-content: center;
-    }
-    button {
-      padding: 12px 18px;
-      font-size: 16px;
-      border: none;
-      border-radius: 8px;
-      cursor: pointer;
-      flex: 1;
-      min-width: 130px;
-      font-weight: 600;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      gap: 8px;
-    }
-    button:nth-child(1) { background: #0a3d62; color: white; }
-    button:nth-child(2) { background: #007BFF; color: white; }
-    button:nth-child(3) { background: #9fd6ab; color: black; }
-    button:nth-child(4) { background: #f2ab6f; color: black; }
-    button:hover {
-      opacity: 0.9;
-      transform: translateY(-1px);
-    }
-    /* ✅ Estilo del resumen para la imagen */
-    #resumenImagen {
-      background: white;
-      padding: 30px;
-      border-radius: 10px;
-      box-shadow: 0 2px 12px rgba(0,0,0,0.12);
-      font-family: 'Segoe UI', sans-serif;
-      font-size: 16px;
-      color: #000;
-      max-width: 700px;
-      margin: 0 auto;
-    }
-    #resumenImagen h3 {
-      text-align: center;
-      color: #0a3d62;
-      margin-bottom: 18px;
-      font-size: 20px;
-    }
-    #resumenImagen .cama {
-      font-weight: bold;
-      color: #0a3d62;
-    }
-    #resumenImagen .separador {
-      border-top: 1px dashed #aaa;
-      margin: 15px 0;
-    }
-    #imagenGenerada {
-      display: block;
-      margin: 20px auto;
-      max-width: 100%;
-      border-radius: 10px;
-      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
-    }
-    #modalImagen {
-      display: none;
-      position: fixed;
-      z-index: 999;
-      left: 0;
-      top: 0;
-      width: 100%;
-      height: 100%;
-      overflow: auto;
-      background-color: rgba(0,0,0,0.5);
-      padding: 20px;
-    }
-    .modal-content {
-      background: white;
-      margin: auto;
-      padding: 25px;
-      border-radius: 12px;
-      max-width: 520px;
-      max-height: 90vh;
-      overflow-y: auto;
-    }
-    .notas-piso {
-      background: #f0f8ff;
-      border-left: 6px solid #0a3d62;
-      padding: 18px;
-      border-radius: 10px;
-      margin-top: 20px;
-      box-shadow: 0 1px 4px rgba(0,0,0,0.08);
-    }
-    .notas-piso h3 {
-      margin: 0 0 12px;
-      color: #0a3d62;
-      font-size: 18px;
-    }
-    .notas-piso textarea {
-      min-height: 100px;
-    }
-  </style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SADOFE - Registro de Novedades</title>
+    <meta name="theme-color" content="#0a3d62">
+    <link rel="manifest" href="application/json,{'name':'SADOFE','short_name':'SADOFE','start_url':'/','display':'standalone','background_color':'#ffffff','theme_color':'#0a3d62','icons':[{'src':'image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22%3E%3Ccircle cx=%2250%22 cy=%2250%22 r=%2245%22 fill=%22%230a3d62%22/%3E%3Ctext x=%2250%22 y=%2260%22 font-size=%2240%22 text-anchor=%22middle%22 fill=%22white%22%3E🩺%3C/text%3E%3C/svg%3E','sizes':'192x192','type':'image/svg+xml'}]}">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            color: #333;
+        }
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        /* Splash Screen */
+        .splash-screen {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            background: linear-gradient(135deg, #0a3d62 0%, #1e3c72 100%);
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            z-index: 10000;
+            transition: opacity 0.5s ease-out;
+            text-align: center;
+        }
+        .splash-logo {
+            font-size: 5.5rem;
+            margin-bottom: 15px;
+            animation: pulse 2s infinite;
+        }
+        .splash-title {
+            color: white;
+            font-size: 2.4rem;
+            margin-bottom: 8px;
+            font-weight: 300;
+            line-height: 1.2;
+        }
+        .splash-subtitle {
+            color: #b8d4f0;
+            font-size: 1.2rem;
+        }
+        .splash-footer {
+            position: absolute;
+            bottom: 20px;
+            color: rgba(255,255,255,0.7);
+            font-size: 0.95rem;
+        }
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.1); }
+        }
+        /* Login Screen */
+        .login-screen {
+            display: none;
+            min-height: 100vh;
+            justify-content: center;
+            align-items: center;
+        }
+        .login-card {
+            background: white;
+            padding: 30px;
+            border-radius: 15px;
+            box-shadow: 0 15px 40px rgba(0,0,0,0.15);
+            width: 100%;
+            max-width: 400px;
+            text-align: center;
+        }
+        .login-card h2 {
+            color: #0a3d62;
+            margin-bottom: 25px;
+            font-weight: 400;
+            font-size: 1.5rem;
+        }
+        .input-group {
+            margin-bottom: 18px;
+            text-align: left;
+        }
+        .input-group label {
+            display: block;
+            margin-bottom: 6px;
+            color: #555;
+            font-weight: 500;
+            font-size: 0.95rem;
+        }
+        .input-group input, .input-group textarea, .input-group select {
+            width: 100%;
+            padding: 11px 14px;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            font-size: 16px;
+            transition: all 0.3s ease;
+        }
+        .input-group input:focus, .input-group textarea:focus, .input-group select:focus {
+            outline: none;
+            border-color: #0a3d62;
+            box-shadow: 0 0 0 3px rgba(10,61,98,0.1);
+        }
+        .btn {
+            background: linear-gradient(135deg, #0a3d62 0%, #1e3c72 100%);
+            color: white;
+            border: none;
+            padding: 12px 20px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: 500;
+            transition: all 0.3s ease;
+            margin: 4px;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+        }
+        .btn:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 6px 20px rgba(10,61,98,0.25);
+        }
+        .btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none;
+        }
+        .loading-message {
+            display: none;
+            text-align: center;
+            margin-top: 15px;
+            color: #0a3d62;
+            font-style: italic;
+            font-size: 0.95rem;
+        }
+        .solicitud-link {
+            margin-top: 15px;
+            font-size: 0.9rem;
+            color: #0a3d62;
+            cursor: pointer;
+            text-decoration: underline;
+        }
+        /* Main App */
+        .main-app {
+            display: none;
+            background: white;
+            border-radius: 15px;
+            overflow: hidden;
+            box-shadow: 0 15px 40px rgba(0,0,0,0.15);
+        }
+        .app-header {
+            background: linear-gradient(135deg, #0a3d62 0%, #1e3c72 100%);
+            color: white;
+            padding: 18px;
+            text-align: center;
+        }
+        .app-header h1 {
+            font-size: 1.5rem;
+            margin-bottom: 8px;
+            font-weight: 300;
+        }
+        .nurse-info {
+            background: rgba(255,255,255,0.15);
+            padding: 10px;
+            border-radius: 8px;
+            margin-top: 10px;
+            font-size: 0.9rem;
+        }
+        .app-content {
+            padding: 20px;
+        }
+        .controls {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 12px;
+            margin-bottom: 20px;
+            align-items: end;
+        }
+        .controls > div {
+            flex: 1;
+            min-width: 180px;
+        }
+        .action-buttons {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            margin: 15px 0;
+            justify-content: center;
+        }
+        .btn-secondary {
+            background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
+        }
+        .btn-warning {
+            background: linear-gradient(135deg, #ffc107 0%, #fd7e14 100%);
+        }
+        .btn-info {
+            background: linear-gradient(135deg, #17a2b8 0%, #007bff 100%);
+        }
+        /* Camas Grid */
+        .camas-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: 15px;
+            margin-top: 15px;
+        }
+        .cama-card {
+            background: #f8f9fa;
+            border: 2px solid #e9ecef;
+            border-radius: 12px;
+            padding: 16px;
+            transition: all 0.2s ease;
+        }
+        .cama-card:hover {
+            border-color: #0a3d62;
+            box-shadow: 0 4px 12px rgba(10,61,98,0.1);
+        }
+        .cama-header {
+            background: #0a3d62;
+            color: white;
+            padding: 8px;
+            border-radius: 8px;
+            text-align: center;
+            font-weight: bold;
+            margin-bottom: 12px;
+            font-size: 1.1rem;
+        }
+        .checkbox-group {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 6px;
+            margin: 12px 0;
+        }
+        .checkbox-item {
+            display: flex;
+            align-items: center;
+            gap: 4px;
+            font-size: 0.9rem;
+        }
+        .checkbox-item input[type="checkbox"] {
+            width: 16px;
+            height: 16px;
+        }
+        .checkbox-item label {
+            cursor: pointer;
+        }
+        .aislamiento-selector {
+            margin: 12px 0;
+        }
+        .aislamiento-selector select {
+            background-color: white;
+        }
+        .observaciones {
+            margin-top: 12px;
+        }
+        .observaciones textarea {
+            min-height: 60px;
+            resize: vertical;
+            font-size: 0.95rem;
+        }
+        /* Modal */
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0,0,0,0.5);
+            backdrop-filter: blur(5px);
+        }
+        .modal-content {
+            background-color: white;
+            margin: 5% auto;
+            padding: 25px;
+            border-radius: 15px;
+            width: 90%;
+            max-width: 500px;
+            max-height: 80vh;
+            overflow-y: auto;
+            box-shadow: 0 15px 40px rgba(0,0,0,0.2);
+        }
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+            padding-bottom: 12px;
+            border-bottom: 2px solid #e9ecef;
+        }
+        .close {
+            font-size: 26px;
+            font-weight: bold;
+            cursor: pointer;
+            color: #999;
+        }
+        .close:hover {
+            color: #333;
+        }
+        .cama-selection {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 10px;
+            margin: 15px 0;
+        }
+        .cama-option {
+            background: #f8f9fa;
+            border: 2px solid #e9ecef;
+            border-radius: 8px;
+            padding: 10px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            font-size: 0.95rem;
+        }
+        .cama-option:hover {
+            border-color: #0a3d62;
+        }
+        .cama-option.selected {
+            border-color: #0a3d62;
+            background: rgba(10,61,98,0.1);
+        }
+        .cama-option input[type="checkbox"] {
+            margin-right: 8px;
+            width: 16px;
+            height: 16px;
+        }
+        /* Resumen para imagen */
+        .resumen-imagen {
+            display: none;
+            background: white;
+            padding: 20px;
+            font-family: 'Segoe UI', sans-serif;
+            color: #000;
+            font-size: 14px;
+            line-height: 1.5;
+            max-width: 500px;
+            margin: 0 auto;
+            box-sizing: border-box;
+        }
+        .resumen-header {
+            text-align: center;
+            border-bottom: 2px solid #0a3d62;
+            padding-bottom: 12px;
+            margin-bottom: 15px;
+        }
+        .resumen-header h1 {
+            color: #0a3d62;
+            font-size: 1.5rem;
+            margin-bottom: 4px;
+        }
+        .resumen-info {
+            margin-bottom: 15px;
+            font-size: 0.95rem;
+        }
+        .info-item {
+            margin-bottom: 6px;
+        }
+        .info-label {
+            font-weight: bold;
+            color: #0a3d62;
+        }
+        .cama-resumen {
+            margin-bottom: 12px;
+            font-size: 0.95rem;
+        }
+        .cama-resumen h3 {
+            color: #0a3d62;
+            margin-bottom: 6px;
+            font-size: 1.1rem;
+        }
+        .novedades-list {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 4px;
+            margin: 4px 0;
+        }
+        .novedad-tag {
+            background: #0a3d62;
+            color: white;
+            padding: 3px 8px;
+            border-radius: 12px;
+            font-size: 0.8rem;
+        }
+        .notas-piso {
+            background: #fff3cd;
+            border: 1px solid #ffeaa7;
+            border-radius: 8px;
+            padding: 12px;
+            margin-top: 15px;
+            font-size: 0.95rem;
+        }
+        .notas-piso h3 {
+            color: #856404;
+            margin-bottom: 6px;
+            font-size: 1rem;
+        }
+        /* Responsive */
+        @media (max-width: 768px) {
+            .container { padding: 10px; }
+            .controls { flex-direction: column; }
+            .camas-container { grid-template-columns: 1fr; }
+            .checkbox-group { grid-template-columns: 1fr; }
+            .action-buttons { flex-direction: column; }
+            .btn { justify-content: center; }
+            .resumen-imagen { padding: 15px; font-size: 13px; }
+            .splash-title { font-size: 2rem; }
+        }
+        .fade-out {
+            opacity: 0 !important;
+        }
+    </style>
 </head>
 <body>
-
-  <!-- ✅ VENTANA SPLASH -->
-  <div id="splash">
-    <div class="icono">🩺</div>
-    <h1>Registro de Novedades<br><br> Enfermería</h1>
-    <p>© Lic. Luis C. Parra</p>
-  </div>
-
-  <!-- ✅ VENTANA LOGIN -->
-  <div id="login">
-    <form id="formLogin">
-      <h3>🔐 Inicio de Sesión</h3>
-      <label for="dni">DNI (Usuario y Contraseña):</label>
-      <input type="text" id="dni" placeholder="Ej: 30123456" required />
-      <button type="submit">Ingresar</button>
-      <div id="cargando" style="display: none;" class="cargando">
-        <span class="mate">🧉</span> Verificando... Mientras, tomate un mate
-      </div>
-    </form>
-  </div>
-
-  <!-- ✅ CONTENIDO PRINCIPAL -->
-  <div class="container">
-    <h2>👩‍⚕️ Registro de Novedades - SADOFE</h2>
-
-    <div class="form-group">
-      <label for="enfermero">👨‍⚕️ Nombre del Enfermero/a:</label>
-      <input type="text" id="enfermero" readonly />
+    <!-- Splash Screen -->
+    <div class="splash-screen" id="splashScreen">
+        <div class="splash-logo">🩺</div>
+        <h1 class="splash-title">SADOFE</h1>
+        <p class="splash-subtitle">Sistema de Registro de Novedades - Enfermería</p>
+        <p class="splash-footer">© Lic. Luis C. Parra</p>
     </div>
 
-    <div class="form-group">
-      <label for="piso">🏢 Seleccionar Piso:</label>
-      <select id="piso">
-        <option value="">-- Elegir piso --</option>
-        <option value="1B">1B (101–110)</option>
-        <option value="2B">2B (201–210)</option>
-        <option value="1C">1C (116–129)</option>
-        <option value="2C">2C (216–229)</option>
-        <option value="3C">3C (316–322)</option>
-        <option value="4C">4C (422–429)</option>
-      </select>
+    <!-- Login Screen -->
+    <div class="login-screen" id="loginScreen">
+        <div class="login-card">
+            <h2>🔐 Iniciar Sesión</h2>
+            <div class="input-group">
+                <label for="dniInput">Número de DNI:</label>
+                <input type="text" id="dniInput" placeholder="Ingrese su DNI">
+            </div>
+            <button class="btn" onclick="login()">
+                🧑‍⚕️ Iniciar Sesión
+            </button>
+            <div class="loading-message" id="loadingMessage">
+                ⏳ Verificando... Mientras, tomate un mate ☕
+            </div>
+            <p class="solicitud-link" onclick="solicitarAccesoPorWhatsApp()">
+                ¿Eres nuevo? Solicita acceso por WhatsApp
+            </p>
+            <div id="otherNursesSection" style="display: none; margin-top: 15px;">
+                <div class="input-group">
+                    <label for="otherNurses">¿Hay otros enfermeros/as en el piso?</label>
+                    <textarea id="otherNurses" placeholder="Nombres separados por coma (opcional)" rows="2"></textarea>
+                </div>
+                <button class="btn btn-secondary" onclick="completeLogin()">
+                    ✅ Continuar
+                </button>
+            </div>
+        </div>
     </div>
 
-    <div id="tarjetasContainer"></div>
-
-    <!-- Notas del piso -->
-    <div class="notas-piso">
-      <h3>📌 Notas del Piso</h3>
-      <textarea id="notasPiso" placeholder="Escriba observaciones generales del piso..."></textarea>
+    <!-- Main Application -->
+    <div class="main-app" id="mainApp">
+        <div class="app-header">
+            <h1>🩺 SADOFE - Registro de Novedades</h1>
+            <div class="nurse-info">
+                <div><strong>🧑‍⚕️ Enfermera/o:</strong> <span id="nurseNameDisplay"></span></div>
+                <div id="otherNursesDisplay" style="display: none;">
+                    <strong>👥 Otros enfermeros/as:</strong> <span id="otherNursesText"></span>
+                </div>
+            </div>
+        </div>
+        <div class="app-content">
+            <div class="controls">
+                <div class="input-group">
+                    <label for="pisoSelect">Seleccionar Piso:</label>
+                    <select id="pisoSelect">
+                        <option value="">Seleccione un piso</option>
+                        <option value="1B">1B (101-110)</option>
+                        <option value="2B">2B (201-210)</option>
+                        <option value="4B">4B (402-409)</option>
+                        <option value="1C">1C (116-129)</option>
+                        <option value="2C">2C (216-229)</option>
+                        <option value="3C">3C (316-322)</option>
+                        <option value="4C">4C (422-429)</option>
+                    </select>
+                </div>
+            </div>
+            <div class="action-buttons">
+                <button class="btn" onclick="loadCamas()">
+                    🏥 Ver Camas de Piso selecionado
+                </button>
+                <button class="btn btn-warning" onclick="enviarDatos()">
+                    📤 Enviar al Servidor
+			solo para el administrador de la pagina
+                </button>
+                <button class="btn btn-secondary" onclick="abrirModalNovedades()">
+                    📋 Generar Novedades
+                </button>
+            </div>
+            <div class="input-group">
+                <label for="notasPiso">📝 Notas del Piso:</label>
+                <textarea id="notasPiso" placeholder="Observaciones generales del piso..." rows="3"></textarea>
+            </div>
+            <div class="camas-container" id="camasContainer">
+                <!-- Camas generadas aquí -->
+            </div>
+        </div>
     </div>
 
-    <div class="botones">
-      <button onclick="generarTarjetas()"><span>📝</span> Ver Camas de Piso Elegido</button>
-      <button onclick="registrar()"><span>📤</span> Datos al Servidor</button>
-      <button onclick="abrirModal()"><span>📷</span> Generar Novedades</button>
-      <button onclick="descargarImagen()" style="display:none;" id="btnDescargar"><span>📥</span> Descargar Imagen</button>
-      <button onclick="compartirImagen()" style="display:none;" id="btnCompartir"><span>📤</span> Compartir</button>
+    <!-- Modal para Seleccionar Camas -->
+    <div id="modalNovedades" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>📋 Seleccionar Camas</h2>
+                <span class="close" onclick="cerrarModal()">&times;</span>
+            </div>
+            <p>Seleccione las camas para incluir en el resumen:</p>
+            <div class="cama-selection" id="camaSelection"></div>
+            <div style="text-align: center; margin-top: 15px;">
+                <button class="btn btn-info" onclick="generarImagen()">🖼️ Generar</button>
+                <button class="btn" onclick="cerrarModal()">❌ Cancelar</button>
+            </div>
+        </div>
     </div>
 
-    <img id="imagenGenerada" style="display:none;" />
-  </div>
-
-  <!-- Modal para seleccionar camas -->
-  <div id="modalImagen">
-    <div class="modal-content">
-      <h3>Seleccionar camas para incluir en la imagen de novedades</h3>
-      <div id="listaCamas"></div>
-      <button onclick="generarImagen()">📝Generar Imagen</button>
-      <button onclick="cerrarModal()">❌Cancelar</button>
+    <!-- Imagen Generada -->
+    <div id="imagenGenerada" style="display: none; text-align: center; margin-top: 20px;">
+        <h3>📸 Imagen Generada</h3>
+        <canvas id="canvasImagen"></canvas>
+        <div style="margin-top: 12px;">
+            <button class="btn btn-info" onclick="descargarImagen()">💾 Descargar</button>
+            <button class="btn btn-secondary" onclick="compartirImagen()">📱 Compartir</button>
+        </div>
     </div>
-  </div>
 
-  <!-- Contenedor oculto para el resumen -->
-  <div id="resumenImagen" style="display:none;"></div>
+    <!-- Resumen oculto para imagen -->
+    <div class="resumen-imagen" id="resumenImagen"></div>
 
-  <script>
-    // ✅ Mostrar splash por 3 segundos
-    window.onload = function() {
-      setTimeout(() => {
-        document.getElementById('splash').classList.add('fade-out');
-        setTimeout(() => {
-          document.getElementById('splash').style.display = 'none';
-          // Mostrar login después del splash
-          document.getElementById('login').style.display = 'flex';
-        }, 800);
-      }, 3000);
-    };
+    <script>
+        const CONFIG = {
+            LOGIN_ENDPOINT: 'https://script.google.com/macros/s/AKfycbwBqfRagEUrSM9f9x1WvgLDKByfvfp-VPsDdUjuCNLKiUBcLO1Xb3pYlJ-qDxO_keFY3A/exec',
+            DATA_ENDPOINT: 'https://script.google.com/macros/s/AKfycbznONc4J-i6p4yuEfW5hcR8hgnbotrqJZVCrMtACl1YS7sKP7vB2BA39lXBLYBSJ6uUxQ/exec',
+            PISOS: {
+                '1B': { desde: 101, hasta: 110, especiales: [110], camas: 3 },
+                '2B': { desde: 201, hasta: 210, especiales: [210], camas: 3 },
+                '4B': { desde: 402, hasta: 409, especiales: [], camas: 2 },
+                '1C': { desde: 116, hasta: 129, especiales: [], camas: 2 },
+                '2C': { desde: 216, hasta: 229, especiales: [], camas: 2 },
+                '3C': { desde: 316, hasta: 322, especiales: [], camas: 2 },
+                '4C': { desde: 422, hasta: 429, especiales: [], camas: 2 }
+            },
+            NOVEDADES: [
+                "Sonda vesical",
+                "Drenaje pleural",
+                "Acceso Venoso Periférico",
+                "Acceso Venoso Central",
+                "Drenaje aspirativo",
+                "Drenaje percutáneo",
+                "Contención física",
+                "Rechazo terapéutico",
+                "Deambula",
+                "Usa pañales",
+                "Lúcido",
+                "Desorientado",
+                "Somnoliento"
+            ]
+        };
 
-    // ✅ Autenticación con Google Sheets
-    document.getElementById('formLogin').addEventListener('submit', function(e) {
-      e.preventDefault();
-      const dni = document.getElementById('dni').value.trim();
-      if (!dni) return;
+        let userData = {
+            nurseName: '',
+            otherNurses: '',
+            currentFloor: '',
+            floorNotes: '',
+            camasData: {}
+        };
 
-const btn = e.target.querySelector('button');
-      const cargando = document.getElementById('cargando');
-
-      // ✅ Mostrar mensaje amable
-      btn.style.display = 'none';
-      cargando.style.display = 'block';
-
-      // Llamar a tu Google Apps Script
-      fetch(`https://script.google.com/macros/s/AKfycbwBqfRagEUrSM9f9x1WvgLDKByfvfp-VPsDdUjuCNLKiUBcLO1Xb3pYlJ-qDxO_keFY3A/exec?dni=${dni}`)
-        .then(res => res.json())
-        .then(data => {
-          if (data.valido) {
-            document.getElementById('enfermero').value = data.nombre;
-            document.getElementById('login').style.display = 'none';
-
-            // Preguntar si hay otros enfermeros
-            const otros = confirm(`¿Hay otros enfermeros en el piso?\n${data.nombre} (Ud.)`);
-            if (otros) {
-              const nombres = prompt("Ingrese los nombres de los otros enfermeros, separados por coma:");
-              if (nombres) {
-                localStorage.setItem('enfermerosPiso', nombres.trim());
-              }
-            } else {
-              localStorage.removeItem('enfermerosPiso');
-            }
-
-            // Recuperar datos guardados
-            const savedPiso = localStorage.getItem('sadofe_piso');
-            if (savedPiso) {
-              document.getElementById('piso').value = savedPiso;
-              generarTarjetas();
-            }
-            const savedNotas = localStorage.getItem('sadofe_notas_piso');
-            if (savedNotas) {
-              document.getElementById('notasPiso').value = savedNotas;
-            }
-          } else {
-            alert("❌ DNI no válido o no autorizado.");
-          }
-        })
-        .catch(err => {
-          alert("❌ Error al verificar credenciales. Intente nuevamente.");
-          console.error(err);
+        document.addEventListener('DOMContentLoaded', function() {
+            loadSavedData();
+            setupEventListeners();
+            showSplashScreen();
         });
-    });
 
-    const camasPorPiso = {
-      "1B": generarCamas(101, 110, [110], 3),
-      "2B": generarCamas(201, 210, [210], 3),
-      "4B": generarCamas(402, 409),
-      "1C": generarCamas(116, 129),
-      "2C": generarCamas(216, 229),
-      "3C": generarCamas(316, 322),
-      "4C": generarCamas(422, 429, [], 2)
-    };
-
-    const opcionesNovedades = [
-      "Sonda vesical", "Drenaje pleural", "Acceso Venoso Periférico", "Acceso Venoso Central",
-      "Drenaje aspirativo", "Drenaje percutáneo", "Contención física", "Rechazo terapéutico",
-      "Deambula", "Usa pañales", "Lúcido", "Desorientado", "Somnoliento"
-    ];
-
-    function generarCamas(desde, hasta, especiales = [], camasEspecial = 2) {
-      let lista = [];
-      for (let i = desde; i <= hasta; i++) {
-        const cantidad = especiales.includes(i) ? camasEspecial : 2;
-        for (let j = 1; j <= cantidad; j++) {
-          lista.push(`${i}-${j}`);
-        }
-      }
-      return lista;
-    }
-
-    function generarTarjetas() {
-      const piso = document.getElementById("piso").value;
-      const contenedor = document.getElementById("tarjetasContainer");
-      contenedor.innerHTML = "";
-
-      if (!piso || !camasPorPiso[piso]) return;
-
-      localStorage.setItem('sadofe_piso', piso);
-
-      camasPorPiso[piso].forEach(cama => {
-        const card = document.createElement("div");
-        card.className = "card";
-        card.innerHTML = `
-          <h3>Cama ${cama}</h3>
-          <div class="input-group">
-            <label><strong>🛏️ Apellido y Nombre:</strong></label>
-            <input type="text" placeholder="Ej: GONZÁLEZ, MARTA" class="nombre" />
-          </div>
-          <div class="input-group">
-            <label><strong>🧪 ¿Aislamiento?</strong></label>
-            <select class="aislamiento">
-              <option value="Ninguno">Ninguno</option>
-              <option value="Respiratorio">Respiratorio</option>
-              <option value="Contacto">Contacto</option>
-              <option value="Neutropénico">Neutropénico</option>
-            </select>
-          </div>
-          <div class="checkbox-group">
-            ${opcionesNovedades.map(nov => `<label><input type="checkbox" value="${nov}">${nov}</label>`).join("")}
-          </div>
-          <div class="input-group">
-            <label><strong>📝 Observaciones:</strong></label>
-            <textarea rows="2" placeholder="Observaciones adicionales..." class="observaciones"></textarea>
-          </div>
-        `;
-        contenedor.appendChild(card);
-
-        const savedData = localStorage.getItem(`sadofe_cama_${cama}`);
-        if (savedData) {
-          const data = JSON.parse(savedData);
-          const inputs = card.querySelectorAll('input, select, textarea');
-          inputs.forEach(input => {
-            if (input.type === 'checkbox') {
-              input.checked = data.novedades?.includes(input.value) || false;
-            } else {
-              input.value = data[input.className] || '';
-            }
-          });
+        function showSplashScreen() {
+            const splash = document.getElementById('splashScreen');
+            splash.style.display = 'flex';
+            setTimeout(() => {
+                splash.classList.add('fade-out');
+                setTimeout(() => {
+                    splash.style.display = 'none';
+                    document.getElementById('loginScreen').style.display = 'flex';
+                }, 500);
+            }, 3000);
         }
 
-        card.querySelectorAll('input, select, textarea').forEach(input => {
-          input.addEventListener('change', () => {
-            const inputs = card.querySelectorAll('input, select, textarea');
-            const data = {};
-            inputs.forEach(inp => {
-              if (inp.type === 'checkbox') {
-                if (!data.novedades) data.novedades = [];
-                if (inp.checked) data.novedades.push(inp.value);
-              } else {
-                data[inp.className] = inp.value;
-              }
+        function setupEventListeners() {
+            document.getElementById('dniInput').addEventListener('keypress', e => {
+                if (e.key === 'Enter') login();
             });
-            localStorage.setItem(`sadofe_cama_${cama}`, JSON.stringify(data));
-          });
-        });
-
-        const nombreInput = card.querySelector('.nombre');
-        nombreInput.addEventListener('input', () => {
-          nombreInput.value = nombreInput.value.toUpperCase();
-        });
-      });
-
-      const savedNotas = localStorage.getItem('sadofe_notas_piso');
-      if (savedNotas) {
-        document.getElementById('notasPiso').value = savedNotas;
-      }
-    }
-
-    document.getElementById('notasPiso').addEventListener('input', function() {
-      localStorage.setItem('sadofe_notas_piso', this.value);
-    });
-
-    function registrar() {
-      const enfermero = document.getElementById("enfermero").value.trim();
-      const piso = document.getElementById("piso").value;
-      if (!enfermero || !piso) {
-        alert("Complete el nombre del enfermero y seleccione un piso.");
-        return;
-      }
-
-      const tarjetas = document.querySelectorAll(".card");
-      const datos = [];
-
-      tarjetas.forEach(card => {
-        const cama = card.querySelector("h3").textContent.replace("Cama ", "");
-        const nombre = card.querySelector(".nombre").value.trim();
-        const aislamiento = card.querySelector(".aislamiento").value;
-        const observaciones = card.querySelector(".observaciones").value.trim();
-        const novedades = [...card.querySelectorAll("input[type=checkbox]")]
-          .filter(chk => chk.checked).map(chk => chk.value).join(", ");
-
-        if (!nombre && !observaciones && !novedades) return;
-
-        datos.push({
-          fecha: new Date().toLocaleString("es-AR"),
-          piso,
-          cama,
-          nombre,
-          aislamiento,
-          novedades,
-          observaciones,
-          enfermero
-        });
-      });
-
-      const notasPiso = document.getElementById("notasPiso").value.trim();
-      if (notasPiso) {
-        datos.push({
-          fecha: new Date().toLocaleString("es-AR"),
-          piso,
-          cama: "NOTAS DE PISO",
-          nombre: "N/A",
-          aislamiento: "N/A",
-          novedades: "N/A",
-          observaciones: notasPiso,
-          enfermero
-        });
-      }
-
-      if (datos.length === 0) {
-        alert("No se completaron datos para enviar.");
-        return;
-      }
-
-      fetch("https://script.google.com/macros/s/AKfycbznONc4J-i6p4yuEfW5hcR8hgnbotrqJZVCrMtACl1YS7sKP7vB2BA39lXBLYBSJ6uUxQ/exec", {
-        method: "POST",
-        mode: "no-cors",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(datos)
-      }).then(() => {
-        alert("✅ Novedades enviadas correctamente.");
-      }).catch(err => {
-        alert("❌ Error al enviar: " + err.message);
-      });
-    }
-
-    function abrirModal() {
-  const modal = document.getElementById("modalImagen");
-  const lista = document.getElementById("listaCamas");
-  lista.innerHTML = "";
-
-  const piso = document.getElementById("piso").value;
-  if (!piso || !camasPorPiso[piso]) return;
-
-  const camas = camasPorPiso[piso];
-
-  // Agrupar por habitación
-  const habitaciones = {};
-  camas.forEach(cama => {
-    const num = cama.split('-')[0];
-    if (!habitaciones[num]) habitaciones[num] = [];
-    habitaciones[num].push(cama);
-  });
-
-  // Ordenar habitaciones
-  const habitacionesOrdenadas = Object.keys(habitaciones).sort((a, b) => a - b);
-
-  habitacionesOrdenadas.forEach(num => {
-    const camasHab = habitaciones[num];
-    const fila = document.createElement("div");
-    fila.style.display = "flex";
-    fila.style.justifyContent = "space-between";
-    fila.style.gap = "20px";
-    fila.style.margin = "8px 0";
-    fila.style.width = "100%";
-
-    camasHab.forEach(cama => {
-      const card = [...document.querySelectorAll('.card')]
-        .find(c => c.querySelector('h3')?.textContent.trim() === `Cama ${cama}`);
-      const nombre = card ? card.querySelector('.nombre').value.trim() || '___' : '___';
-
-      const contenedor = document.createElement("div");
-      contenedor.style.flex = "1";
-      contenedor.style.minWidth = "200px";
-
-      contenedor.innerHTML = `
-        <label style="display: flex; align-items: center; font-size: 14px; cursor: pointer;">
-          <input type='checkbox' value='${cama}' style="margin-right: 8px;">
-          <strong>${cama}:</strong> ${nombre}
-        </label>
-      `;
-      fila.appendChild(contenedor);
-    });
-
-    if (camasHab.length === 1) {
-      const vacio = document.createElement("div");
-      vacio.style.flex = "1";
-      fila.appendChild(vacio);
-    }
-
-    lista.appendChild(fila);
-  });
-
-  modal.style.display = "block";
-}
-
-    function cerrarModal() {
-      document.getElementById("modalImagen").style.display = "none";
-    }
-
-    function generarImagen() {
-  const enfermero = document.getElementById("enfermero").value.trim();
-  const piso = document.getElementById("piso").value;
-  if (!enfermero || !piso) {
-    alert("👩‍⚕️ Complete el nombre del enfermero (a) y seleccione un piso.");
-    return;
-  }
-
-  const checkboxes = document.querySelectorAll("#listaCamas input[type='checkbox']:checked");
-  const camasSeleccionadas = Array.from(checkboxes).map(cb => cb.value);
-
-  if (camasSeleccionadas.length === 0) {
-    alert("Seleccione al menos una cama para generar la imagen.");
-    return;
-  }
-
-  // ✅ HTML bien estructurado y centrado
-  let contenido = `
-    <h3>📋 Resumen de Novedades</h3>
-    <p><strong>📅 Fecha:</strong> ${new Date().toLocaleString("es-AR")}</p>
-    <p><strong>🏢 Piso:</strong> ${piso}</p>
-    <p><strong>👨‍⚕️ Enfermero (a):</strong> ${enfermero}</p>
-  `;
-
-  // Agregar otros enfermeros si los hay
-  const otrosEnfermeros = localStorage.getItem('enfermerosPiso');
-  if (otrosEnfermeros) {
-    contenido += `<p><strong>👥 Otros enfermeros (as):</strong> ${otrosEnfermeros}</p>`;
-  }
-
-  contenido += `<div class="separador"></div>`;
-
-  const tarjetas = document.querySelectorAll(".card");
-  let datosIncluidos = false;
-
-  camasSeleccionadas.forEach(camaSel => {
-    const card = [...tarjetas].find(c => c.querySelector("h3").textContent.replace("Cama ", "") === camaSel);
-    if (!card) return;
-    const nombre = card.querySelector(".nombre").value.trim();
-    const aislamiento = card.querySelector(".aislamiento").value;
-    const observaciones = card.querySelector(".observaciones").value.trim();
-    const novedades = [...card.querySelectorAll("input[type=checkbox]")]
-      .filter(chk => chk.checked).map(chk => chk.value).join(", ");
-
-    if (!nombre && !observaciones && !novedades) return;
-
-    datosIncluidos = true;
-
-    contenido += `
-      <p><strong class="cama">🛏️ Cama ${camaSel}</strong>: ${nombre}`;
-    if (aislamiento !== "Ninguno") contenido += ` | 🧪 Aislamiento: ${aislamiento}`;
-    if (novedades) contenido += ` | 📌 ${novedades}`;
-    if (observaciones) contenido += ` | 📝 Obs: ${observaciones}`;
-    contenido += `</p>
-      <div class="separador"></div>`;
-  });
-
-  const notasPiso = document.getElementById("notasPiso").value.trim();
-  if (notasPiso) {
-    contenido += `<p><strong>📌 Notas del Piso:</strong><br>${notasPiso}</p>`;
-  }
-
-  if (!datosIncluidos && !notasPiso) {
-    alert("No hay datos para las camas seleccionadas ni notas del piso.");
-    return;
-  }
-
-  const contenedorResumen = document.getElementById("resumenImagen");
-  contenedorResumen.innerHTML = contenido;
-  contenedorResumen.style.display = "block";
-  contenedorResumen.style.width = "600px"; // ✅ Ancho fijo
-  contenedorResumen.style.margin = "0 auto";
-  contenedorResumen.style.boxSizing = "border-box";
-
-  // ✅ Captura con configuración fija
-  html2canvas(contenedorResumen, {
-    backgroundColor: "#ffffff",
-    scale: 2,
-    useCORS: true,
-    width: 600,
-    height: contenedorResumen.scrollHeight + 40,
-    scrollY: 0,
-    windowWidth: 600,
-    windowHeight: contenedorResumen.scrollHeight + 100,
-    logging: false
-  }).then(canvas => {
-    const img = document.getElementById("imagenGenerada");
-    img.src = canvas.toDataURL("image/png");
-    img.style.display = "block";
-
-    const btnDescargar = document.getElementById("btnDescargar");
-    btnDescargar.style.display = "inline-flex";
-
-    const btnCompartir = document.getElementById("btnCompartir");
-    btnCompartir.style.display = "inline-flex";
-
-    canvas.toBlob(blob => {
-      const file = new File([blob], "novedades.png", { type: "image/png" });
-      btnCompartir.onclick = () => {
-        if (navigator.canShare && navigator.canShare({ files: [file] })) {
-          navigator.share({ files: [file] }).catch(() => alert("Error al compartir"));
-        } else {
-          alert("Tu navegador no soporta compartir archivos.");
+            document.getElementById('notasPiso').addEventListener('input', () => {
+                userData.floorNotes = document.getElementById('notasPiso').value;
+                saveData();
+            });
+            document.getElementById('pisoSelect').addEventListener('change', () => {
+                userData.currentFloor = document.getElementById('pisoSelect').value;
+                saveData();
+            });
         }
-      };
-    });
-    cerrarModal();
-  });
-}
 
-    function descargarImagen() {
-      const link = document.createElement("a");
-      link.download = "novedades.png";
-      link.href = document.getElementById("imagenGenerada").src;
-      link.click();
-    }
+        function loadSavedData() {
+            try {
+                const saved = JSON.parse(localStorage.getItem('sadofe_data') || '{}');
+                if (saved.nurseName) userData = { ...userData, ...saved };
+                if (userData.currentFloor) document.getElementById('pisoSelect').value = userData.currentFloor;
+                if (userData.floorNotes) document.getElementById('notasPiso').value = userData.floorNotes;
+            } catch (e) { console.log('Error al cargar datos', e); }
+        }
 
-    function compartirImagen() {}
-  </script>
+        function saveData() {
+            try {
+                localStorage.setItem('sadofe_data', JSON.stringify(userData));
+            } catch (e) { console.log('Error al guardar', e); }
+        }
+
+        async function login() {
+            const dni = document.getElementById('dniInput').value.trim();
+            if (!dni) {
+                alert('Ingrese un DNI válido');
+                return;
+            }
+            document.getElementById('loadingMessage').style.display = 'block';
+            try {
+                const res = await fetch(`${CONFIG.LOGIN_ENDPOINT}?dni=${dni}`);
+                const data = await res.json();
+                if (data.valido) {
+                    userData.nurseName = data.nombre;
+                    document.getElementById('loadingMessage').style.display = 'none';
+                    document.getElementById('otherNursesSection').style.display = 'block';
+                } else {
+                    throw new Error('No autorizado');
+                }
+            } catch (err) {
+                document.getElementById('loadingMessage').style.display = 'none';
+                alert('Error: DNI no válido o sin acceso.');
+            }
+        }
+
+        // ✅ FUNCIÓN NUEVA: Solicitar acceso por WhatsApp
+        function solicitarAccesoPorWhatsApp() {
+            const nombre = prompt("📝 Para solicitar acceso, ingresa tu nombre completo:");
+            if (!nombre) return;
+
+            const dni = prompt("🔢 Ahora ingresa tu DNI:");
+            if (!dni) return;
+
+            // 📱 Reemplaza con tu número de WhatsApp (con código de país)
+            const numeroWhatsApp = '5491124076812'; // ← CAMBIA ESTE NÚMERO
+
+            const mensaje = `Hola, soy ${nombre.trim()} (DNI: ${dni.trim()}).\n\nQuiero solicitar acceso al sistema de Enfermeria para el registro de novedades.\n\n¿Me habilitas el DNI para el ingreso?`;
+
+            const url = `https://wa.me/${numeroWhatsApp}?text=${encodeURIComponent(mensaje)}`;
+
+            window.open(url, '_blank');
+        }
+
+        function completeLogin() {
+            userData.otherNurses = document.getElementById('otherNurses').value.trim();
+            document.getElementById('loginScreen').style.display = 'none';
+            document.getElementById('mainApp').style.display = 'block';
+            document.getElementById('nurseNameDisplay').textContent = userData.nurseName;
+            if (userData.otherNurses) {
+                document.getElementById('otherNursesDisplay').style.display = 'block';
+                document.getElementById('otherNursesText').textContent = userData.otherNurses;
+            }
+            saveData();
+        }
+
+        function generarCamas(config) {
+            const { desde, hasta, especiales, camas } = config;
+            const camasList = [];
+            for (let hab = desde; hab <= hasta; hab++) {
+                const numCamas = especiales.includes(hab) ? camas : 2;
+                for (let c = 1; c <= numCamas; c++) {
+                    camasList.push(`${hab}-${c}`);
+                }
+            }
+            return camasList;
+        }
+
+        function loadCamas() {
+            const piso = document.getElementById('pisoSelect').value;
+            if (!piso) {
+                alert('Seleccione un piso');
+                return;
+            }
+            userData.currentFloor = piso;
+            const container = document.getElementById('camasContainer');
+            container.innerHTML = '';
+            const config = CONFIG.PISOS[piso];
+            const camas = generarCamas(config);
+            camas.forEach(camaId => {
+                const camaCard = createCamaCard(piso, camaId);
+                container.appendChild(camaCard);
+            });
+            saveData();
+        }
+
+        function createCamaCard(piso, camaId) {
+            const data = userData.camasData[camaId] || {};
+            const card = document.createElement('div');
+            card.className = 'cama-card';
+            card.innerHTML = `
+                <div class="cama-header">Cama ${camaId}</div>
+                <div class="input-group">
+                    <label>👤 Paciente:</label>
+                    <input type="text" value="${data.paciente || ''}" onchange="updateCamaData('${camaId}', 'paciente', this.value.toUpperCase())" style="text-transform:uppercase">
+                </div>
+                <div class="aislamiento-selector">
+                    <label>🔒 Aislamiento:</label>
+                    <select onchange="updateCamaData('${camaId}', 'aislamiento', this.value)">
+                        <option value="Ninguno" ${data.aislamiento === 'Ninguno' ? 'selected' : ''}>Ninguno</option>
+                        <option value="Respiratorio" ${data.aislamiento === 'Respiratorio' ? 'selected' : ''}>Respiratorio</option>
+                        <option value="Contacto" ${data.aislamiento === 'Contacto' ? 'selected' : ''}>Contacto</option>
+                        <option value="Neutropénico" ${data.aislamiento === 'Neutropénico' ? 'selected' : ''}>Neutropénico</option>
+                    </select>
+                </div>
+                <div class="checkbox-group">
+                    ${CONFIG.NOVEDADES.map(n => `
+                        <div class="checkbox-item">
+                            <input type="checkbox" ${data.novedades?.includes(n) ? 'checked' : ''} onchange="updateNovedades('${camaId}')">
+                            <label>${n}</label>
+                        </div>
+                    `).join('')}
+                </div>
+                <div class="observaciones">
+                    <label>📝 Obs:</label>
+                    <textarea onchange="updateCamaData('${camaId}', 'observaciones', this.value)">${data.observaciones || ''}</textarea>
+                </div>
+            `;
+            return card;
+        }
+
+        function updateCamaData(camaId, field, value) {
+            if (!userData.camasData[camaId]) userData.camasData[camaId] = {};
+            userData.camasData[camaId][field] = value;
+            saveData();
+        }
+
+        function updateNovedades(camaId) {
+            const novedades = [];
+            const checkboxes = document.querySelectorAll(`#camasContainer .cama-card`);
+            const cardIndex = Array.from(checkboxes).findIndex(card => {
+                const header = card.querySelector('.cama-header')?.textContent || '';
+                return header.includes(camaId);
+            });
+            if (cardIndex === -1) return;
+            const inputs = checkboxes[cardIndex].querySelectorAll('.checkbox-item input');
+            inputs.forEach((cb, i) => {
+                if (cb.checked) novedades.push(CONFIG.NOVEDADES[i]);
+            });
+            updateCamaData(camaId, 'novedades', novedades);
+        }
+
+        async function enviarDatos() {
+            if (!userData.nurseName || !userData.currentFloor) {
+                alert('Complete todos los datos requeridos');
+                return;
+            }
+            const data = [];
+            const now = new Date().toLocaleString('es-AR');
+            const piso = userData.currentFloor;
+
+            Object.keys(userData.camasData).forEach(camaId => {
+                const d = userData.camasData[camaId];
+                if (d.paciente || d.observaciones || (d.novedades && d.novedades.length)) {
+                    data.push({
+                        fecha: now,
+                        piso: piso,
+                        cama: camaId,
+                        'apellido y nombre': d.paciente || '',
+                        aislamiento: d.aislamiento || 'Ninguno',
+                        novedades: d.novedades?.join(', ') || '',
+                        observaciones: d.observaciones || '',
+                        'enfermero/a': userData.nurseName
+                    });
+                }
+            });
+
+            if (userData.floorNotes) {
+                data.push({
+                    fecha: now,
+                    piso: piso,
+                    cama: 'NOTAS DE PISO',
+                    'apellido y nombre': 'N/A',
+                    aislamiento: 'N/A',
+                    novedades: 'N/A',
+                    observaciones: userData.floorNotes,
+                    'enfermero/a': userData.nurseName
+                });
+            }
+
+            if (data.length === 0) {
+                alert('No hay datos para enviar');
+                return;
+            }
+
+            try {
+                const response = await fetch(CONFIG.DATA_ENDPOINT, {
+                    method: 'POST',
+                    mode: 'cors',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ data })
+                });
+
+                if (response.ok) {
+                    alert('✅ Datos enviados correctamente al servidor');
+                } else {
+                    throw new Error(`Error ${response.status}: ${response.statusText}`);
+                }
+            } catch (err) {
+                console.error('Error al enviar datos:', err);
+                alert('❌ Error al enviar datos. Verifique conexión.\n' + err.message);
+            }
+        }
+
+        function abrirModalNovedades() {
+            const container = document.getElementById('camaSelection');
+            container.innerHTML = '';
+            const piso = userData.currentFloor;
+            if (!piso) return;
+            const config = CONFIG.PISOS[piso];
+            const camas = generarCamas(config);
+            camas.forEach(camaId => {
+                const data = userData.camasData[camaId] || {};
+                const hasData = data.paciente || (data.novedades && data.novedades.length) || data.observaciones;
+                const div = document.createElement('div');
+                div.className = 'cama-option';
+                div.innerHTML = `
+                    <input type="checkbox" id="sel-${camaId}" ${hasData ? 'checked' : ''}>
+                    <label for="sel-${camaId}">Cama ${camaId} - ${data.paciente || ''}</label>
+                `;
+                div.onclick = () => div.querySelector('input').click();
+                container.appendChild(div);
+            });
+            document.getElementById('modalNovedades').style.display = 'flex';
+        }
+
+        function cerrarModal() {
+            document.getElementById('modalNovedades').style.display = 'none';
+        }
+
+        function generarImagen() {
+            const selected = Array.from(document.querySelectorAll('#camaSelection input:checked')).map(cb => cb.id.replace('sel-', ''));
+            if (selected.length === 0) {
+                alert('Seleccione al menos una cama');
+                return;
+            }
+            const resumen = document.getElementById('resumenImagen');
+            resumen.innerHTML = `
+                <div class="resumen-header">
+                    <h1>📋 Novedades</h1>
+                    <p>${new Date().toLocaleString('es-AR')}</p>
+                </div>
+                <div class="resumen-info">
+                    <div class="info-item"><span class="info-label">Piso:</span> ${userData.currentFloor}</div>
+                    <div class="info-item"><span class="info-label">Enfermera/o:</span> ${userData.nurseName}</div>
+                    ${userData.otherNurses ? `<div class="info-item"><span class="info-label">Otros:</span> ${userData.otherNurses}</div>` : ''}
+                </div>
+            `;
+            selected.forEach(camaId => {
+                const data = userData.camasData[camaId] || {};
+                if (!data.paciente && !data.observaciones && (!data.novedades || !data.novedades.length)) return;
+                resumen.innerHTML += `
+                    <div class="cama-resumen">
+                        <h3>Cama ${camaId}: ${data.paciente || 'Sin nombre'}</h3>
+                        ${data.aislamiento !== 'Ninguno' ? `<p><strong>🧪 ${data.aislamiento}</strong></p>` : ''}
+                        ${data.novedades?.length ? `<div class="novedades-list">${data.novedades.map(n => `<span class="novedad-tag">${n}</span>`).join('')}</div>` : ''}
+                        ${data.observaciones ? `<p><strong>📝 Obs:</strong> ${data.observaciones}</p>` : ''}
+                    </div>
+                `;
+            });
+            if (userData.floorNotes) {
+                resumen.innerHTML += `<div class="notas-piso"><h3>📌 Notas del Piso</h3><p>${userData.floorNotes}</p></div>`;
+            }
+            resumen.style.display = 'block';
+            html2canvas(resumen, { scale: 2, backgroundColor: '#ffffff', width: 500 }).then(canvas => {
+                const img = document.getElementById('canvasImagen');
+                img.width = canvas.width;
+                img.height = canvas.height;
+                img.getContext('2d').drawImage(canvas, 0, 0);
+                document.getElementById('imagenGenerada').style.display = 'block';
+                cerrarModal();
+            });
+        }
+
+        function descargarImagen() {
+            const link = document.createElement('a');
+            link.download = 'novedades.png';
+            link.href = document.getElementById('canvasImagen').toDataURL('image/png');
+            link.click();
+        }
+
+        function compartirImagen() {
+            const canvas = document.getElementById('canvasImagen');
+            canvas.toBlob(blob => {
+                const file = new File([blob], 'novedades.png', { type: 'image/png' });
+                if (navigator.canShare && navigator.canShare({ files: [file] })) {
+                    navigator.share({ files: [file] });
+                } else {
+                    alert('Compartir no soportado en este navegador.');
+                }
+            });
+        }
+    </script>
 </body>
 </html>
