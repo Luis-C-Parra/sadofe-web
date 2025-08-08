@@ -335,75 +335,81 @@
             width: 16px;
             height: 16px;
         }
-        /* Resumen para imagen */
+        /* Resumen para imagen - Optimizado para móvil */
         .resumen-imagen {
             display: none;
             background: white;
-            padding: 20px;
+            padding: 16px;
             font-family: 'Segoe UI', sans-serif;
             color: #000;
             font-size: 14px;
             line-height: 1.5;
-            max-width: 500px;
-            margin: 0 auto;
+            max-width: 400px; /* Ancho ideal para móviles */
+            margin: 0 auto; /* Centrado */
             box-sizing: border-box;
+            text-align: center; /* Centrado de texto */
         }
         .resumen-header {
             text-align: center;
             border-bottom: 2px solid #0a3d62;
-            padding-bottom: 12px;
-            margin-bottom: 15px;
+            padding-bottom: 10px;
+            margin-bottom: 12px;
         }
         .resumen-header h1 {
             color: #0a3d62;
-            font-size: 1.5rem;
+            font-size: 1.4rem;
             margin-bottom: 4px;
+            font-weight: 300;
         }
         .resumen-info {
-            margin-bottom: 15px;
-            font-size: 0.95rem;
+            margin-bottom: 12px;
+            font-size: 0.9rem;
+            text-align: left;
         }
         .info-item {
-            margin-bottom: 6px;
+            margin-bottom: 4px;
         }
         .info-label {
             font-weight: bold;
             color: #0a3d62;
         }
         .cama-resumen {
-            margin-bottom: 12px;
-            font-size: 0.95rem;
+            margin-bottom: 10px;
+            font-size: 0.9rem;
+            text-align: left;
+            page-break-inside: avoid;
         }
         .cama-resumen h3 {
             color: #0a3d62;
-            margin-bottom: 6px;
-            font-size: 1.1rem;
+            margin-bottom: 4px;
+            font-size: 1.05rem;
         }
         .novedades-list {
             display: flex;
             flex-wrap: wrap;
-            gap: 4px;
-            margin: 4px 0;
+            gap: 3px;
+            margin: 3px 0;
         }
         .novedad-tag {
             background: #0a3d62;
             color: white;
-            padding: 3px 8px;
-            border-radius: 12px;
-            font-size: 0.8rem;
+            padding: 2px 6px;
+            border-radius: 10px;
+            font-size: 0.75rem;
         }
         .notas-piso {
             background: #fff3cd;
             border: 1px solid #ffeaa7;
             border-radius: 8px;
-            padding: 12px;
-            margin-top: 15px;
-            font-size: 0.95rem;
+            padding: 10px;
+            margin-top: 12px;
+            font-size: 0.9rem;
+            text-align: left;
         }
         .notas-piso h3 {
             color: #856404;
-            margin-bottom: 6px;
-            font-size: 1rem;
+            margin-bottom: 4px;
+            font-size: 0.95rem;
         }
         /* Responsive */
         @media (max-width: 768px) {
@@ -413,7 +419,7 @@
             .checkbox-group { grid-template-columns: 1fr; }
             .action-buttons { flex-direction: column; }
             .btn { justify-content: center; }
-            .resumen-imagen { padding: 15px; font-size: 13px; }
+            .resumen-imagen { padding: 14px; font-size: 13px; }
             .splash-title { font-size: 2rem; }
         }
         .fade-out {
@@ -426,7 +432,8 @@
     <div class="splash-screen" id="splashScreen">
         <div class="splash-logo">🩺</div>
         <h1 class="splash-title">SADOFE</h1>
-        <p class="splash-subtitle">Sistema de Registro de Novedades - Enfermería</p>
+        <p class="splash-subtitle">Sistema de Registro de Novedades</p>
+	<p class="splash-subtitle">Enfermería</p>
         <p class="splash-footer">© Lic. Luis C. Parra</p>
     </div>
 
@@ -443,14 +450,16 @@
             </button>
             <div class="loading-message" id="loadingMessage">
                 ⏳ Verificando... Mientras, tomate un mate ☕
+	
+                 o fijate si la gotita no cae
             </div>
             <p class="solicitud-link" onclick="solicitarAccesoPorWhatsApp()">
                 ¿Eres nuevo? Solicita acceso por WhatsApp
             </p>
             <div id="otherNursesSection" style="display: none; margin-top: 15px;">
                 <div class="input-group">
-                    <label for="otherNurses">¿Hay otros enfermeros/as en el piso?</label>
-                    <textarea id="otherNurses" placeholder="Nombres separados por coma (opcional)" rows="2"></textarea>
+                    <label for="otherNurses">¿Hay otros enfermeros/as en el piso?, si es NO, no escriba nada y presione continuar</label>
+                    <textarea id="otherNurses" placeholder="Nombres separados por coma si hay otros compas (opcional)" rows="2"></textarea>
                 </div>
                 <button class="btn btn-secondary" onclick="completeLogin()">
                     ✅ Continuar
@@ -463,10 +472,11 @@
     <div class="main-app" id="mainApp">
         <div class="app-header">
             <h1>🩺 SADOFE - Registro de Novedades</h1>
+		<h1>🩺 E N F E R M E R I A</h1>
             <div class="nurse-info">
                 <div><strong>🧑‍⚕️ Enfermera/o:</strong> <span id="nurseNameDisplay"></span></div>
                 <div id="otherNursesDisplay" style="display: none;">
-                    <strong>👥 Otros enfermeros/as:</strong> <span id="otherNursesText"></span>
+                    <strong>👥🧑‍⚕️ Otros enfermeros/as:</strong> <span id="otherNursesText"></span>
                 </div>
             </div>
         </div>
@@ -488,18 +498,17 @@
             </div>
             <div class="action-buttons">
                 <button class="btn" onclick="loadCamas()">
-                    🏥 Ver Camas de Piso selecionado
+                    🏥 Ver Camas del PISO Seleccionado
                 </button>
                 <button class="btn btn-warning" onclick="enviarDatos()">
-                    📤 Enviar al Servidor
-			solo para el administrador de la pagina
+                    📤 Enviar datos al Servidor, solo autorizados
                 </button>
                 <button class="btn btn-secondary" onclick="abrirModalNovedades()">
-                    📋 Generar Novedades
+                    📋 Generar NOVEDADES
                 </button>
             </div>
             <div class="input-group">
-                <label for="notasPiso">📝 Notas del Piso:</label>
+                <label for="notasPiso">📝 Notas del Piso, estudios, pases internos, altas, etc:</label>
                 <textarea id="notasPiso" placeholder="Observaciones generales del piso..." rows="3"></textarea>
             </div>
             <div class="camas-container" id="camasContainer">
@@ -515,10 +524,10 @@
                 <h2>📋 Seleccionar Camas</h2>
                 <span class="close" onclick="cerrarModal()">&times;</span>
             </div>
-            <p>Seleccione las camas para incluir en el resumen:</p>
+            <p>Seleccione las camas para incluir en las novedades:</p>
             <div class="cama-selection" id="camaSelection"></div>
             <div style="text-align: center; margin-top: 15px;">
-                <button class="btn btn-info" onclick="generarImagen()">🖼️ Generar</button>
+                <button class="btn btn-info" onclick="generarImagen()">🖼️ Generar Imagen</button>
                 <button class="btn" onclick="cerrarModal()">❌ Cancelar</button>
             </div>
         </div>
@@ -529,8 +538,8 @@
         <h3>📸 Imagen Generada</h3>
         <canvas id="canvasImagen"></canvas>
         <div style="margin-top: 12px;">
-            <button class="btn btn-info" onclick="descargarImagen()">💾 Descargar</button>
-            <button class="btn btn-secondary" onclick="compartirImagen()">📱 Compartir</button>
+            <button class="btn btn-info" onclick="descargarImagen()">💾 Descargar Imagen</button>
+            <button class="btn btn-secondary" onclick="compartirImagen()">📱 Compartir Imagen</button>
         </div>
     </div>
 
@@ -541,6 +550,7 @@
         const CONFIG = {
             LOGIN_ENDPOINT: 'https://script.google.com/macros/s/AKfycbwBqfRagEUrSM9f9x1WvgLDKByfvfp-VPsDdUjuCNLKiUBcLO1Xb3pYlJ-qDxO_keFY3A/exec',
             DATA_ENDPOINT: 'https://script.google.com/macros/s/AKfycbznONc4J-i6p4yuEfW5hcR8hgnbotrqJZVCrMtACl1YS7sKP7vB2BA39lXBLYBSJ6uUxQ/exec',
+
             PISOS: {
                 '1B': { desde: 101, hasta: 110, especiales: [110], camas: 3 },
                 '2B': { desde: 201, hasta: 210, especiales: [210], camas: 3 },
@@ -645,7 +655,6 @@
             }
         }
 
-        // ✅ FUNCIÓN NUEVA: Solicitar acceso por WhatsApp
         function solicitarAccesoPorWhatsApp() {
             const nombre = prompt("📝 Para solicitar acceso, ingresa tu nombre completo:");
             if (!nombre) return;
@@ -656,7 +665,7 @@
             // 📱 Reemplaza con tu número de WhatsApp (con código de país)
             const numeroWhatsApp = '5491124076812'; // ← CAMBIA ESTE NÚMERO
 
-            const mensaje = `Hola, soy ${nombre.trim()} (DNI: ${dni.trim()}).\n\nQuiero solicitar acceso al sistema de Enfermeria para el registro de novedades.\n\n¿Me habilitas el DNI para el ingreso?`;
+            const mensaje = `Hola, soy ${nombre.trim()} (DNI: ${dni.trim()}).\n\nQuiero solicitar acceso al sistema SADOFE.\n\n¿Puedes ayudarme?`;
 
             const url = `https://wa.me/${numeroWhatsApp}?text=${encodeURIComponent(mensaje)}`;
 
@@ -837,7 +846,7 @@
                 div.className = 'cama-option';
                 div.innerHTML = `
                     <input type="checkbox" id="sel-${camaId}" ${hasData ? 'checked' : ''}>
-                    <label for="sel-${camaId}">Cama ${camaId} - ${data.paciente || ''}</label>
+                    <label for="sel-${camaId}">Cama ${camaId} - ${data.paciente || ' '}</label>
                 `;
                 div.onclick = () => div.querySelector('input').click();
                 container.appendChild(div);
@@ -883,7 +892,13 @@
                 resumen.innerHTML += `<div class="notas-piso"><h3>📌 Notas del Piso</h3><p>${userData.floorNotes}</p></div>`;
             }
             resumen.style.display = 'block';
-            html2canvas(resumen, { scale: 2, backgroundColor: '#ffffff', width: 500 }).then(canvas => {
+            html2canvas(resumen, { 
+                scale: 2, 
+                backgroundColor: '#ffffff',
+                width: 400,
+                useCORS: true,
+                logging: false
+            }).then(canvas => {
                 const img = document.getElementById('canvasImagen');
                 img.width = canvas.width;
                 img.height = canvas.height;
