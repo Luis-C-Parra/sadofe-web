@@ -1058,11 +1058,11 @@ if (userData.floorNotes) {
             }
 
             let texto = `📋 *NOVEDADES DE ENFERMERÍA*\n`;
-            texto += `📅 ${new Date().toLocaleString('es-AR')}\n`;
+            texto += `📅 FECHA: ${new Date().toLocaleString('es-AR')}\n`;
             texto += `🏥 *Piso:* ${userData.currentFloor}\n`;
             texto += `👩‍⚕️ *Enfermero/a:* ${userData.nurseName || 'No especificado'}\n`;
             if (userData.otherNurses) {
-                texto += `👥 *Otros:* ${userData.otherNurses}\n`;
+                texto += `👥 *Enfermeros:* ${userData.otherNurses}\n`;
             }
             texto += `\n──────────────────────\n`;
 
@@ -1075,8 +1075,8 @@ if (userData.floorNotes) {
 
                 const [habitacion, cama] = camaId.split('-');
                 texto += `🏠 *HAB ${habitacion}, Cama ${cama}*\n`;
-                if (data.paciente) texto += `👤 ${data.paciente}\n`;
-                if (data.observaciones) texto += `📝 ${data.observaciones}\n`;
+                if (data.paciente) texto += `👤*Paciente: * ${data.paciente}\n`;
+                if (data.observaciones) texto += `📝*Novedad: * ${data.observaciones}\n`;
                 texto += `──────────────────────\n`;
             });
 
@@ -1119,10 +1119,10 @@ if (userData.floorNotes) {
                 hayDatos = true;
 
                 const [habitacion, cama] = camaId.split('-');
-                texto += `HAB ${habitacion}, Cama ${cama}\n`;
-                if (data.paciente) texto += `Paciente: ${data.paciente}\n`;
-                if (data.observaciones) texto += `Observaciones: ${data.observaciones}\n`;
-                texto += `--------\n`;
+                texto += `*HAB ${habitacion}, Cama ${cama}*\n`;
+                if (data.paciente) texto += `*Paciente: ${data.paciente}*\n`;
+                if (data.observaciones) texto += `*Observaciones:* ${data.observaciones}\n`;
+                texto += `──────────────────────\n`;
             });
 
             if (userData.floorNotes) {
@@ -1145,4 +1145,5 @@ if (userData.floorNotes) {
         }
     </script>
 </body>
+
 </html>
