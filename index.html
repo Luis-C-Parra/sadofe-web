@@ -5,29 +5,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>SADOFE - Registro de Novedades</title>
     <meta name="theme-color" content="#0a3d62">
-    <link rel="manifest" href="application/json,{'name':'SADOFE','short_name':'SADOFE','start_url':'/','display':'standalone','background_color':'#ffffff','theme_color':'#0a3d62','icons':[{'src':'image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22%3E%3Ccircle cx=%2250%22 cy=%2250%22 r=%2245%22 fill=%22%230a3d62%22/%3E%3Ctext x=%2250%22 y=%2260%22 font-size=%2240%22 text-anchor=%22middle%22 fill=%22white%22%3E🩺%3C/text%3E%3C/svg%3E','sizes':'192x192','type':'image/svg+xml'}]}">
+    <link rel="manifest" href="application/json,{'name':'REGISTRO CONTROL','short_name':'ENFERMERIA','start_url':'/','display':'standalone','background_color':'#ffffff','theme_color':'#0a3d62','icons':[{'src':'image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22%3E%3Ccircle cx=%2250%22 cy=%2250%22 r=%2245%22 fill=%22%230a3d62%22/%3E%3Ctext x=%2250%22 y=%2260%22 font-size=%2240%22 text-anchor=%22middle%22 fill=%22white%22%3E🩺%3C/text%3E%3C/svg%3E','sizes':'192x192','type':'image/svg+xml'}]}">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
-    <!-- Firebase SDK -->
-    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
-    <script>
-        // 🔥 CONFIGURACIÓN DE FIREBASE (REEMPLAZA CON TUS DATOS)
-        const firebaseConfig = {
-            apiKey: "AIzaSyBipuhd9-PfkEFzX3YhIZgoJqD04Bb7OgA",
-            authDomain: "novedades-enfermeria.firebaseapp.com",
-            databaseURL: "https://novedades-enfermeria-default-rtdb.firebaseio.com",
-            projectId: "novedades-enfermeria",
-            storageBucket: "novedades-enfermeria.firebasestorage.app",
-            messagingSenderId: "174293835224",
-            appId: "1:174293835224:web:cf42f4d835efb3fcfaa6ad",
-            measurementId: "G-55F657115B"
-        };
-
-        // Inicializar Firebase
-        firebase.initializeApp(firebaseConfig);
-        const db = firebase.database();
-        let dbRef = null;
-    </script>
     <style>
         * {
             margin: 0;
@@ -484,8 +463,8 @@
             </p>
             <div id="otherNursesSection" style="display: none; margin-top: 15px;">
                 <div class="input-group">
-                    <label for="otherNurses">¿Hay otros enfermeros (as) en el piso? (opcional)</label>
-                    <textarea id="otherNurses" placeholder="Nombres separados por coma" rows="2"></textarea>
+                    <label for="otherNurses">¿Hay otros enfermeros/as en el piso?, si es NO, no escriba nada y presione continuar</label>
+                    <textarea id="otherNurses" placeholder="Nombres separados por coma si hay otros compas (opcional)" rows="2"></textarea>
                 </div>
                 <button class="btn btn-secondary" onclick="completeLogin()">
                     ✅ Continuar
@@ -502,7 +481,7 @@
             <div class="nurse-info">
                 <div><strong>🧑‍⚕️ Enfermera/o:</strong> <span id="nurseNameDisplay"></span></div>
                 <div id="otherNursesDisplay" style="display: none;">
-                    <strong>👥 Enfermeros (as):</strong> <span id="otherNursesText"></span>
+                    <strong>👥🧑‍⚕️ Enfermeros/as:</strong> <span id="otherNursesText"></span>
                 </div>
             </div>
         </div>
@@ -553,7 +532,9 @@
             <p>Seleccione las camas para incluir en las novedades:</p>
             <div class="cama-selection" id="camaSelection"></div>
             <div style="text-align: center; margin-top: 15px;">
-                <button class="btn btn-info" onclick="enviarPorWhatsApp()">💬 WhatsApp</button>
+                <button class="btn btn-info" onclick="generarImagen()">🖼️ Generar Imagen</button>
+                <button class="btn btn-secondary" onclick="enviarPorWhatsApp()">💬 WhatsApp</button>
+                <button class="btn" onclick="copiarNovedades()">📋 Copiar</button>
                 <button class="btn" onclick="cerrarModal()">❌ Cancelar</button>
             </div>
         </div>
@@ -632,16 +613,14 @@
             document.getElementById('dniInput').addEventListener('keypress', e => {
                 if (e.key === 'Enter') login();
             });
-            document.getElementById('notasPiso').addEventListener('input', () => {
-                userData.floorNotes = document.getElementById('notasPiso').value;
-                saveData();
-            });
+            // Ya está bien, pero aseguramos que se guarde en tiempo real
+document.getElementById('notasPiso').addEventListener('input', () => {
+    userData.floorNotes = document.getElementById('notasPiso').value;
+    saveData(); // Guarda en localStorage
+});
             document.getElementById('pisoSelect').addEventListener('change', () => {
                 userData.currentFloor = document.getElementById('pisoSelect').value;
                 saveData();
-                if (userData.currentFloor) {
-                    escucharCambiosEnPiso(userData.currentFloor);
-                }
             });
         }
 
@@ -655,20 +634,8 @@
         }
 
         function saveData() {
-            if (!userData.currentFloor) return;
             try {
                 localStorage.setItem('sadofe_data', JSON.stringify(userData));
-                // Guardar en Firebase
-                dbRef = db.ref('pisos/' + userData.currentFloor);
-                dbRef.set({
-                    nurseName: userData.nurseName,
-                    otherNurses: userData.otherNurses,
-                    floorNotes: userData.floorNotes,
-                    camasData: userData.camasData,
-                    lastUpdated: Date.now()
-                }).catch(err => {
-                    console.error('Error al guardar en Firebase:', err);
-                });
             } catch (e) { console.log('Error al guardar', e); }
         }
 
@@ -805,140 +772,262 @@
         }
 
         async function enviarDatos() {
-            if (!userData.nurseName || !userData.currentFloor) {
-                alert('Complete todos los datos requeridos');
-                return;
-            }
-            const data = [];
-            const now = new Date().toLocaleString('es-AR');
-            const piso = userData.currentFloor;
+    if (!userData.nurseName || !userData.currentFloor) {
+        alert('Complete todos los datos requeridos');
+        return;
+    }
 
-            Object.keys(userData.camasData).forEach(camaId => {
-                const d = userData.camasData[camaId] || {};
-                if (d.paciente || d.observaciones || (d.novedades && d.novedades.length)) {
-                    data.push({
-                        fecha: now,
-                        piso: piso,
-                        cama: camaId,
-                        'apellido y nombre': d.paciente || '',
-                        aislamiento: d.aislamiento || 'Ninguno',
-                        novedades: d.novedades?.join(', ') || '',
-                        observaciones: d.observaciones || '',
-                        'enfermero/a': userData.nurseName
-                    });
-                }
+    // 🔴 Leer el valor actual de las notas del piso ANTES de enviar
+    userData.floorNotes = document.getElementById('notasPiso').value;
+
+    const data = [];
+    const now = new Date().toLocaleString('es-AR');
+    const piso = userData.currentFloor;
+
+    Object.keys(userData.camasData).forEach(camaId => {
+        const d = userData.camasData[camaId] || {};
+        if (d.paciente || d.observaciones || (d.novedades && d.novedades.length)) {
+            data.push({
+                fecha: now,
+                piso: piso,
+                cama: camaId,
+                'apellido y nombre': d.paciente || '',
+                aislamiento: d.aislamiento || 'Ninguno',
+                novedades: d.novedades?.join(', ') || '',
+                observaciones: d.observaciones || '',
+                'enfermero/a': userData.nurseName
             });
-
-            if (userData.floorNotes) {
-                data.push({
-                    fecha: now,
-                    piso: piso,
-                    cama: 'NOTAS DE PISO',
-                    'apellido y nombre': 'N/A',
-                    aislamiento: 'N/A',
-                    novedades: 'N/A',
-                    observaciones: userData.floorNotes,
-                    'enfermero/a': userData.nurseName
-                });
-            }
-
-            if (data.length === 0) {
-                alert('No hay datos para enviar');
-                return;
-            }
-
-            try {
-                const response = await fetch(CONFIG.DATA_ENDPOINT, {
-                    method: 'POST',
-                    mode: 'cors',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ data })
-                });
-
-                if (response.ok) {
-                    alert('✅ Datos enviados correctamente al servidor');
-                } else {
-                    throw new Error(`Error ${response.status}: ${response.statusText}`);
-                }
-            } catch (err) {
-                console.error('Error al enviar datos:', err);
-                alert('❌ Error al enviar datos. Verifique conexión.\n' + err.message);
-            }
         }
+    });
+
+    // 🔴 Aseguramos que las notas del piso se envíen si existen
+    if (userData.floorNotes) {
+        data.push({
+            fecha: now,
+            piso: piso,
+            cama: 'NOTAS DE PISO',
+            'apellido y nombre': 'N/A',
+            aislamiento: 'N/A',
+            novedades: 'N/A',
+            observaciones: userData.floorNotes,
+            'enfermero/a': userData.nurseName
+        });
+    }
+
+    if (data.length === 0) {
+        alert('No hay datos para enviar');
+        return;
+    }
+
+    try {
+        const response = await fetch(CONFIG.DATA_ENDPOINT, {
+            method: 'POST',
+            mode: 'cors',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ data })
+        });
+
+        if (response.ok) {
+            alert('✅ Datos enviados correctamente al servidor');
+        } else {
+            throw new Error(`Error ${response.status}: ${response.statusText}`);
+        }
+    } catch (err) {
+        console.error('Error al enviar datos:', err);
+        alert('❌ Error al enviar datos. Verifique conexión.\n' + err.message);
+    }
+}
 
         function abrirModalNovedades() {
-            userData.floorNotes = document.getElementById('notasPiso').value;
-            const container = document.getElementById('camaSelection');
-            container.innerHTML = '';
-            const piso = userData.currentFloor;
-            if (!piso) return;
-            const config = CONFIG.PISOS[piso];
-            const camas = generarCamas(config);
-            camas.forEach(camaId => {
-                const data = userData.camasData[camaId] || {};
-                const hasData = data.paciente || (data.novedades && data.novedades.length) || data.observaciones;
-                const div = document.createElement('div');
-                div.className = 'cama-option';
-                div.innerHTML = `
-                    <input type="checkbox" id="sel-${camaId}" ${hasData ? 'checked' : ''}>
-                    <label for="sel-${camaId}">Cama ${camaId} - ${data.paciente || ' '}</label>
-                `;
-                div.onclick = () => div.querySelector('input').click();
-                container.appendChild(div);
-            });
-            document.getElementById('modalNovedades').style.display = 'flex';
-        }
+    // 🔴 Aseguramos que las notas del piso se guarden ANTES de abrir el modal
+    userData.floorNotes = document.getElementById('notasPiso').value;
+
+    const container = document.getElementById('camaSelection');
+    container.innerHTML = '';
+    const piso = userData.currentFloor;
+    if (!piso) return;
+    const config = CONFIG.PISOS[piso];
+    const camas = generarCamas(config);
+    camas.forEach(camaId => {
+        const data = userData.camasData[camaId] || {};
+        const hasData = data.paciente || (data.novedades && data.novedades.length) || data.observaciones;
+        const div = document.createElement('div');
+        div.className = 'cama-option';
+        div.innerHTML = `
+            <input type="checkbox" id="sel-${camaId}" ${hasData ? 'checked' : ''}>
+            <label for="sel-${camaId}">Cama ${camaId} - ${data.paciente || ' '}</label>
+        `;
+        div.onclick = () => div.querySelector('input').click();
+        container.appendChild(div);
+    });
+    document.getElementById('modalNovedades').style.display = 'flex';
+}
 
         function cerrarModal() {
             document.getElementById('modalNovedades').style.display = 'none';
         }
 
-        function enviarPorWhatsApp() {
+        function generarImagen() {
             const selected = Array.from(document.querySelectorAll('#camaSelection input:checked')).map(cb => cb.id.replace('sel-', ''));
             if (selected.length === 0) {
                 alert('Seleccione al menos una cama');
                 return;
             }
+            const resumen = document.getElementById('resumenImagen');
+            resumen.innerHTML = '';
 
-            userData.floorNotes = document.getElementById('notasPiso').value;
+            let contenidoHTML = `
+                <div style="background: #0a3d62; color: white; padding: 12px; margin: -16px -16px 12px -16px; text-align: center;">
+                    <h1 style="margin: 0; font-size: 16px; font-weight: bold;">📋 NOVEDADES DE ENFERMERÍA</h1>
+                </div>
+                <div style="border-bottom: 1px solid #ddd; margin-bottom: 8px;"></div>
+            `;
 
-            let texto = `📋 *NOVEDADES DE ENFERMERÍA*\n`;
-            texto += `📅 ${new Date().toLocaleString('es-AR')}\n`;
-            texto += `🏥 *Piso:* ${userData.currentFloor}\n`;
-            texto += `👩‍⚕️ *Enfermero/a:* ${userData.nurseName || 'No especificado'}\n`;
+            contenidoHTML += `
+                <div style="margin-bottom: 10px; font-size: 11px; line-height: 1.4;">
+                    <div style="font-weight: bold; color: #0a3d62; margin-bottom: 4px;">👩‍⚕️ Enfermera/o de turno:</div>
+                    <div style="background: #f8f9fa; padding: 6px; border-radius: 4px; border-left: 3px solid #0a3d62;">
+                        ${userData.nurseName || 'No especificado'}
+                    </div>
+            `;
             if (userData.otherNurses) {
-                texto += `👥 *Enfermeros (as):* ${userData.otherNurses}\n`;
+                contenidoHTML += `
+                    <div style="font-weight: bold; color: #0a3d62; margin-top: 8px; margin-bottom: 4px;">👩‍⚕️👥 Enfermeros/as:</div>
+                    <div style="background: #f8f9fa; padding: 6px; border-radius: 4px; border-left: 3px solid #28a745;">
+                        ${userData.otherNurses}
+                    </div>
+                `;
             }
-            texto += `\n──────────────────────\n`;
+            contenidoHTML += `</div>`;
 
             let hayDatos = false;
+            let camasConDatos = 0;
 
             selected.forEach((camaId) => {
                 const data = userData.camasData[camaId] || {};
                 if (!data.paciente && !data.observaciones) return;
                 hayDatos = true;
-
                 const [habitacion, cama] = camaId.split('-');
-                texto += `🏠 *HAB ${habitacion}, Cama ${cama}*\n`;
-                if (data.paciente) texto += `👤 ${data.paciente}\n`;
-                if (data.observaciones) texto += `📝 ${data.observaciones}\n`;
-                texto += `──────────────────────\n`;
+
+                if (camasConDatos > 0) {
+                    contenidoHTML += `<div style="border-top: 1px dashed #ccc; margin: 8px 0;"></div>`;
+                }
+                camasConDatos++;
+
+                contenidoHTML += `
+                    <div style="margin-bottom: 8px;">
+                        <div style="background: #0a3d62; color: white; padding: 4px 8px; border-radius: 4px; font-size: 12px; font-weight: bold; margin-bottom: 4px;">
+                            🏠 HABITACIÓN ${habitacion} - 🛏️ CAMA ${cama}
+                        </div>
+                `;
+
+                if (data.paciente) {
+                    contenidoHTML += `
+                        <div style="font-size: 11px; margin: 3px 0; padding: 2px 6px; background: #e8f4f8; border-left: 3px solid #0a3d62;">
+                            <strong>👤 PACIENTE:</strong> ${data.paciente}
+                        </div>
+                    `;
+                }
+
+                if (data.observaciones) {
+                    contenidoHTML += `
+                        <div style="font-size: 10px; margin: 4px 0; padding: 3px 6px; background: #f0f8ff; border-left: 3px solid #17a2b8;">
+                            <strong>📝 OBSERVACIONES:</strong> ${data.observaciones}
+                        </div>
+                    `;
+                }
+
+                contenidoHTML += `</div>`;
             });
 
-            if (userData.floorNotes) {
-                hayDatos = true;
-                texto += `📌 *NOTAS DEL PISO:*\n${userData.floorNotes}\n`;
-            }
+            // Notas del piso
+if (userData.floorNotes) {
+    hayDatos = true;
+    contenidoHTML += `
+        <div style="border-top: 2px solid #ffc107; margin-top: 10px; padding-top: 6px;">
+            <div style="background: #fff3cd; padding: 6px; border-radius: 4px; border: 1px solid #ffeaa7;">
+                <div style="font-size: 11px; font-weight: bold; color: #856404; margin-bottom: 3px;">
+                    📌 NOTAS GENERALES DEL PISO:
+                </div>
+                <div style="font-size: 10px; color: #856404; line-height: 1.3;">
+                    ${userData.floorNotes}
+                </div>
+            </div>
+        </div>
+    `;
+}
 
-            if (!hayDatos) {
+            if (!hayDatos && !userData.floorNotes) {
                 alert('No hay datos para generar');
                 return;
             }
 
-            const textoCodificado = encodeURIComponent(texto);
-            const url = `https://wa.me/?text=${textoCodificado}`;
-            window.open(url, '_blank');
-            cerrarModal();
+            resumen.innerHTML = contenidoHTML;
+
+            resumen.style.display = 'block';
+            resumen.style.position = 'absolute';
+            resumen.style.left = '-9999px';
+            resumen.style.top = '0';
+            resumen.style.width = '300px';
+            resumen.style.padding = '16px';
+            resumen.style.margin = '0';
+            resumen.style.backgroundColor = '#ffffff';
+            resumen.style.fontFamily = 'Arial, sans-serif';
+            resumen.style.fontSize = '10px';
+            resumen.style.lineHeight = '1.2';
+            resumen.style.color = '#000000';
+            resumen.style.boxSizing = 'border-box';
+            resumen.style.border = '1px solid #ddd';
+            resumen.style.zIndex = '-9999';
+
+            setTimeout(() => {
+                html2canvas(resumen, {
+                    scale: 2,
+                    width: 300,
+                    backgroundColor: '#ffffff',
+                    useCORS: true,
+                    allowTaint: false,
+                    logging: false
+                }).then(canvas => {
+                    resumen.style.display = 'none';
+                    resumen.style.position = 'static';
+
+                    const displayCanvas = document.getElementById('canvasImagen');
+                    const optimalWidth = Math.min(300, window.innerWidth - 40);
+                    displayCanvas.width = canvas.width;
+                    displayCanvas.height = canvas.height;
+                    displayCanvas.style.maxWidth = '100%';
+                    displayCanvas.style.width = optimalWidth + 'px';
+                    displayCanvas.style.height = 'auto';
+                    displayCanvas.style.border = '2px solid #0a3d62';
+                    displayCanvas.style.borderRadius = '8px';
+                    displayCanvas.style.display = 'block';
+                    displayCanvas.style.margin = '10px auto';
+                    displayCanvas.style.boxShadow = '0 4px 12px rgba(0,0,0,0.15)';
+
+                    const ctx = displayCanvas.getContext('2d');
+                    ctx.imageSmoothingEnabled = true;
+                    ctx.imageSmoothingQuality = 'high';
+                    ctx.clearRect(0, 0, canvas.width, canvas.height);
+                    ctx.drawImage(canvas, 0, 0);
+
+                    document.getElementById('imagenGenerada').style.display = 'block';
+
+                    setTimeout(() => {
+                        document.getElementById('imagenGenerada').scrollIntoView({ 
+                            behavior: 'smooth', 
+                            block: 'center' 
+                        });
+                    }, 100);
+
+                    cerrarModal();
+                }).catch(err => {
+                    console.error('Error al generar imagen:', err);
+                    resumen.style.display = 'none';
+                    resumen.style.position = 'static';
+                    alert('❌ Error al generar imagen: ' + err.message);
+                });
+            }, 500);
         }
 
         function descargarImagen() {
@@ -960,37 +1049,101 @@
             });
         }
 
-        // Escuchar cambios en tiempo real
-        function escucharCambiosEnPiso(piso) {
-            if (dbRef) {
-                dbRef.off();
+        // === NUEVAS FUNCIONES ===
+        function enviarPorWhatsApp() {
+            const selected = Array.from(document.querySelectorAll('#camaSelection input:checked')).map(cb => cb.id.replace('sel-', ''));
+            if (selected.length === 0) {
+                alert('Seleccione al menos una cama');
+                return;
             }
-            const ref = db.ref('pisos/' + piso);
-            ref.on('value', (snapshot) => {
-                const data = snapshot.val();
-                if (data) {
-                    userData.nurseName = data.nurseName || userData.nurseName;
-                    userData.otherNurses = data.otherNurses || '';
-                    userData.floorNotes = data.floorNotes || '';
-                    userData.camasData = data.camasData || {};
 
-                    document.getElementById('nurseNameDisplay').textContent = userData.nurseName;
-                    if (userData.otherNurses) {
-                        document.getElementById('otherNursesDisplay').style.display = 'block';
-                        document.getElementById('otherNursesText').textContent = userData.otherNurses;
-                    } else {
-                        document.getElementById('otherNursesDisplay').style.display = 'none';
-                    }
+            let texto = `📋 *NOVEDADES DE ENFERMERÍA*\n`;
+            texto += `📅 FECHA: ${new Date().toLocaleString('es-AR')}\n`;
+            texto += `🏥 *Piso:* ${userData.currentFloor}\n`;
+            texto += `👩‍⚕️ *Enfermero/a:* ${userData.nurseName || 'No especificado'}\n`;
+            if (userData.otherNurses) {
+                texto += `👥 *Enfermeros:* ${userData.otherNurses}\n`;
+            }
+            texto += `\n───────────────────\n`;
 
-                    document.getElementById('notasPiso').value = userData.floorNotes;
-                    if (document.getElementById('pisoSelect').value === piso) {
-                        loadCamas();
-                    }
-                }
-            }, (error) => {
-                console.error('Error al escuchar cambios:', error);
+            let hayDatos = false;
+
+            selected.forEach((camaId) => {
+                const data = userData.camasData[camaId] || {};
+                if (!data.paciente && !data.observaciones) return;
+                hayDatos = true;
+
+                const [habitacion, cama] = camaId.split('-');
+                texto += `🏠 *HAB ${habitacion}, Cama ${cama}*\n`;
+                if (data.paciente) texto += `👤*Paciente: * ${data.paciente}\n`;
+                if (data.observaciones) texto += `📝*Novedad: * ${data.observaciones}\n`;
+                texto += `───────────────────\n`;
+            });
+
+            if (userData.floorNotes) {
+                hayDatos = true;
+                texto += `📌 *NOTAS DEL PISO:*\n${userData.floorNotes}\n`;
+            }
+
+            if (!hayDatos) {
+                alert('No hay datos para generar');
+                return;
+            }
+
+            const url = `https://wa.me/?text=${encodeURIComponent(texto)}`;
+            window.open(url, '_blank');
+            cerrarModal();
+        }
+
+        function copiarNovedades() {
+            const selected = Array.from(document.querySelectorAll('#camaSelection input:checked')).map(cb => cb.id.replace('sel-', ''));
+            if (selected.length === 0) {
+                alert('Seleccione al menos una cama');
+                return;
+            }
+
+            let texto = `📋 NOVEDADES DE ENFERMERÍA\n`;
+            texto += `Fecha: ${new Date().toLocaleString('es-AR')}\n`;
+            texto += `Piso: ${userData.currentFloor}\n`;
+            texto += `Enfermero/a: ${userData.nurseName || 'No especificado'}\n`;
+            if (userData.otherNurses) {
+                texto += `Otros: ${userData.otherNurses}\n`;
+            }
+            texto += `\n--- DETALLE ---\n`;
+
+            let hayDatos = false;
+
+            selected.forEach((camaId) => {
+                const data = userData.camasData[camaId] || {};
+                if (!data.paciente && !data.observaciones) return;
+                hayDatos = true;
+
+                const [habitacion, cama] = camaId.split('-');
+                texto += `*HAB ${habitacion}, Cama ${cama}*\n`;
+                if (data.paciente) texto += `*Paciente: ${data.paciente}*\n`;
+                if (data.observaciones) texto += `*Observaciones:* ${data.observaciones}\n`;
+                texto += `───────────────────\n`;
+            });
+
+            if (userData.floorNotes) {
+                hayDatos = true;
+                texto += `Notas del piso:\n${userData.floorNotes}\n`;
+            }
+
+            if (!hayDatos) {
+                alert('No hay datos para generar');
+                return;
+            }
+
+            navigator.clipboard.writeText(texto).then(() => {
+                alert('✅ Novedades copiadas al portapapeles. ¡Pégala en WhatsApp!');
+                cerrarModal();
+            }).catch(err => {
+                console.error('Error al copiar:', err);
+                alert('❌ No se pudo copiar. Usa la opción de WhatsApp.');
             });
         }
     </script>
 </body>
+
 </html>
