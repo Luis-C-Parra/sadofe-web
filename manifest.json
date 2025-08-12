@@ -1,0 +1,22 @@
+{
+  "name": "SADOFE - Enfermería",
+  "short_name": "SADOFE",
+  "start_url": "./index.html",
+  "display": "standalone",
+  "background_color": "#ffffff",
+  "theme_color": "#0a3d62",
+  "description": "Sistema de Registro de Novedades de Enfermería",
+  "icons": [
+    {
+      "src": "icon-192.png",
+      "type": "image/png",
+      "sizes": "192x192"
+    },
+    {
+      "src": "icon-512.png",
+      "type": "image/png",
+      "sizes": "512x512"
+    }
+  ],
+  "scope": "./"
+}

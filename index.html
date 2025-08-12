@@ -5,7 +5,11 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>SADOFE - Registro de Novedades</title>
     <meta name="theme-color" content="#0a3d62">
-    <link rel="manifest" href="application/json,{'name':'SADOFE','short_name':'SADOFE','start_url':'/','display':'standalone','background_color':'#ffffff','theme_color':'#0a3d62','icons':[{'src':'image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22%3E%3Ccircle cx=%2250%22 cy=%2250%22 r=%2245%22 fill=%22%230a3d62%22/%3E%3Ctext x=%2250%22 y=%2260%22 font-size=%2240%22 text-anchor=%22middle%22 fill=%22white%22%3E🩺%3C/text%3E%3C/svg%3E','sizes':'192x192','type':'image/svg+xml'}]}">
+    <link rel="manifest" href="manifest.json">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="SADOFE">
+<link rel="apple-touch-icon" href="icon-192.png">3Ccircle cx=%2250%22 cy=%2250%22 r=%2245%22 fill=%22%230a3d62%22/%3E%3Ctext x=%2250%22 y=%2260%22 font-size=%2240%22 text-anchor=%22middle%22 fill=%22white%22%3E🩺%3C/text%3E%3C/svg%3E','sizes':'192x192','type':'image/svg+xml'}]}">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
     <style>
         * {
@@ -34,12 +38,12 @@
             background: linear-gradient(135deg, #0a3d62 0%, #1e3c72 100%);
             display: flex;
             flex-direction: column;
-            justify-content: start;
+            justify-content: center;
             align-items: center;
             z-index: 10000;
             transition: opacity 0.5s ease-out;
             text-align: center;
-            padding: 80px 20px 40px;
+            padding: 40px 20px;
             box-sizing: border-box;
         }
         .splash-logo {
@@ -49,14 +53,22 @@
         }
         .splash-title {
             color: white;
-            font-size: 3rem;
-            margin-bottom: 8px;
+            font-size: 3.5rem;
+            margin-bottom: 10px;
             font-weight: 300;
             line-height: 1.2;
         }
         .splash-subtitle {
             color: #b8d4f0;
+            font-size: 2rem;
+            margin-bottom: 8px;
+            line-height: 1.3;
+        }
+        .splash-subtitle2 {
+            color: #b8d4f0;
             font-size: 1.8rem;
+            margin-bottom: 20px;
+            line-height: 1.3;
         }
         .splash-footer {
             position: static;
@@ -118,8 +130,9 @@
             border-color: #0a3d62;
             box-shadow: 0 0 0 3px rgba(10,61,98,0.1);
         }
+        /* Botones con colores suaves */
         .btn {
-            background: linear-gradient(135deg, #0a3d62 0%, #1e3c72 100%);
+            background: #1a5276;
             color: white;
             border: none;
             padding: 12px 20px;
@@ -134,13 +147,32 @@
             gap: 6px;
         }
         .btn:hover {
+            background: #2874a6;
             transform: translateY(-1px);
-            box-shadow: 0 6px 20px rgba(10,61,98,0.25);
+            box-shadow: 0 6px 20px rgba(40,116,166,0.25);
         }
         .btn:disabled {
             opacity: 0.6;
             cursor: not-allowed;
             transform: none;
+        }
+        .btn-secondary {
+            background: #27ae60;
+        }
+        .btn-secondary:hover {
+            background: #2ecc71;
+        }
+        .btn-warning {
+            background: #d35400;
+        }
+        .btn-warning:hover {
+            background: #e67e22;
+        }
+        .btn-info {
+            background: #2980b9;
+        }
+        .btn-info:hover {
+            background: #3498db;
         }
         .loading-message {
             display: none;
@@ -166,7 +198,7 @@
             box-shadow: 0 15px 40px rgba(0,0,0,0.15);
         }
         .app-header {
-            background: linear-gradient(135deg, #0a3d62 0%, #1e3c72 100%);
+            background: #1a5276;
             color: white;
             padding: 18px;
             text-align: center;
@@ -175,6 +207,16 @@
             font-size: 1.5rem;
             margin-bottom: 8px;
             font-weight: 300;
+        }
+        .piso-display {
+            background: #007bff;
+            color: white;
+            font-size: 1.8rem;
+            font-weight: bold;
+            padding: 10px;
+            border-radius: 8px;
+            margin: 10px 0;
+            text-shadow: 1px 1px 2px rgba(0,0,0,0.3);
         }
         .nurse-info {
             background: rgba(255,255,255,0.15);
@@ -204,15 +246,6 @@
             margin: 15px 0;
             justify-content: center;
         }
-        .btn-secondary {
-            background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
-        }
-        .btn-warning {
-            background: linear-gradient(135deg, #ffc107 0%, #fd7e14 100%);
-        }
-        .btn-info {
-            background: linear-gradient(135deg, #17a2b8 0%, #007bff 100%);
-        }
         /* Camas Grid */
         .camas-container {
             display: grid;
@@ -226,13 +259,26 @@
             border-radius: 12px;
             padding: 16px;
             transition: all 0.2s ease;
+            position: relative;
         }
-        .cama-card:hover {
-            border-color: #0a3d62;
-            box-shadow: 0 4px 12px rgba(10,61,98,0.1);
+        .cama-card.aislamiento-respiratorio {
+            border-color: #f39c12;
+            background: #fef9f3;
+        }
+        .cama-card.aislamiento-contacto {
+            border-color: #27ae60;
+            background: #f7fdf8;
+        }
+        .cama-card.aislamiento-neutropenico {
+            border-color: #c0392b;
+            background: #fdf3f3;
+        }
+        .cama-card.aislamiento-psiquiatrico {
+            border-color: #007bff;
+            background: #e3f2fd;
         }
         .cama-header {
-            background: #0a3d62;
+            background: #1a5276;
             color: white;
             padding: 8px;
             border-radius: 8px;
@@ -341,7 +387,7 @@
             width: 16px;
             height: 16px;
         }
-        /* Resumen para imagen - Optimizado para móvil */
+        /* Resumen para imagen */
         .resumen-imagen {
             display: none;
             background: white;
@@ -426,20 +472,24 @@
             .action-buttons { flex-direction: column; }
             .btn { justify-content: center; }
             .resumen-imagen { padding: 14px; font-size: 13px; }
-            .splash-title { font-size: 2rem; }
+            .splash-title { font-size: 2.5rem; }
+            .splash-subtitle { font-size: 1.6rem; }
+            .splash-subtitle2 { font-size: 1.4rem; }
+            .piso-display { font-size: 1.5rem; }
         }
         .fade-out {
             opacity: 0 !important;
         }
     </style>
 </head>
+
 <body>
     <!-- Splash Screen -->
     <div class="splash-screen" id="splashScreen">
         <div class="splash-logo">🩺</div>
         <h1 class="splash-title">SADOFE</h1>
         <p class="splash-subtitle">Sistema de Registro de Novedades</p>
-        <p class="splash-subtitle">Enfermería</p>
+        <p class="splash-subtitle2">Enfermería</p>
         <p class="splash-footer">© Lic. Luis C. Parra</p>
     </div>
 
@@ -463,8 +513,8 @@
             </p>
             <div id="otherNursesSection" style="display: none; margin-top: 15px;">
                 <div class="input-group">
-                    <label for="otherNurses">¿Hay otros enfermeros/as en el piso?, si es NO, no escriba nada y presione continuar</label>
-                    <textarea id="otherNurses" placeholder="Nombres separados por coma." rows="2"></textarea>
+                    <label for="otherNurses">¿Hay otros enfermeros/as en el piso?</label>
+                    <textarea id="otherNurses" placeholder="Nombres separados por coma (opcional)" rows="2"></textarea>
                 </div>
                 <button class="btn btn-secondary" onclick="completeLogin()">
                     ✅ Continuar
@@ -481,7 +531,7 @@
             <div class="nurse-info">
                 <div><strong>🧑‍⚕️ Enfermera/o:</strong> <span id="nurseNameDisplay"></span></div>
                 <div id="otherNursesDisplay" style="display: none;">
-                    <strong>👥🧑‍⚕️ Enfermeros/as:</strong> <span id="otherNursesText"></span>
+                    <strong>👥 Enfermeros (as):</strong> <span id="otherNursesText"></span>
                 </div>
             </div>
         </div>
@@ -489,7 +539,7 @@
             <div class="controls">
                 <div class="input-group">
                     <label for="pisoSelect">Seleccionar Piso:</label>
-                    <select id="pisoSelect">
+                    <select id="pisoSelect" onchange="handlePisoChange()">
                         <option value="">Seleccione un piso</option>
                         <option value="1B">1B (101-110)</option>
                         <option value="2B">2B (201-210)</option>
@@ -501,20 +551,26 @@
                     </select>
                 </div>
             </div>
+
+            <!-- Número de piso grande y visible -->
+            <div id="pisoDisplay" class="piso-display" style="display: none;">
+                PISO: <span id="pisoNumber">--</span>
+            </div>
+
             <div class="action-buttons">
                 <button class="btn" onclick="loadCamas()">
                     🏥 Ver Camas del PISO Seleccionado
                 </button>
                 <button class="btn btn-warning" onclick="enviarDatos()">
-                    📤 Enviar datos al Servidor, solo autorizados
+                    📤 Enviar datos al Servidor
                 </button>
                 <button class="btn btn-secondary" onclick="abrirModalNovedades()">
                     📋 Generar NOVEDADES
                 </button>
             </div>
             <div class="input-group">
-                <label for="notasPiso">📝 Notas del Piso, estudios, pases internos, altas, etc:</label>
-                <textarea id="notasPiso" placeholder="Observaciones generales del piso..." rows="3"></textarea>
+                <label for="notasPiso">📝 Notas del Piso:</label>
+                <textarea id="notasPiso" placeholder="Estudios, pases internos, altas, etc." rows="3"></textarea>
             </div>
             <div class="camas-container" id="camasContainer">
                 <!-- Camas generadas aquí -->
@@ -529,10 +585,10 @@
                 <h2>📋 Seleccionar Camas</h2>
                 <span class="close" onclick="cerrarModal()">&times;</span>
             </div>
-            <p>Seleccione las camas para incluir en las novedades:</p>
+            <p>Seleccione las camas marcadas como "Mandar a novedad":</p>
             <div class="cama-selection" id="camaSelection"></div>
             <div style="text-align: center; margin-top: 15px;">
-                <button class="btn btn-info" onclick="generarImagen()">🖼️ Generar Imagen</button>
+                <button class="btn btn-info" onclick="generarImagen()">🖼️ Imagen</button>
                 <button class="btn btn-secondary" onclick="enviarPorWhatsApp()">💬 WhatsApp</button>
                 <button class="btn" onclick="copiarNovedades()">📋 Copiar</button>
                 <button class="btn" onclick="cerrarModal()">❌ Cancelar</button>
@@ -545,8 +601,8 @@
         <h3>📸 Imagen Generada</h3>
         <canvas id="canvasImagen"></canvas>
         <div style="margin-top: 12px;">
-            <button class="btn btn-info" onclick="descargarImagen()">💾 Descargar Imagen</button>
-            <button class="btn btn-secondary" onclick="compartirImagen()">📱 Compartir Imagen</button>
+            <button class="btn btn-info" onclick="descargarImagen()">💾 Descargar</button>
+            <button class="btn btn-secondary" onclick="compartirImagen()">📱 Compartir</button>
         </div>
     </div>
 
@@ -561,26 +617,11 @@
                 '1B': { desde: 101, hasta: 110, especiales: [110], camas: 3 },
                 '2B': { desde: 201, hasta: 210, especiales: [210], camas: 3 },
                 '4B': { desde: 402, hasta: 409, especiales: [], camas: 2 },
-                '1C': { desde: 116, hasta: 129, especiales: [], camas: 2 },
+                '1C': { desde: 116, hasta: 129, especiales: [], camas: 2, sinCamas: [126] },
                 '2C': { desde: 216, hasta: 229, especiales: [], camas: 2 },
                 '3C': { desde: 316, hasta: 322, especiales: [], camas: 2 },
                 '4C': { desde: 422, hasta: 429, especiales: [], camas: 2 }
-            },
-            NOVEDADES: [
-                "Sonda vesical",
-                "Drenaje pleural",
-                "Acceso Venoso Periférico",
-                "Acceso Venoso Central",
-                "Drenaje aspirativo",
-                "Drenaje percutáneo",
-                "Contención física",
-                "Rechazo terapéutico",
-                "Deambula",
-                "Usa pañales",
-                "Lúcido",
-                "Desorientado",
-                "Somnoliento"
-            ]
+            }
         };
 
         let userData = {
@@ -590,6 +631,12 @@
             floorNotes: '',
             camasData: {}
         };
+
+        // Datos por piso
+        let dataPorPiso = {};
+
+        // Camas marcadas para novedades
+        let camasParaNovedades = new Set();
 
         document.addEventListener('DOMContentLoaded', function() {
             loadSavedData();
@@ -613,14 +660,12 @@
             document.getElementById('dniInput').addEventListener('keypress', e => {
                 if (e.key === 'Enter') login();
             });
-            // Ya está bien, pero aseguramos que se guarde en tiempo real
-document.getElementById('notasPiso').addEventListener('input', () => {
-    userData.floorNotes = document.getElementById('notasPiso').value;
-    saveData(); // Guarda en localStorage
-});
-            document.getElementById('pisoSelect').addEventListener('change', () => {
-                userData.currentFloor = document.getElementById('pisoSelect').value;
-                saveData();
+            document.getElementById('notasPiso').addEventListener('input', () => {
+                if (userData.currentFloor) {
+                    dataPorPiso[userData.currentFloor] = dataPorPiso[userData.currentFloor] || {};
+                    dataPorPiso[userData.currentFloor].floorNotes = document.getElementById('notasPiso').value;
+                    saveData();
+                }
             });
         }
 
@@ -628,14 +673,25 @@ document.getElementById('notasPiso').addEventListener('input', () => {
             try {
                 const saved = JSON.parse(localStorage.getItem('sadofe_data') || '{}');
                 if (saved.nurseName) userData = { ...userData, ...saved };
-                if (userData.currentFloor) document.getElementById('pisoSelect').value = userData.currentFloor;
-                if (userData.floorNotes) document.getElementById('notasPiso').value = userData.floorNotes;
+                if (saved.dataPorPiso) dataPorPiso = saved.dataPorPiso;
+                if (saved.camasParaNovedades) {
+                    camasParaNovedades = new Set(saved.camasParaNovedades);
+                }
+                if (userData.currentFloor) {
+                    document.getElementById('pisoSelect').value = userData.currentFloor;
+                    mostrarNumeroPiso(userData.currentFloor);
+                }
             } catch (e) { console.log('Error al cargar datos', e); }
         }
 
         function saveData() {
             try {
-                localStorage.setItem('sadofe_data', JSON.stringify(userData));
+                const dataToSave = {
+                    ...userData,
+                    dataPorPiso,
+                    camasParaNovedades: Array.from(camasParaNovedades)
+                };
+                localStorage.setItem('sadofe_data', JSON.stringify(dataToSave));
             } catch (e) { console.log('Error al guardar', e); }
         }
 
@@ -668,7 +724,9 @@ document.getElementById('notasPiso').addEventListener('input', () => {
             const dni = prompt("🔢 Ahora ingresa tu DNI:");
             if (!dni) return;
             const numeroWhatsApp = '5491124076812';
-            const mensaje = `Hola, soy ${nombre.trim()} (DNI: ${dni.trim()}).\n\nQuiero solicitar acceso al sistema SADOFE.\n\n¿Puedes ayudarme?`;
+            const mensaje = `Hola, soy ${nombre.trim()} (DNI: ${dni.trim()}).
+Quiero solicitar acceso al sistema SADOFE.
+¿Puedes ayudarme?`;
             const url = `https://wa.me/${numeroWhatsApp}?text=${encodeURIComponent(mensaje)}`;
             window.open(url, '_blank');
         }
@@ -685,10 +743,29 @@ document.getElementById('notasPiso').addEventListener('input', () => {
             saveData();
         }
 
+        function handlePisoChange() {
+            const piso = document.getElementById('pisoSelect').value;
+            if (piso) {
+                userData.currentFloor = piso;
+                mostrarNumeroPiso(piso);
+                loadCamas();
+            } else {
+                document.getElementById('pisoDisplay').style.display = 'none';
+                document.getElementById('camasContainer').innerHTML = '';
+            }
+            saveData();
+        }
+
+        function mostrarNumeroPiso(piso) {
+            document.getElementById('pisoNumber').textContent = piso;
+            document.getElementById('pisoDisplay').style.display = 'block';
+        }
+
         function generarCamas(config) {
-            const { desde, hasta, especiales, camas } = config;
+            const { desde, hasta, especiales, camas, sinCamas = [] } = config;
             const camasList = [];
             for (let hab = desde; hab <= hasta; hab++) {
+                if (sinCamas.includes(hab)) continue;
                 const numCamas = especiales.includes(hab) ? camas : 2;
                 for (let c = 1; c <= numCamas; c++) {
                     camasList.push(`${hab}-${c}`);
@@ -704,6 +781,14 @@ document.getElementById('notasPiso').addEventListener('input', () => {
                 return;
             }
             userData.currentFloor = piso;
+
+            dataPorPiso[piso] = dataPorPiso[piso] || {
+                floorNotes: '',
+                camasData: {}
+            };
+
+            document.getElementById('notasPiso').value = dataPorPiso[piso].floorNotes || '';
+
             const container = document.getElementById('camasContainer');
             container.innerHTML = '';
             const config = CONFIG.PISOS[piso];
@@ -716,155 +801,537 @@ document.getElementById('notasPiso').addEventListener('input', () => {
         }
 
         function createCamaCard(piso, camaId) {
-            const data = userData.camasData[camaId] || {};
+            const data = (dataPorPiso[piso]?.camasData || {})[camaId] || {};
             const card = document.createElement('div');
             card.className = 'cama-card';
+
+            // Aplicar clase según aislamiento
+            if (data.aislamiento === 'Respiratorio') card.classList.add('aislamiento-respiratorio');
+            else if (data.aislamiento === 'Contacto') card.classList.add('aislamiento-contacto');
+            else if (data.aislamiento === 'Neutropénico') card.classList.add('aislamiento-neutropenico');
+            else if (data.aislamiento === 'Psiquiátrico') card.classList.add('aislamiento-psiquiatrico');
+
             card.innerHTML = `
                 <div class="cama-header">Cama ${camaId}</div>
                 <div class="input-group">
                     <label>👤 Paciente:</label>
-                    <input type="text" value="${data.paciente || ''}" onchange="updateCamaData('${camaId}', 'paciente', this.value.toUpperCase())" style="text-transform:uppercase">
+                    <input type="text" value="${data.paciente || ''}" onchange="updateCamaData('${piso}', '${camaId}', 'paciente', this.value.toUpperCase())" style="text-transform:uppercase">
                 </div>
                 <div class="aislamiento-selector">
                     <label>🔒 Aislamiento:</label>
-                    <select onchange="updateCamaData('${camaId}', 'aislamiento', this.value)">
+                    <select onchange="updateAislamiento('${piso}', '${camaId}', this.value)">
                         <option value="Ninguno" ${data.aislamiento === 'Ninguno' ? 'selected' : ''}>Ninguno</option>
                         <option value="Respiratorio" ${data.aislamiento === 'Respiratorio' ? 'selected' : ''}>Respiratorio</option>
                         <option value="Contacto" ${data.aislamiento === 'Contacto' ? 'selected' : ''}>Contacto</option>
                         <option value="Neutropénico" ${data.aislamiento === 'Neutropénico' ? 'selected' : ''}>Neutropénico</option>
+                        <option value="Psiquiátrico" ${data.aislamiento === 'Psiquiátrico' ? 'selected' : ''}>Psiquiátrico</option>
                     </select>
                 </div>
-                <div class="checkbox-group">
-                    ${CONFIG.NOVEDADES.map(n => `
+
+                <!-- Sondas -->
+                <details>
+                    <summary style="font-weight: bold; margin: 8px 0; cursor: pointer;">🔧 Sonda</summary>
+                    <div class="checkbox-group" style="margin-left: 16px;">
                         <div class="checkbox-item">
-                            <input type="checkbox" ${data.novedades?.includes(n) ? 'checked' : ''} onchange="updateNovedades('${camaId}')">
-                            <label>${n}</label>
+                            <input type="checkbox" ${data.sonda_vesical ? 'checked' : ''} onchange="updateCamaData('${piso}', '${camaId}', 'sonda_vesical', this.checked)">
+                            <label>Sonda Vesical</label>
                         </div>
-                    `).join('')}
+                        <div class="checkbox-item">
+                            <input type="checkbox" ${data.sonda_3vias ? 'checked' : ''} onchange="updateCamaData('${piso}', '${camaId}', 'sonda_3vias', this.checked)">
+                            <label>Sonda 3 vías (lavado)</label>
+                        </div>
+                        <details style="margin-left: 16px;">
+                            <summary style="cursor: pointer;">Sonda Nasogástrica</summary>
+                            <div class="checkbox-item">
+                                <input type="checkbox" ${data.sonda_ng_debito ? 'checked' : ''} onchange="updateCamaData('${piso}', '${camaId}', 'sonda_ng_debito', this.checked)">
+                                <label>Débito</label>
+                            </div>
+                            <div class="checkbox-item">
+                                <input type="checkbox" ${data.sonda_ng_alimento ? 'checked' : ''} onchange="updateCamaData('${piso}', '${camaId}', 'sonda_ng_alimento', this.checked)">
+                                <label>Alimento</label>
+                            </div>
+                        </details>
+                    </div>
+                </details>
+
+                <!-- Drenajes -->
+                <details>
+                    <summary style="font-weight: bold; margin: 8px 0; cursor: pointer;">💧 Drenajes</summary>
+                    <div class="checkbox-group" style="margin-left: 16px;">
+                        <div class="checkbox-item">
+                            <input type="checkbox" ${data.drenaje_pleural ? 'checked' : ''} onchange="updateCamaData('${piso}', '${camaId}', 'drenaje_pleural', this.checked)">
+                            <label>Drenaje Pleural</label>
+                        </div>
+                        <div class="checkbox-item">
+                            <input type="checkbox" ${data.drenaje_aspirativo ? 'checked' : ''} onchange="updateCamaData('${piso}', '${camaId}', 'drenaje_aspirativo', this.checked)">
+                            <label>Drenaje Aspirativo</label>
+                        </div>
+                        <div class="checkbox-item">
+                            <input type="checkbox" ${data.drenaje_percutaneo ? 'checked' : ''} onchange="updateCamaData('${piso}', '${camaId}', 'drenaje_percutaneo', this.checked)">
+                            <label>Drenaje Percutáneo</label>
+                        </div>
+                    </div>
+                </details>
+
+                <!-- Acceso Venoso -->
+                <details>
+                    <summary style="font-weight: bold; margin: 8px 0; cursor: pointer;">💉 Acceso Venoso</summary>
+                    <div class="checkbox-group" style="margin-left: 16px;">
+                        <div class="checkbox-item">
+                            <input type="checkbox" ${data.acceso_periferico ? 'checked' : ''} onchange="updateCamaData('${piso}', '${camaId}', 'acceso_periferico', this.checked)">
+                            <label>Acceso Venoso Periférico</label>
+                        </div>
+                        <details style="margin-left: 16px;">
+                            <summary style="cursor: pointer;">Acceso Venoso Central</summary>
+                            <div class="checkbox-item">
+                                <input type="checkbox" ${data.avc_yugular ? 'checked' : ''} onchange="updateCamaData('${piso}', '${camaId}', 'avc_yugular', this.checked)">
+                                <label>Yugular</label>
+                            </div>
+                            <div class="checkbox-item">
+                                <input type="checkbox" ${data.avc_femoral ? 'checked' : ''} onchange="updateCamaData('${piso}', '${camaId}', 'avc_femoral', this.checked)">
+                                <label>Femoral</label>
+                            </div>
+                            <div class="checkbox-item">
+                                <input type="checkbox" ${data.avc_subclavia ? 'checked' : ''} onchange="updateCamaData('${piso}', '${camaId}', 'avc_subclavia', this.checked)">
+                                <label>Subclavia</label>
+                            </div>
+                        </details>
+                    </div>
+                </details>
+
+                <!-- Oxígeno -->
+                <details>
+                    <summary style="font-weight: bold; margin: 8px 0; cursor: pointer;">💨 Oxígeno</summary>
+                    <div class="checkbox-group" style="margin-left: 16px;">
+                        <div class="checkbox-item">
+                            <input type="checkbox" ${data.oxigeno_canula ? 'checked' : ''} onchange="updateCamaData('${piso}', '${camaId}', 'oxigeno_canula', this.checked)">
+                            <label>Cánula nasal</label>
+                        </div>
+                        <details style="margin-left: 16px;">
+                            <summary style="cursor: pointer;">Máscara</summary>
+                            <div class="checkbox-item">
+                                <input type="checkbox" ${data.oxigeno_reservorio ? 'checked' : ''} onchange="updateCamaData('${piso}', '${camaId}', 'oxigeno_reservorio', this.checked)">
+                                <label>Reservorio</label>
+                            </div>
+                            <div class="checkbox-item">
+                                <input type="checkbox" ${data.oxigeno_venturi ? 'checked' : ''} onchange="updateCamaData('${piso}', '${camaId}', 'oxigeno_venturi', this.checked)">
+                                <label>Venturi</label>
+                            </div>
+                        </details>
+                    </div>
+                </details>
+
+                <!-- Estado -->
+                <details>
+                    <summary style="font-weight: bold; margin: 8px 0; cursor: pointer;">🧠 Estado</summary>
+                    <div class="checkbox-group" style="margin-left: 16px;">
+                        <div class="checkbox-item">
+                            <input type="checkbox" ${data.estado_lucido ? 'checked' : ''} onchange="updateCamaData('${piso}', '${camaId}', 'estado_lucido', this.checked)">
+                            <label>Lúcido</label>
+                        </div>
+                        <div class="checkbox-item">
+                            <input type="checkbox" ${data.estado_somnoliento ? 'checked' : ''} onchange="updateCamaData('${piso}', '${camaId}', 'estado_somnoliento', this.checked)">
+                            <label>Somnoliento</label>
+                        </div>
+                        <div class="checkbox-item">
+                            <input type="checkbox" ${data.estado_vigil ? 'checked' : ''} onchange="updateCamaData('${piso}', '${camaId}', 'estado_vigil', this.checked)">
+                            <label>Vigil</label>
+                        </div>
+                        <div class="checkbox-item">
+                            <input type="checkbox" ${data.estado_comatoso ? 'checked' : ''} onchange="updateCamaData('${piso}', '${camaId}', 'estado_comatoso', this.checked)">
+                            <label>Comatoso</label>
+                        </div>
+                    </div>
+                </details>
+
+                <!-- Otros -->
+                <div class="checkbox-group">
+                    <div class="checkbox-item">
+                        <input type="checkbox" ${data.contencion ? 'checked' : ''} onchange="updateCamaData('${piso}', '${camaId}', 'contencion', this.checked)">
+                        <label>Contención física</label>
+                    </div>
+                    <div class="checkbox-item">
+                        <input type="checkbox" ${data.rechazo ? 'checked' : ''} onchange="updateCamaData('${piso}', '${camaId}', 'rechazo', this.checked)">
+                        <label>Rechazo terapéutico</label>
+                    </div>
+                    <div class="checkbox-item">
+                        <input type="checkbox" ${data.deambula ? 'checked' : ''} onchange="updateCamaData('${piso}', '${camaId}', 'deambula', this.checked)">
+                        <label>Deambula</label>
+                    </div>
+                    <div class="checkbox-item">
+                        <input type="checkbox" ${data.paniales ? 'checked' : ''} onchange="updateCamaData('${piso}', '${camaId}', 'paniales', this.checked)">
+                        <label>Usa pañales</label>
+                    </div>
                 </div>
+
                 <div class="observaciones">
                     <label>📝 Obs:</label>
-                    <textarea onchange="updateCamaData('${camaId}', 'observaciones', this.value)">${data.observaciones || ''}</textarea>
+                    <textarea onchange="updateCamaData('${piso}', '${camaId}', 'observaciones', this.value)">${data.observaciones || ''}</textarea>
+                </div>
+
+                <!-- Botones de acción -->
+                <div style="margin-top: 10px; display: flex; flex-wrap: wrap; gap: 4px; justify-content: center;">
+                    <button class="btn btn-warning" style="padding: 5px 8px; font-size: 10px;" onclick="registrarAlta('${piso}', '${camaId}')">🏥 Alta</button>
+                    <button class="btn btn-danger" style="padding: 5px 8px; font-size: 10px;" onclick="registrarObito('${piso}', '${camaId}')">⚰️ Óbito</button>
+                    <button class="btn btn-info" style="padding: 5px 8px; font-size: 10px;" onclick="registrarPase('${piso}', '${camaId}')">🔁 Pase</button>
+                    <button class="btn" style="padding: 5px 8px; font-size: 10px;" onclick="mandarANovedad('${piso}', '${camaId}')">📤 Mandar a novedad</button>
                 </div>
             `;
+
             return card;
         }
 
-        function updateCamaData(camaId, field, value) {
-            if (!userData.camasData[camaId]) userData.camasData[camaId] = {};
-            userData.camasData[camaId][field] = value;
+        function updateCamaData(piso, camaId, field, value) {
+            dataPorPiso[piso] = dataPorPiso[piso] || { camasData: {} };
+            dataPorPiso[piso].camasData = dataPorPiso[piso].camasData || {};
+            if (!dataPorPiso[piso].camasData[camaId]) dataPorPiso[piso].camasData[camaId] = {};
+            dataPorPiso[piso].camasData[camaId][field] = value;
             saveData();
         }
 
-        function updateNovedades(camaId) {
-            const novedades = [];
-            const checkboxes = document.querySelectorAll(`#camasContainer .cama-card`);
-            const cardIndex = Array.from(checkboxes).findIndex(card => {
-                const header = card.querySelector('.cama-header')?.textContent || '';
+        function updateAislamiento(piso, camaId, value) {
+            dataPorPiso[piso] = dataPorPiso[piso] || { camasData: {} };
+            dataPorPiso[piso].camasData = dataPorPiso[piso].camasData || {};
+            if (!dataPorPiso[piso].camasData[camaId]) dataPorPiso[piso].camasData[camaId] = {};
+            dataPorPiso[piso].camasData[camaId].aislamiento = value;
+            saveData();
+
+            // Actualizar color de la tarjeta
+            const container = document.getElementById('camasContainer');
+            const card = Array.from(container.children).find(c => {
+                const header = c.querySelector('.cama-header')?.textContent || '';
                 return header.includes(camaId);
             });
-            if (cardIndex === -1) return;
-            const inputs = checkboxes[cardIndex].querySelectorAll('.checkbox-item input');
-            inputs.forEach((cb, i) => {
-                if (cb.checked) novedades.push(CONFIG.NOVEDADES[i]);
+            if (card) {
+                card.className = 'cama-card';
+                if (value === 'Respiratorio') card.classList.add('aislamiento-respiratorio');
+                else if (value === 'Contacto') card.classList.add('aislamiento-contacto');
+                else if (value === 'Neutropénico') card.classList.add('aislamiento-neutropenico');
+                else if (value === 'Psiquiátrico') card.classList.add('aislamiento-psiquiatrico');
+            }
+        }
+
+        function mandarANovedad(piso, camaId) {
+            const data = dataPorPiso[piso]?.camasData[camaId] || {};
+            if (!data.paciente && !data.observaciones && !Object.values(data).some(v => v === true)) {
+                alert('Primero debe ingresar datos en la cama');
+                return;
+            }
+
+            const [habitacion, cama] = camaId.split('-');
+            let texto = `📌 HAB ${habitacion}, Cama ${cama} - ${data.paciente || 'Sin paciente'}: `;
+            const detalles = [];
+
+            // Aislamiento
+            if (data.aislamiento && data.aislamiento !== 'Ninguno') {
+                detalles.push(`Aislamiento: ${data.aislamiento}`);
+            }
+
+            // Sondas
+            if (data.sonda_vesical) detalles.push('Sonda Vesical');
+            if (data.sonda_3vias) detalles.push('Sonda 3 vías');
+            if (data.sonda_ng_debito) detalles.push('NG Débito');
+            if (data.sonda_ng_alimento) detalles.push('NG Alimento');
+
+            // Drenajes
+            if (data.drenaje_pleural) detalles.push('Drenaje Pleural');
+            if (data.drenaje_aspirativo) detalles.push('Drenaje Aspirativo');
+            if (data.drenaje_percutaneo) detalles.push('Drenaje Percutáneo');
+
+            // Acceso Venoso
+            if (data.acceso_periferico) detalles.push('AVP');
+            if (data.acceso_central) detalles.push('AVC');
+            if (data.avc_yugular) detalles.push('AVC Yugular');
+            if (data.avc_femoral) detalles.push('AVC Femoral');
+            if (data.avc_subclavia) detalles.push('AVC Subclavia');
+
+            // Oxígeno
+            if (data.oxigeno_canula) detalles.push('O2 Cánula');
+            if (data.oxigeno_mascara) detalles.push('O2 Máscara');
+            if (data.oxigeno_reservorio) detalles.push('O2 Reservorio');
+            if (data.oxigeno_venturi) detalles.push('O2 Venturi');
+
+            // Estado
+            if (data.estado_lucido) detalles.push('Lúcido');
+            if (data.estado_somnoliento) detalles.push('Somnoliento');
+            if (data.estado_vigil) detalles.push('Vigil');
+            if (data.estado_comatoso) detalles.push('Comatoso');
+
+            // Otros
+            if (data.contencion) detalles.push('Contención');
+            if (data.rechazo) detalles.push('Rechazo');
+            if (data.deambula) detalles.push('Deambula');
+            if (data.paniales) detalles.push('Pañales');
+
+            if (data.observaciones) detalles.push(`Obs: "${data.observaciones}"`);
+
+            texto += detalles.join(', ');
+
+            const notasActuales = document.getElementById('notasPiso').value || '';
+            if (notasActuales.includes(texto)) {
+                alert('⚠️ Esta información ya fue enviada a "Notas del Piso"');
+                return;
+            }
+
+            const nuevasNotas = notasActuales ? `${notasActuales}\n${texto}` : texto;
+            document.getElementById('notasPiso').value = nuevasNotas;
+            dataPorPiso[piso].floorNotes = nuevasNotas;
+            camasParaNovedades.add(`${piso}-${camaId}`);
+            saveData();
+
+            alert('✅ Enviado a "Notas del Piso"');
+        }
+
+        function registrarAlta(piso, camaId) {
+            const data = dataPorPiso[piso]?.camasData[camaId] || {};
+            if (!data.paciente) {
+                alert('Primero debe ingresar el nombre del paciente');
+                return;
+            }
+
+            const tipo = prompt(
+                `🏥 ${data.paciente}\n\n¿Qué tipo de alta?\n\n1. Alta Médica\n2. Alta Voluntaria\n\nIngrese 1 o 2:`
+            );
+
+            let texto = '';
+            if (tipo === '1') {
+                texto = `✅ ALTA MÉDICA: ${data.paciente} (Cama ${camaId})`;
+            } else if (tipo === '2') {
+                texto = `⚠️ ALTA VOLUNTARIA: ${data.paciente} (Cama ${camaId})`;
+            } else if (tipo === null) {
+                return;
+            } else {
+                alert('Opción no válida');
+                return;
+            }
+
+            const notasActuales = document.getElementById('notasPiso').value || '';
+            if (notasActuales.includes(texto)) {
+                alert('⚠️ Esta alta ya fue registrada');
+                return;
+            }
+
+            const nuevasNotas = notasActuales ? `${notasActuales}\n${texto}` : texto;
+            document.getElementById('notasPiso').value = nuevasNotas;
+            dataPorPiso[piso].floorNotes = nuevasNotas;
+            camasParaNovedades.add(`${piso}-${camaId}`);
+            saveData();
+
+            // Limpiar la cama
+            delete dataPorPiso[piso].camasData[camaId];
+            loadCamas();
+
+            alert('✅ Alta registrada y cama limpiada');
+        }
+
+        function registrarObito(piso, camaId) {
+            const data = dataPorPiso[piso]?.camasData[camaId] || {};
+            if (!data.paciente) {
+                alert('Primero debe ingresar el nombre del paciente');
+                return;
+            }
+
+            const causa = prompt(
+                `⚰️ ${data.paciente}\n\n¿Causa del óbito?\nEj: Paro cardiorrespiratorio, Sepsis, etc.`
+            );
+
+            if (!causa) return;
+
+            const texto = `❌ ÓBITO: ${data.paciente} (Cama ${camaId}) - Causa: ${causa}`;
+
+            const notasActuales = document.getElementById('notasPiso').value || '';
+            if (notasActuales.includes(texto)) {
+                alert('⚠️ Este óbito ya fue registrado');
+                return;
+            }
+
+            const nuevasNotas = notasActuales ? `${notasActuales}\n${texto}` : texto;
+            document.getElementById('notasPiso').value = nuevasNotas;
+            dataPorPiso[piso].floorNotes = nuevasNotas;
+            camasParaNovedades.add(`${piso}-${camaId}`);
+            saveData();
+
+            // Limpiar la cama
+            delete dataPorPiso[piso].camasData[camaId];
+            loadCamas();
+
+            alert('✅ Óbito registrado y cama limpiada');
+        }
+
+        function registrarPase(piso, camaId) {
+            const data = dataPorPiso[piso]?.camasData[camaId] || {};
+            if (!data.paciente) {
+                alert('Primero debe ingresar el nombre del paciente');
+                return;
+            }
+
+            const destinoPiso = prompt(`🔁 ${data.paciente}\n\n¿A qué piso se traslada? (ej: 1B, 2C, 4B)`).trim();
+            if (!destinoPiso) return;
+
+            const destinoHab = prompt(`🏠 Habitación destino:`).trim();
+            if (!destinoHab) return;
+
+            const destinoCama = prompt(`🛏️ Cama destino:`).trim();
+            if (!destinoCama) return;
+
+            const texto = `🔁 PASE INTERNO: ${data.paciente} (Cama ${camaId}) → Piso ${destinoPiso}, Hab ${destinoHab}, Cama ${destinoCama}`;
+
+            const notasActuales = document.getElementById('notasPiso').value || '';
+            if (notasActuales.includes(texto)) {
+                alert('⚠️ Este pase ya fue registrado');
+                return;
+            }
+
+            const nuevasNotas = notasActuales ? `${notasActuales}\n${texto}` : texto;
+            document.getElementById('notasPiso').value = nuevasNotas;
+            dataPorPiso[piso].floorNotes = nuevasNotas;
+            camasParaNovedades.add(`${piso}-${camaId}`);
+            saveData();
+
+            alert('✅ Pase interno registrado');
+        }
+
+        function enviarPorWhatsApp() {
+            const selected = Array.from(document.querySelectorAll('#camaSelection input:checked')).map(cb => cb.id.replace('sel-', ''));
+            if (selected.length === 0) {
+                alert('Seleccione al menos una cama');
+                return;
+            }
+
+            const piso = userData.currentFloor;
+            const notasPiso = dataPorPiso[piso]?.floorNotes || '';
+
+            let texto = `📋 *NOVEDADES DE ENFERMERÍA*\n`;
+            texto += `📅 ${new Date().toLocaleString('es-AR')}\n`;
+            texto += `🏥 *Piso:* ${piso}\n`;
+            texto += `👩‍⚕️ *Enfermero/a:* ${userData.nurseName || 'No especificado'}\n`;
+            if (userData.otherNurses) {
+                texto += `👥 *Enfermeros (as):* ${userData.otherNurses}\n`;
+            }
+            texto += `\n──────────────────────\n`;
+
+            let hayDatos = false;
+
+            selected.forEach((camaId) => {
+                const data = dataPorPiso[piso]?.camasData[camaId] || {};
+                if (!data.paciente && !data.observaciones && !Object.values(data).some(v => v === true)) return;
+                hayDatos = true;
+
+                const [habitacion, cama] = camaId.split('-');
+                texto += `🏠 *HAB ${habitacion}, Cama ${cama}*\n`;
+                if (data.paciente) texto += `👤 ${data.paciente}\n`;
+                if (data.aislamiento && data.aislamiento !== 'Ninguno') texto += `🔹 Aislamiento: ${data.aislamiento}\n`;
+                if (data.sonda_vesical) texto += `🔹 Sonda Vesical\n`;
+                if (data.sonda_3vias) texto += `🔹 Sonda 3 vías\n`;
+                if (data.sonda_ng_debito) texto += `🔹 NG Débito\n`;
+                if (data.sonda_ng_alimento) texto += `🔹 NG Alimento\n`;
+                if (data.drenaje_pleural) texto += `🔹 Drenaje Pleural\n`;
+                if (data.drenaje_aspirativo) texto += `🔹 Drenaje Aspirativo\n`;
+                if (data.drenaje_percutaneo) texto += `🔹 Drenaje Percutáneo\n`;
+                if (data.acceso_periferico) texto += `🔹 Acceso Periférico\n`;
+                if (data.acceso_central) texto += `🔹 Acceso Central\n`;
+                if (data.avc_yugular) texto += `🔹 AVC Yugular\n`;
+                if (data.avc_femoral) texto += `🔹 AVC Femoral\n`;
+                if (data.avc_subclavia) texto += `🔹 AVC Subclavia\n`;
+                if (data.oxigeno_canula) texto += `🔹 O2 por Cánula\n`;
+                if (data.oxigeno_mascara) texto += `🔹 O2 por Máscara\n`;
+                if (data.oxigeno_reservorio) texto += `🔹 O2 Reservorio\n`;
+                if (data.oxigeno_venturi) texto += `🔹 O2 Venturi\n`;
+                if (data.estado_lucido) texto += `🔹 Estado: Lúcido\n`;
+                if (data.estado_somnoliento) texto += `🔹 Estado: Somnoliento\n`;
+                if (data.estado_vigil) texto += `🔹 Estado: Vigil\n`;
+                if (data.estado_comatoso) texto += `🔹 Estado: Comatoso\n`;
+                if (data.observaciones) texto += `📝 ${data.observaciones}\n`;
+                texto += `──────────────────────\n`;
             });
-            updateCamaData(camaId, 'novedades', novedades);
+
+            if (notasPiso) {
+                hayDatos = true;
+                texto += `📌 *NOTAS DEL PISO:*\n${notasPiso}\n`;
+            }
+
+            if (!hayDatos) {
+                alert('No hay datos para generar');
+                return;
+            }
+
+            const textoCodificado = encodeURIComponent(texto);
+            const url = `https://wa.me/?text=${textoCodificado}`;
+            window.open(url, '_blank');
+            cerrarModal();
         }
 
-        async function enviarDatos() {
-    if (!userData.nurseName || !userData.currentFloor) {
-        alert('Complete todos los datos requeridos');
-        return;
-    }
+        function copiarNovedades() {
+            const selected = Array.from(document.querySelectorAll('#camaSelection input:checked')).map(cb => cb.id.replace('sel-', ''));
+            if (selected.length === 0) {
+                alert('Seleccione al menos una cama');
+                return;
+            }
 
-    // 🔴 Leer el valor actual de las notas del piso ANTES de enviar
-    userData.floorNotes = document.getElementById('notasPiso').value;
+            const piso = userData.currentFloor;
+            const notasPiso = dataPorPiso[piso]?.floorNotes || '';
 
-    const data = [];
-    const now = new Date().toLocaleString('es-AR');
-    const piso = userData.currentFloor;
+            let texto = `📋 NOVEDADES DE ENFERMERÍA\n`;
+            texto += `Fecha: ${new Date().toLocaleString('es-AR')}\n`;
+            texto += `Piso: ${piso}\n`;
+            texto += `Enfermero/a: ${userData.nurseName || 'No especificado'}\n`;
+            if (userData.otherNurses) {
+                texto += `Enfermeros (as): ${userData.otherNurses}\n`;
+            }
+            texto += `\n--- DETALLE ---\n`;
 
-    Object.keys(userData.camasData).forEach(camaId => {
-        const d = userData.camasData[camaId] || {};
-        if (d.paciente || d.observaciones || (d.novedades && d.novedades.length)) {
-            data.push({
-                fecha: now,
-                piso: piso,
-                cama: camaId,
-                'apellido y nombre': d.paciente || '',
-                aislamiento: d.aislamiento || 'Ninguno',
-                novedades: d.novedades?.join(', ') || '',
-                observaciones: d.observaciones || '',
-                'enfermero/a': userData.nurseName
+            let hayDatos = false;
+
+            selected.forEach((camaId) => {
+                const data = dataPorPiso[piso]?.camasData[camaId] || {};
+                if (!data.paciente && !data.observaciones && !Object.values(data).some(v => v === true)) return;
+                hayDatos = true;
+
+                const [habitacion, cama] = camaId.split('-');
+                texto += `HAB ${habitacion}, Cama ${cama}\n`;
+                if (data.paciente) texto += `Paciente: ${data.paciente}\n`;
+                if (data.aislamiento && data.aislamiento !== 'Ninguno') texto += `Aislamiento: ${data.aislamiento}\n`;
+                if (data.sonda_vesical) texto += `Sonda Vesical\n`;
+                if (data.sonda_3vias) texto += `Sonda 3 vías\n`;
+                if (data.sonda_ng_debito) texto += `NG Débito\n`;
+                if (data.sonda_ng_alimento) texto += `NG Alimento\n`;
+                if (data.drenaje_pleural) texto += `Drenaje Pleural\n`;
+                if (data.drenaje_aspirativo) texto += `Drenaje Aspirativo\n`;
+                if (data.drenaje_percutaneo) texto += `Drenaje Percutáneo\n`;
+                if (data.acceso_periferico) texto += `Acceso Periférico\n`;
+                if (data.acceso_central) texto += `Acceso Central\n`;
+                if (data.avc_yugular) texto += `AVC Yugular\n`;
+                if (data.avc_femoral) texto += `AVC Femoral\n`;
+                if (data.avc_subclavia) texto += `AVC Subclavia\n`;
+                if (data.oxigeno_canula) texto += `O2 por Cánula\n`;
+                if (data.oxigeno_mascara) texto += `O2 por Máscara\n`;
+                if (data.oxigeno_reservorio) texto += `O2 Reservorio\n`;
+                if (data.oxigeno_venturi) texto += `O2 Venturi\n`;
+                if (data.estado_lucido) texto += `Estado: Lúcido\n`;
+                if (data.estado_somnoliento) texto += `Estado: Somnoliento\n`;
+                if (data.estado_vigil) texto += `Estado: Vigil\n`;
+                if (data.estado_comatoso) texto += `Estado: Comatoso\n`;
+                if (data.observaciones) texto += `Observaciones: ${data.observaciones}\n`;
+                texto += `--------\n`;
             });
-        }
-    });
 
-    // 🔴 Aseguramos que las notas del piso se envíen si existen
-    if (userData.floorNotes) {
-        data.push({
-            fecha: now,
-            piso: piso,
-            cama: 'NOTAS DE PISO',
-            'apellido y nombre': 'N/A',
-            aislamiento: 'N/A',
-            novedades: 'N/A',
-            observaciones: userData.floorNotes,
-            'enfermero/a': userData.nurseName
-        });
-    }
+            if (notasPiso) {
+                hayDatos = true;
+                texto += `Notas del piso:\n${notasPiso}\n`;
+            }
 
-    if (data.length === 0) {
-        alert('No hay datos para enviar');
-        return;
-    }
+            if (!hayDatos) {
+                alert('No hay datos para generar');
+                return;
+            }
 
-    try {
-        const response = await fetch(CONFIG.DATA_ENDPOINT, {
-            method: 'POST',
-            mode: 'cors',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ data })
-        });
-
-        if (response.ok) {
-            alert('✅ Datos enviados correctamente al servidor');
-        } else {
-            throw new Error(`Error ${response.status}: ${response.statusText}`);
-        }
-    } catch (err) {
-        console.error('Error al enviar datos:', err);
-        alert('❌ Error al enviar datos. Verifique conexión.\n' + err.message);
-    }
-}
-
-        function abrirModalNovedades() {
-    // 🔴 Aseguramos que las notas del piso se guarden ANTES de abrir el modal
-    userData.floorNotes = document.getElementById('notasPiso').value;
-
-    const container = document.getElementById('camaSelection');
-    container.innerHTML = '';
-    const piso = userData.currentFloor;
-    if (!piso) return;
-    const config = CONFIG.PISOS[piso];
-    const camas = generarCamas(config);
-    camas.forEach(camaId => {
-        const data = userData.camasData[camaId] || {};
-        const hasData = data.paciente || (data.novedades && data.novedades.length) || data.observaciones;
-        const div = document.createElement('div');
-        div.className = 'cama-option';
-        div.innerHTML = `
-            <input type="checkbox" id="sel-${camaId}" ${hasData ? 'checked' : ''}>
-            <label for="sel-${camaId}">Cama ${camaId} - ${data.paciente || ' '}</label>
-        `;
-        div.onclick = () => div.querySelector('input').click();
-        container.appendChild(div);
-    });
-    document.getElementById('modalNovedades').style.display = 'flex';
-}
-
-        function cerrarModal() {
-            document.getElementById('modalNovedades').style.display = 'none';
+            navigator.clipboard.writeText(texto).then(() => {
+                alert('✅ Novedades copiadas al portapapeles. ¡Pégala en WhatsApp!');
+                cerrarModal();
+            }).catch(err => {
+                console.error('Error al copiar:', err);
+                alert('❌ No se pudo copiar. Usa la opción de WhatsApp.');
+            });
         }
 
         function generarImagen() {
@@ -883,6 +1350,9 @@ document.getElementById('notasPiso').addEventListener('input', () => {
                 <div style="border-bottom: 1px solid #ddd; margin-bottom: 8px;"></div>
             `;
 
+            const piso = userData.currentFloor;
+            const notasPiso = dataPorPiso[piso]?.floorNotes || '';
+
             contenidoHTML += `
                 <div style="margin-bottom: 10px; font-size: 11px; line-height: 1.4;">
                     <div style="font-weight: bold; color: #0a3d62; margin-bottom: 4px;">👩‍⚕️ Enfermera/o de turno:</div>
@@ -892,7 +1362,7 @@ document.getElementById('notasPiso').addEventListener('input', () => {
             `;
             if (userData.otherNurses) {
                 contenidoHTML += `
-                    <div style="font-weight: bold; color: #0a3d62; margin-top: 8px; margin-bottom: 4px;">👩‍⚕️👥 Enfermeros/as:</div>
+                    <div style="font-weight: bold; color: #0a3d62; margin-top: 8px; margin-bottom: 4px;">👥 Enfermeros (as):</div>
                     <div style="background: #f8f9fa; padding: 6px; border-radius: 4px; border-left: 3px solid #28a745;">
                         ${userData.otherNurses}
                     </div>
@@ -904,66 +1374,123 @@ document.getElementById('notasPiso').addEventListener('input', () => {
             let camasConDatos = 0;
 
             selected.forEach((camaId) => {
-                const data = userData.camasData[camaId] || {};
-                if (!data.paciente && !data.observaciones) return;
+                const data = dataPorPiso[piso]?.camasData[camaId] || {};
+                if (!data.paciente && !data.observaciones && !Object.values(data).some(v => v === true)) return;
                 hayDatos = true;
+
                 const [habitacion, cama] = camaId.split('-');
 
+                // Separador entre camas
                 if (camasConDatos > 0) {
                     contenidoHTML += `<div style="border-top: 1px dashed #ccc; margin: 8px 0;"></div>`;
                 }
                 camasConDatos++;
 
-                contenidoHTML += `
-                    <div style="margin-bottom: 8px;">
-                        <div style="background: #0a3d62; color: white; padding: 4px 8px; border-radius: 4px; font-size: 12px; font-weight: bold; margin-bottom: 4px;">
-                            🏠 HABITACIÓN ${habitacion} - 🛏️ CAMA ${cama}
-                        </div>
-                `;
+                contenidoHTML += `<div style="border-top: 2px solid #0a3d62; margin: 10px 0; padding: 8px; background: #f8f9fa; border-radius: 8px;">`;
+                contenidoHTML += `<div style="font-size: 12px; font-weight: bold; color: #0a3d62; margin-bottom: 4px;">🏠 HABITACIÓN ${habitacion} - CAMA ${cama}</div>`;
 
                 if (data.paciente) {
-                    contenidoHTML += `
-                        <div style="font-size: 11px; margin: 3px 0; padding: 2px 6px; background: #e8f4f8; border-left: 3px solid #0a3d62;">
-                            <strong>👤 PACIENTE:</strong> ${data.paciente}
-                        </div>
-                    `;
+                    contenidoHTML += `<div style="font-size: 11px; margin: 2px 0; padding: 2px 6px; background: #e8f4f8; border-left: 3px solid #0a3d62;"><strong>👤 PACIENTE:</strong> ${data.paciente}</div>`;
+                }
+
+                if (data.aislamiento && data.aislamiento !== 'Ninguno') {
+                    contenidoHTML += `<div style="font-size: 11px; margin: 2px 0; padding: 2px 6px; background: #fff3cd; border-left: 3px solid #ffc107;"><strong>🧪 AISLAMIENTO:</strong> ${data.aislamiento}</div>`;
+                }
+
+                // Sondas
+                if (data.sonda_vesical || data.sonda_3vias || data.sonda_ng_debito || data.sonda_ng_alimento) {
+                    contenidoHTML += `<div style="font-size: 11px; margin: 2px 0; padding: 2px 6px; background: #d1ecf1; border-left: 3px solid #17a2b8;"><strong>🔹 SONDA:</strong> `;
+                    const sondas = [];
+                    if (data.sonda_vesical) sondas.push('Vesical');
+                    if (data.sonda_3vias) sondas.push('3 vías');
+                    if (data.sonda_ng_debito) sondas.push('NG Débito');
+                    if (data.sonda_ng_alimento) sondas.push('NG Alimento');
+                    contenidoHTML += sondas.join(', ') + `</div>`;
+                }
+
+                // Drenajes
+                if (data.drenaje_pleural || data.drenaje_aspirativo || data.drenaje_percutaneo) {
+                    contenidoHTML += `<div style="font-size: 11px; margin: 2px 0; padding: 2px 6px; background: #d4edda; border-left: 3px solid #28a745;"><strong>🔹 DRENAJE:</strong> `;
+                    const drenajes = [];
+                    if (data.drenaje_pleural) drenajes.push('Pleural');
+                    if (data.drenaje_aspirativo) drenajes.push('Aspirativo');
+                    if (data.drenaje_percutaneo) drenajes.push('Percutáneo');
+                    contenidoHTML += drenajes.join(', ') + `</div>`;
+                }
+
+                // Acceso Venoso
+                if (data.acceso_periferico || data.acceso_central || data.avc_yugular || data.avc_femoral || data.avc_subclavia) {
+                    contenidoHTML += `<div style="font-size: 11px; margin: 2px 0; padding: 2px 6px; background: #fff3cd; border-left: 3px solid #ffc107;"><strong>🔹 AVC:</strong> `;
+                    const avcs = [];
+                    if (data.acceso_periferico) avcs.push('Periférico');
+                    if (data.acceso_central) avcs.push('Central');
+                    if (data.avc_yugular) avcs.push('Yugular');
+                    if (data.avc_femoral) avcs.push('Femoral');
+                    if (data.avc_subclavia) avcs.push('Subclavia');
+                    contenidoHTML += avcs.join(', ') + `</div>`;
+                }
+
+                // Oxígeno
+                if (data.oxigeno_canula || data.oxigeno_mascara || data.oxigeno_reservorio || data.oxigeno_venturi) {
+                    contenidoHTML += `<div style="font-size: 11px; margin: 2px 0; padding: 2px 6px; background: #f8f9f0; border-left: 3px solid #fd7e14;"><strong>🔹 O2:</strong> `;
+                    const oxigeno = [];
+                    if (data.oxigeno_canula) oxigeno.push('Cánula');
+                    if (data.oxigeno_mascara) oxigeno.push('Máscara');
+                    if (data.oxigeno_reservorio) oxigeno.push('Reservorio');
+                    if (data.oxigeno_venturi) oxigeno.push('Venturi');
+                    contenidoHTML += oxigeno.join(', ') + `</div>`;
+                }
+
+                // Estado
+                if (data.estado_lucido || data.estado_somnoliento || data.estado_vigil || data.estado_comatoso) {
+                    contenidoHTML += `<div style="font-size: 11px; margin: 2px 0; padding: 2px 6px; background: #e9ecef; border-left: 3px solid #6c757d;"><strong>📌 ESTADO:</strong> `;
+                    const estados = [];
+                    if (data.estado_lucido) estados.push('Lúcido');
+                    if (data.estado_somnoliento) estados.push('Somnoliento');
+                    if (data.estado_vigil) estados.push('Vigil');
+                    if (data.estado_comatoso) estados.push('Comatoso');
+                    contenidoHTML += estados.join(', ') + `</div>`;
+                }
+
+                // Otros
+                const otros = [];
+                if (data.contencion) otros.push('Contención');
+                if (data.rechazo) otros.push('Rechazo');
+                if (data.deambula) otros.push('Deambula');
+                if (data.paniales) otros.push('Pañales');
+                if (otros.length > 0) {
+                    contenidoHTML += `<div style="font-size: 11px; margin: 2px 0; padding: 2px 6px; background: #d1ecf1; border-left: 3px solid #17a2b8;"><strong>🔹 OTROS:</strong> ${otros.join(', ')}</div>`;
                 }
 
                 if (data.observaciones) {
-                    contenidoHTML += `
-                        <div style="font-size: 10px; margin: 4px 0; padding: 3px 6px; background: #f0f8ff; border-left: 3px solid #17a2b8;">
-                            <strong>📝 OBSERVACIONES:</strong> ${data.observaciones}
-                        </div>
-                    `;
+                    contenidoHTML += `<div style="font-size: 10px; margin: 2px 0; padding: 3px 6px; background: #f0f8ff; border-left: 3px solid #17a2b8; font-style: italic;"><strong>📝 OBS:</strong> ${data.observaciones}</div>`;
                 }
 
                 contenidoHTML += `</div>`;
             });
 
-            // Notas del piso
-if (userData.floorNotes) {
-    hayDatos = true;
-    contenidoHTML += `
-        <div style="border-top: 2px solid #ffc107; margin-top: 10px; padding-top: 6px;">
-            <div style="background: #fff3cd; padding: 6px; border-radius: 4px; border: 1px solid #ffeaa7;">
-                <div style="font-size: 11px; font-weight: bold; color: #856404; margin-bottom: 3px;">
-                    📌 NOTAS GENERALES DEL PISO:
-                </div>
-                <div style="font-size: 10px; color: #856404; line-height: 1.3;">
-                    ${userData.floorNotes}
-                </div>
-            </div>
-        </div>
-    `;
-}
+            if (notasPiso) {
+                hayDatos = true;
+                contenidoHTML += `
+                    <div style="border-top: 2px solid #17a2b8; margin-top: 10px; padding-top: 6px;">
+                        <div style="background: #f8f9fa; padding: 8px; border-radius: 6px; border: 1px solid #e9ecef;">
+                            <div style="font-size: 11px; font-weight: bold; color: #17a2b8; margin-bottom: 4px;">
+                                📝 NOTAS DEL PISO:
+                            </div>
+                            <div style="font-size: 10px; color: #333; line-height: 1.4;">
+                                ${notasPiso}
+                            </div>
+                        </div>
+                    </div>
+                `;
+            }
 
-            if (!hayDatos && !userData.floorNotes) {
+            if (!hayDatos) {
                 alert('No hay datos para generar');
                 return;
             }
 
             resumen.innerHTML = contenidoHTML;
-
             resumen.style.display = 'block';
             resumen.style.position = 'absolute';
             resumen.style.left = '-9999px';
@@ -1024,7 +1551,6 @@ if (userData.floorNotes) {
                 }).catch(err => {
                     console.error('Error al generar imagen:', err);
                     resumen.style.display = 'none';
-                    resumen.style.position = 'static';
                     alert('❌ Error al generar imagen: ' + err.message);
                 });
             }, 500);
@@ -1049,101 +1575,75 @@ if (userData.floorNotes) {
             });
         }
 
-        // === NUEVAS FUNCIONES ===
-        function enviarPorWhatsApp() {
-            const selected = Array.from(document.querySelectorAll('#camaSelection input:checked')).map(cb => cb.id.replace('sel-', ''));
-            if (selected.length === 0) {
-                alert('Seleccione al menos una cama');
-                return;
-            }
+        function abrirModalNovedades() {
+            const container = document.getElementById('camaSelection');
+            container.innerHTML = '';
+            const piso = userData.currentFloor;
+            if (!piso || !dataPorPiso[piso]) return;
+            const config = CONFIG.PISOS[piso];
+            const camas = generarCamas(config);
+            camas.forEach(camaId => {
+                const data = dataPorPiso[piso].camasData[camaId] || {};
+                const estaMarcada = camasParaNovedades.has(`${piso}-${camaId}`);
 
-            let texto = `📋 *NOVEDADES DE ENFERMERÍA*\n`;
-            texto += `📅 FECHA: ${new Date().toLocaleString('es-AR')}\n`;
-            texto += `🏥 *Piso:* ${userData.currentFloor}\n`;
-            texto += `👩‍⚕️ *Enfermero/a:* ${userData.nurseName || 'No especificado'}\n`;
-            if (userData.otherNurses) {
-                texto += `👥 *Enfermeros:* ${userData.otherNurses}\n`;
-            }
-            texto += `\n───────────────────\n`;
+                if (!estaMarcada) return;
 
-            let hayDatos = false;
-
-            selected.forEach((camaId) => {
-                const data = userData.camasData[camaId] || {};
-                if (!data.paciente && !data.observaciones) return;
-                hayDatos = true;
-
-                const [habitacion, cama] = camaId.split('-');
-                texto += `🏠 *HAB ${habitacion}, Cama ${cama}*\n`;
-                if (data.paciente) texto += `👤*Paciente: * ${data.paciente}\n`;
-                if (data.observaciones) texto += `📝*Novedad: * ${data.observaciones}\n`;
-                texto += `───────────────────\n`;
+                const div = document.createElement('div');
+                div.className = 'cama-option';
+                div.innerHTML = `
+                    <input type="checkbox" id="sel-${camaId}" checked>
+                    <label for="sel-${camaId}">Cama ${camaId} - ${data.paciente || 'Sin paciente'}</label>
+                `;
+                div.onclick = () => div.querySelector('input').click();
+                container.appendChild(div);
             });
-
-            if (userData.floorNotes) {
-                hayDatos = true;
-                texto += `📌 *NOTAS DEL PISO:*\n${userData.floorNotes}\n`;
+            if (container.children.length === 0) {
+                container.innerHTML = '<p style="text-align: center; color: #999;">No hay camas marcadas</p>';
             }
-
-            if (!hayDatos) {
-                alert('No hay datos para generar');
-                return;
-            }
-
-            const url = `https://wa.me/?text=${encodeURIComponent(texto)}`;
-            window.open(url, '_blank');
-            cerrarModal();
+            document.getElementById('modalNovedades').style.display = 'flex';
         }
 
-        function copiarNovedades() {
-            const selected = Array.from(document.querySelectorAll('#camaSelection input:checked')).map(cb => cb.id.replace('sel-', ''));
-            if (selected.length === 0) {
-                alert('Seleccione al menos una cama');
-                return;
-            }
-
-            let texto = `📋 NOVEDADES DE ENFERMERÍA\n`;
-            texto += `Fecha: ${new Date().toLocaleString('es-AR')}\n`;
-            texto += `Piso: ${userData.currentFloor}\n`;
-            texto += `Enfermero/a: ${userData.nurseName || 'No especificado'}\n`;
-            if (userData.otherNurses) {
-                texto += `Otros: ${userData.otherNurses}\n`;
-            }
-            texto += `\n--- DETALLE ---\n`;
-
-            let hayDatos = false;
-
-            selected.forEach((camaId) => {
-                const data = userData.camasData[camaId] || {};
-                if (!data.paciente && !data.observaciones) return;
-                hayDatos = true;
-
-                const [habitacion, cama] = camaId.split('-');
-                texto += `*HAB ${habitacion}, Cama ${cama}*\n`;
-                if (data.paciente) texto += `*Paciente: ${data.paciente}*\n`;
-                if (data.observaciones) texto += `*Observaciones:* ${data.observaciones}\n`;
-                texto += `───────────────────\n`;
-            });
-
-            if (userData.floorNotes) {
-                hayDatos = true;
-                texto += `Notas del piso:\n${userData.floorNotes}\n`;
-            }
-
-            if (!hayDatos) {
-                alert('No hay datos para generar');
-                return;
-            }
-
-            navigator.clipboard.writeText(texto).then(() => {
-                alert('✅ Novedades copiadas al portapapeles. ¡Pégala en WhatsApp!');
-                cerrarModal();
-            }).catch(err => {
-                console.error('Error al copiar:', err);
-                alert('❌ No se pudo copiar. Usa la opción de WhatsApp.');
-            });
+        function cerrarModal() {
+            document.getElementById('modalNovedades').style.display = 'none';
         }
     </script>
-</body>
+<script>
+  // Registrar el Service Worker
+  if ('serviceWorker' in navigator) {
+    window.addEventListener('load', () => {
+      navigator.serviceWorker.register('service-worker.js')
+        .then(reg => console.log('SW registrado:', reg))
+        .catch(err => console.log('Error al registrar SW:', err));
+    });
+  }
 
+  // Detectar si se puede instalar la PWA
+  let deferredPrompt;
+  window.addEventListener('beforeinstallprompt', (e) => {
+    e.preventDefault();
+    deferredPrompt = e;
+    // Aquí puedes mostrar un botón de "Instalar App"
+    console.log('App lista para instalarse.');
+  });
+
+  // Opcional: Botón de instalación manual
+  window.instalarApp = () => {
+    if (deferredPrompt) {
+      deferredPrompt.prompt();
+      deferredPrompt.userChoice.then(() => {
+        deferredPrompt = null;
+      });
+    }
+  };
+</script>
+<script>
+  if ('serviceWorker' in navigator) {
+    window.addEventListener('load', () => {
+      navigator.serviceWorker.register('service-worker.js')
+        .then(reg => console.log('SW registrado'))
+        .catch(err => console.log('Error:', err));
+    });
+  }
+</script>
+</body>
 </html>
