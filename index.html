@@ -569,7 +569,7 @@
                 </button>
             </div>
             <div class="input-group">
-                <label for="notasPiso">📝 Notas del Piso:</label>
+                <label for="notasPiso">📝 Novedades del Piso:</label>
                 <textarea id="notasPiso" placeholder="Estudios, pases internos, altas, etc." rows="3"></textarea>
             </div>
             <div class="camas-container" id="camasContainer">
@@ -1230,7 +1230,7 @@ Quiero solicitar acceso al sistema SADOFE.
     if (userData.otherNurses) {
         texto += `Enfermeros (as): ${userData.otherNurses}\n`;
     }
-    texto += `\n--- NOTAS DEL PISO ---\n`;
+    texto += `\n--- NOVEDADES DEL PISO ---\n`;
     texto += notasPiso;
 
     navigator.clipboard.writeText(texto).then(() => {
@@ -1245,7 +1245,7 @@ Quiero solicitar acceso al sistema SADOFE.
         function generarImagen() {
     const piso = userData.currentFloor;
     const notasPiso = dataPorPiso[piso]?.floorNotes || '';
-    
+
     if (!notasPiso.trim()) {
         alert('No hay notas del piso para mostrar.');
         return;
@@ -1278,12 +1278,12 @@ Quiero solicitar acceso al sistema SADOFE.
     }
     contenidoHTML += `</div>`;
 
-    // ✅ Solo Notas del Piso
+    // ✅ Solo Notas del Piso (con el número de piso en el título)
     contenidoHTML += `
         <div style="border-top: 2px solid #17a2b8; margin-top: 10px; padding-top: 6px;">
             <div style="background: #fff3cd; padding: 12px; border-radius: 8px; border: 1px solid #ffeaa7;">
                 <div style="font-size: 12px; font-weight: bold; color: #856404; margin-bottom: 6px;">
-                    📝 NOTAS DEL PISO
+                    📝 NOTAS DEL PISO ${piso}:
                 </div>
                 <div style="font-size: 11px; color: #333; line-height: 1.5; white-space: pre-wrap;">
                     ${notasPiso}
