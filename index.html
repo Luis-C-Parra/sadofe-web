@@ -1192,369 +1192,166 @@ Quiero solicitar acceso al sistema SADOFE.
         }
 
         function enviarPorWhatsApp() {
-            const selected = Array.from(document.querySelectorAll('#camaSelection input:checked')).map(cb => cb.id.replace('sel-', ''));
-            if (selected.length === 0) {
-                alert('Seleccione al menos una cama');
-                return;
-            }
+    const piso = userData.currentFloor;
+    const notasPiso = dataPorPiso[piso]?.floorNotes || '';
 
-            const piso = userData.currentFloor;
-            const notasPiso = dataPorPiso[piso]?.floorNotes || '';
+    if (!notasPiso.trim()) {
+        alert('No hay notas del piso para enviar.');
+        return;
+    }
 
-            let texto = `📋 *NOVEDADES DE ENFERMERÍA*\n`;
-            texto += `📅 ${new Date().toLocaleString('es-AR')}\n`;
-            texto += `🏥 *Piso:* ${piso}\n`;
-            texto += `👩‍⚕️ *Enfermero/a:* ${userData.nurseName || 'No especificado'}\n`;
-            if (userData.otherNurses) {
-                texto += `👥 *Enfermeros (as):* ${userData.otherNurses}\n`;
-            }
-            texto += `\n──────────────────────\n`;
+    let texto = `📋 *NOVEDADES DE ENFERMERÍA*\n`;
+    texto += `📅 ${new Date().toLocaleString('es-AR')}\n`;
+    texto += `🏥 *Piso:* ${piso}\n`;
+    texto += `👩‍⚕️ *Enfermero/a:* ${userData.nurseName || 'No especificado'}\n`;
+    if (userData.otherNurses) {
+        texto += `👥 *Enfermeros (as):* ${userData.otherNurses}\n`;
+    }
+    texto += `\n📌 *NOVEDADES DEL PISO:*\n${notasPiso}`;
 
-            let hayDatos = false;
+    const textoCodificado = encodeURIComponent(texto);
+    const url = `https://wa.me/?text=${textoCodificado}`;
+    window.open(url, '_blank');
+    cerrarModal();
+}
+       function copiarNovedades() {
+    const piso = userData.currentFloor;
+    const notasPiso = dataPorPiso[piso]?.floorNotes || '';
 
-            selected.forEach((camaId) => {
-                const data = dataPorPiso[piso]?.camasData[camaId] || {};
-                if (!data.paciente && !data.observaciones && !Object.values(data).some(v => v === true)) return;
-                hayDatos = true;
+    if (!notasPiso.trim()) {
+        alert('No hay notas del piso para copiar.');
+        return;
+    }
 
-                const [habitacion, cama] = camaId.split('-');
-                texto += `🏠 *HAB ${habitacion}, Cama ${cama}*\n`;
-                if (data.paciente) texto += `👤 ${data.paciente}\n`;
-                if (data.aislamiento && data.aislamiento !== 'Ninguno') texto += `🔹 Aislamiento: ${data.aislamiento}\n`;
-                if (data.sonda_vesical) texto += `🔹 Sonda Vesical\n`;
-                if (data.sonda_3vias) texto += `🔹 Sonda 3 vías\n`;
-                if (data.sonda_ng_debito) texto += `🔹 NG Débito\n`;
-                if (data.sonda_ng_alimento) texto += `🔹 NG Alimento\n`;
-                if (data.drenaje_pleural) texto += `🔹 Drenaje Pleural\n`;
-                if (data.drenaje_aspirativo) texto += `🔹 Drenaje Aspirativo\n`;
-                if (data.drenaje_percutaneo) texto += `🔹 Drenaje Percutáneo\n`;
-                if (data.acceso_periferico) texto += `🔹 Acceso Periférico\n`;
-                if (data.acceso_central) texto += `🔹 Acceso Central\n`;
-                if (data.avc_yugular) texto += `🔹 AVC Yugular\n`;
-                if (data.avc_femoral) texto += `🔹 AVC Femoral\n`;
-                if (data.avc_subclavia) texto += `🔹 AVC Subclavia\n`;
-                if (data.oxigeno_canula) texto += `🔹 O2 por Cánula\n`;
-                if (data.oxigeno_mascara) texto += `🔹 O2 por Máscara\n`;
-                if (data.oxigeno_reservorio) texto += `🔹 O2 Reservorio\n`;
-                if (data.oxigeno_venturi) texto += `🔹 O2 Venturi\n`;
-                if (data.estado_lucido) texto += `🔹 Estado: Lúcido\n`;
-                if (data.estado_somnoliento) texto += `🔹 Estado: Somnoliento\n`;
-                if (data.estado_vigil) texto += `🔹 Estado: Vigil\n`;
-                if (data.estado_comatoso) texto += `🔹 Estado: Comatoso\n`;
-                if (data.observaciones) texto += `📝 ${data.observaciones}\n`;
-                texto += `──────────────────────\n`;
-            });
+    let texto = `📋 NOVEDADES DE ENFERMERÍA\n`;
+    texto += `Fecha: ${new Date().toLocaleString('es-AR')}\n`;
+    texto += `Piso: ${piso}\n`;
+    texto += `Enfermero/a: ${userData.nurseName || 'No especificado'}\n`;
+    if (userData.otherNurses) {
+        texto += `Enfermeros (as): ${userData.otherNurses}\n`;
+    }
+    texto += `\n--- NOTAS DEL PISO ---\n`;
+    texto += notasPiso;
 
-            if (notasPiso) {
-                hayDatos = true;
-                texto += `📌 *NOTAS DEL PISO:*\n${notasPiso}\n`;
-            }
-
-            if (!hayDatos) {
-                alert('No hay datos para generar');
-                return;
-            }
-
-            const textoCodificado = encodeURIComponent(texto);
-            const url = `https://wa.me/?text=${textoCodificado}`;
-            window.open(url, '_blank');
-            cerrarModal();
-        }
-
-        function copiarNovedades() {
-            const selected = Array.from(document.querySelectorAll('#camaSelection input:checked')).map(cb => cb.id.replace('sel-', ''));
-            if (selected.length === 0) {
-                alert('Seleccione al menos una cama');
-                return;
-            }
-
-            const piso = userData.currentFloor;
-            const notasPiso = dataPorPiso[piso]?.floorNotes || '';
-
-            let texto = `📋 NOVEDADES DE ENFERMERÍA\n`;
-            texto += `Fecha: ${new Date().toLocaleString('es-AR')}\n`;
-            texto += `Piso: ${piso}\n`;
-            texto += `Enfermero/a: ${userData.nurseName || 'No especificado'}\n`;
-            if (userData.otherNurses) {
-                texto += `Enfermeros (as): ${userData.otherNurses}\n`;
-            }
-            texto += `\n--- DETALLE ---\n`;
-
-            let hayDatos = false;
-
-            selected.forEach((camaId) => {
-                const data = dataPorPiso[piso]?.camasData[camaId] || {};
-                if (!data.paciente && !data.observaciones && !Object.values(data).some(v => v === true)) return;
-                hayDatos = true;
-
-                const [habitacion, cama] = camaId.split('-');
-                texto += `HAB ${habitacion}, Cama ${cama}\n`;
-                if (data.paciente) texto += `Paciente: ${data.paciente}\n`;
-                if (data.aislamiento && data.aislamiento !== 'Ninguno') texto += `Aislamiento: ${data.aislamiento}\n`;
-                if (data.sonda_vesical) texto += `Sonda Vesical\n`;
-                if (data.sonda_3vias) texto += `Sonda 3 vías\n`;
-                if (data.sonda_ng_debito) texto += `NG Débito\n`;
-                if (data.sonda_ng_alimento) texto += `NG Alimento\n`;
-                if (data.drenaje_pleural) texto += `Drenaje Pleural\n`;
-                if (data.drenaje_aspirativo) texto += `Drenaje Aspirativo\n`;
-                if (data.drenaje_percutaneo) texto += `Drenaje Percutáneo\n`;
-                if (data.acceso_periferico) texto += `Acceso Periférico\n`;
-                if (data.acceso_central) texto += `Acceso Central\n`;
-                if (data.avc_yugular) texto += `AVC Yugular\n`;
-                if (data.avc_femoral) texto += `AVC Femoral\n`;
-                if (data.avc_subclavia) texto += `AVC Subclavia\n`;
-                if (data.oxigeno_canula) texto += `O2 por Cánula\n`;
-                if (data.oxigeno_mascara) texto += `O2 por Máscara\n`;
-                if (data.oxigeno_reservorio) texto += `O2 Reservorio\n`;
-                if (data.oxigeno_venturi) texto += `O2 Venturi\n`;
-                if (data.estado_lucido) texto += `Estado: Lúcido\n`;
-                if (data.estado_somnoliento) texto += `Estado: Somnoliento\n`;
-                if (data.estado_vigil) texto += `Estado: Vigil\n`;
-                if (data.estado_comatoso) texto += `Estado: Comatoso\n`;
-                if (data.observaciones) texto += `Observaciones: ${data.observaciones}\n`;
-                texto += `--------\n`;
-            });
-
-            if (notasPiso) {
-                hayDatos = true;
-                texto += `Notas del piso:\n${notasPiso}\n`;
-            }
-
-            if (!hayDatos) {
-                alert('No hay datos para generar');
-                return;
-            }
-
-            navigator.clipboard.writeText(texto).then(() => {
-                alert('✅ Novedades copiadas al portapapeles. ¡Pégala en WhatsApp!');
-                cerrarModal();
-            }).catch(err => {
-                console.error('Error al copiar:', err);
-                alert('❌ No se pudo copiar. Usa la opción de WhatsApp.');
-            });
-        }
+    navigator.clipboard.writeText(texto).then(() => {
+        alert('✅ Notas del piso copiadas al portapapeles');
+        cerrarModal();
+    }).catch(err => {
+        console.error('Error al copiar:', err);
+        alert('❌ No se pudo copiar al portapapeles');
+    });
+}
 
         function generarImagen() {
-            const selected = Array.from(document.querySelectorAll('#camaSelection input:checked')).map(cb => cb.id.replace('sel-', ''));
-            if (selected.length === 0) {
-                alert('Seleccione al menos una cama');
-                return;
-            }
-            const resumen = document.getElementById('resumenImagen');
-            resumen.innerHTML = '';
+    const piso = userData.currentFloor;
+    const notasPiso = dataPorPiso[piso]?.floorNotes || '';
+    
+    if (!notasPiso.trim()) {
+        alert('No hay notas del piso para mostrar.');
+        return;
+    }
 
-            let contenidoHTML = `
-                <div style="background: #0a3d62; color: white; padding: 12px; margin: -16px -16px 12px -16px; text-align: center;">
-                    <h1 style="margin: 0; font-size: 16px; font-weight: bold;">📋 NOVEDADES DE ENFERMERÍA</h1>
+    const resumen = document.getElementById('resumenImagen');
+    resumen.innerHTML = '';
+    
+    let contenidoHTML = `
+        <div style="background: #0a3d62; color: white; padding: 12px; margin: -16px -16px 12px -16px; text-align: center;">
+            <h1 style="margin: 0; font-size: 16px; font-weight: bold;">📋 NOVEDADES DE ENFERMERÍA</h1>
+        </div>
+        <div style="border-bottom: 1px solid #ddd; margin-bottom: 8px;"></div>
+    `;
+
+    contenidoHTML += `
+        <div style="margin-bottom: 10px; font-size: 11px; line-height: 1.4;">
+            <div style="font-weight: bold; color: #0a3d62; margin-bottom: 4px;">👩‍⚕️ Enfermera/o de turno:</div>
+            <div style="background: #f8f9fa; padding: 6px; border-radius: 4px; border-left: 3px solid #0a3d62;">
+                ${userData.nurseName || 'No especificado'}
+            </div>
+    `;
+    if (userData.otherNurses) {
+        contenidoHTML += `
+            <div style="font-weight: bold; color: #0a3d62; margin-top: 8px; margin-bottom: 4px;">👥 Enfermeros (as):</div>
+            <div style="background: #f8f9fa; padding: 6px; border-radius: 4px; border-left: 3px solid #28a745;">
+                ${userData.otherNurses}
+            </div>
+        `;
+    }
+    contenidoHTML += `</div>`;
+
+    // ✅ Solo Notas del Piso
+    contenidoHTML += `
+        <div style="border-top: 2px solid #17a2b8; margin-top: 10px; padding-top: 6px;">
+            <div style="background: #fff3cd; padding: 12px; border-radius: 8px; border: 1px solid #ffeaa7;">
+                <div style="font-size: 12px; font-weight: bold; color: #856404; margin-bottom: 6px;">
+                    📝 NOTAS DEL PISO
                 </div>
-                <div style="border-bottom: 1px solid #ddd; margin-bottom: 8px;"></div>
-            `;
+                <div style="font-size: 11px; color: #333; line-height: 1.5; white-space: pre-wrap;">
+                    ${notasPiso}
+                </div>
+            </div>
+        </div>
+    `;
 
-            const piso = userData.currentFloor;
-            const notasPiso = dataPorPiso[piso]?.floorNotes || '';
+    resumen.innerHTML = contenidoHTML;
+    resumen.style.display = 'block';
+    resumen.style.position = 'absolute';
+    resumen.style.left = '-9999px';
+    resumen.style.top = '0';
+    resumen.style.width = '300px';
+    resumen.style.padding = '16px';
+    resumen.style.margin = '0';
+    resumen.style.backgroundColor = '#ffffff';
+    resumen.style.fontFamily = 'Arial, sans-serif';
+    resumen.style.fontSize = '10px';
+    resumen.style.lineHeight = '1.2';
+    resumen.style.color = '#000000';
+    resumen.style.boxSizing = 'border-box';
+    resumen.style.border = '1px solid #ddd';
+    resumen.style.zIndex = '-9999';
 
-            contenidoHTML += `
-                <div style="margin-bottom: 10px; font-size: 11px; line-height: 1.4;">
-                    <div style="font-weight: bold; color: #0a3d62; margin-bottom: 4px;">👩‍⚕️ Enfermera/o de turno:</div>
-                    <div style="background: #f8f9fa; padding: 6px; border-radius: 4px; border-left: 3px solid #0a3d62;">
-                        ${userData.nurseName || 'No especificado'}
-                    </div>
-            `;
-            if (userData.otherNurses) {
-                contenidoHTML += `
-                    <div style="font-weight: bold; color: #0a3d62; margin-top: 8px; margin-bottom: 4px;">👥 Enfermeros (as):</div>
-                    <div style="background: #f8f9fa; padding: 6px; border-radius: 4px; border-left: 3px solid #28a745;">
-                        ${userData.otherNurses}
-                    </div>
-                `;
-            }
-            contenidoHTML += `</div>`;
-
-            let hayDatos = false;
-            let camasConDatos = 0;
-
-            selected.forEach((camaId) => {
-                const data = dataPorPiso[piso]?.camasData[camaId] || {};
-                if (!data.paciente && !data.observaciones && !Object.values(data).some(v => v === true)) return;
-                hayDatos = true;
-
-                const [habitacion, cama] = camaId.split('-');
-
-                // Separador entre camas
-                if (camasConDatos > 0) {
-                    contenidoHTML += `<div style="border-top: 1px dashed #ccc; margin: 8px 0;"></div>`;
-                }
-                camasConDatos++;
-
-                contenidoHTML += `<div style="border-top: 2px solid #0a3d62; margin: 10px 0; padding: 8px; background: #f8f9fa; border-radius: 8px;">`;
-                contenidoHTML += `<div style="font-size: 12px; font-weight: bold; color: #0a3d62; margin-bottom: 4px;">🏠 HABITACIÓN ${habitacion} - CAMA ${cama}</div>`;
-
-                if (data.paciente) {
-                    contenidoHTML += `<div style="font-size: 11px; margin: 2px 0; padding: 2px 6px; background: #e8f4f8; border-left: 3px solid #0a3d62;"><strong>👤 PACIENTE:</strong> ${data.paciente}</div>`;
-                }
-
-                if (data.aislamiento && data.aislamiento !== 'Ninguno') {
-                    contenidoHTML += `<div style="font-size: 11px; margin: 2px 0; padding: 2px 6px; background: #fff3cd; border-left: 3px solid #ffc107;"><strong>🧪 AISLAMIENTO:</strong> ${data.aislamiento}</div>`;
-                }
-
-                // Sondas
-                if (data.sonda_vesical || data.sonda_3vias || data.sonda_ng_debito || data.sonda_ng_alimento) {
-                    contenidoHTML += `<div style="font-size: 11px; margin: 2px 0; padding: 2px 6px; background: #d1ecf1; border-left: 3px solid #17a2b8;"><strong>🔹 SONDA:</strong> `;
-                    const sondas = [];
-                    if (data.sonda_vesical) sondas.push('Vesical');
-                    if (data.sonda_3vias) sondas.push('3 vías');
-                    if (data.sonda_ng_debito) sondas.push('NG Débito');
-                    if (data.sonda_ng_alimento) sondas.push('NG Alimento');
-                    contenidoHTML += sondas.join(', ') + `</div>`;
-                }
-
-                // Drenajes
-                if (data.drenaje_pleural || data.drenaje_aspirativo || data.drenaje_percutaneo) {
-                    contenidoHTML += `<div style="font-size: 11px; margin: 2px 0; padding: 2px 6px; background: #d4edda; border-left: 3px solid #28a745;"><strong>🔹 DRENAJE:</strong> `;
-                    const drenajes = [];
-                    if (data.drenaje_pleural) drenajes.push('Pleural');
-                    if (data.drenaje_aspirativo) drenajes.push('Aspirativo');
-                    if (data.drenaje_percutaneo) drenajes.push('Percutáneo');
-                    contenidoHTML += drenajes.join(', ') + `</div>`;
-                }
-
-                // Acceso Venoso
-                if (data.acceso_periferico || data.acceso_central || data.avc_yugular || data.avc_femoral || data.avc_subclavia) {
-                    contenidoHTML += `<div style="font-size: 11px; margin: 2px 0; padding: 2px 6px; background: #fff3cd; border-left: 3px solid #ffc107;"><strong>🔹 AVC:</strong> `;
-                    const avcs = [];
-                    if (data.acceso_periferico) avcs.push('Periférico');
-                    if (data.acceso_central) avcs.push('Central');
-                    if (data.avc_yugular) avcs.push('Yugular');
-                    if (data.avc_femoral) avcs.push('Femoral');
-                    if (data.avc_subclavia) avcs.push('Subclavia');
-                    contenidoHTML += avcs.join(', ') + `</div>`;
-                }
-
-                // Oxígeno
-                if (data.oxigeno_canula || data.oxigeno_mascara || data.oxigeno_reservorio || data.oxigeno_venturi) {
-                    contenidoHTML += `<div style="font-size: 11px; margin: 2px 0; padding: 2px 6px; background: #f8f9f0; border-left: 3px solid #fd7e14;"><strong>🔹 O2:</strong> `;
-                    const oxigeno = [];
-                    if (data.oxigeno_canula) oxigeno.push('Cánula');
-                    if (data.oxigeno_mascara) oxigeno.push('Máscara');
-                    if (data.oxigeno_reservorio) oxigeno.push('Reservorio');
-                    if (data.oxigeno_venturi) oxigeno.push('Venturi');
-                    contenidoHTML += oxigeno.join(', ') + `</div>`;
-                }
-
-                // Estado
-                if (data.estado_lucido || data.estado_somnoliento || data.estado_vigil || data.estado_comatoso) {
-                    contenidoHTML += `<div style="font-size: 11px; margin: 2px 0; padding: 2px 6px; background: #e9ecef; border-left: 3px solid #6c757d;"><strong>📌 ESTADO:</strong> `;
-                    const estados = [];
-                    if (data.estado_lucido) estados.push('Lúcido');
-                    if (data.estado_somnoliento) estados.push('Somnoliento');
-                    if (data.estado_vigil) estados.push('Vigil');
-                    if (data.estado_comatoso) estados.push('Comatoso');
-                    contenidoHTML += estados.join(', ') + `</div>`;
-                }
-
-                // Otros
-                const otros = [];
-                if (data.contencion) otros.push('Contención');
-                if (data.rechazo) otros.push('Rechazo');
-                if (data.deambula) otros.push('Deambula');
-                if (data.paniales) otros.push('Pañales');
-                if (otros.length > 0) {
-                    contenidoHTML += `<div style="font-size: 11px; margin: 2px 0; padding: 2px 6px; background: #d1ecf1; border-left: 3px solid #17a2b8;"><strong>🔹 OTROS:</strong> ${otros.join(', ')}</div>`;
-                }
-
-                if (data.observaciones) {
-                    contenidoHTML += `<div style="font-size: 10px; margin: 2px 0; padding: 3px 6px; background: #f0f8ff; border-left: 3px solid #17a2b8; font-style: italic;"><strong>📝 OBS:</strong> ${data.observaciones}</div>`;
-                }
-
-                contenidoHTML += `</div>`;
-            });
-
-            if (notasPiso) {
-                hayDatos = true;
-                contenidoHTML += `
-                    <div style="border-top: 2px solid #17a2b8; margin-top: 10px; padding-top: 6px;">
-                        <div style="background: #f8f9fa; padding: 8px; border-radius: 6px; border: 1px solid #e9ecef;">
-                            <div style="font-size: 11px; font-weight: bold; color: #17a2b8; margin-bottom: 4px;">
-                                📝 NOTAS DEL PISO:
-                            </div>
-                            <div style="font-size: 10px; color: #333; line-height: 1.4;">
-                                ${notasPiso}
-                            </div>
-                        </div>
-                    </div>
-                `;
-            }
-
-            if (!hayDatos) {
-                alert('No hay datos para generar');
-                return;
-            }
-
-            resumen.innerHTML = contenidoHTML;
-            resumen.style.display = 'block';
-            resumen.style.position = 'absolute';
-            resumen.style.left = '-9999px';
-            resumen.style.top = '0';
-            resumen.style.width = '300px';
-            resumen.style.padding = '16px';
-            resumen.style.margin = '0';
-            resumen.style.backgroundColor = '#ffffff';
-            resumen.style.fontFamily = 'Arial, sans-serif';
-            resumen.style.fontSize = '10px';
-            resumen.style.lineHeight = '1.2';
-            resumen.style.color = '#000000';
-            resumen.style.boxSizing = 'border-box';
-            resumen.style.border = '1px solid #ddd';
-            resumen.style.zIndex = '-9999';
-
+    setTimeout(() => {
+        html2canvas(resumen, {
+            scale: 2,
+            width: 300,
+            backgroundColor: '#ffffff',
+            useCORS: true,
+            allowTaint: false,
+            logging: false
+        }).then(canvas => {
+            resumen.style.display = 'none';
+            resumen.style.position = 'static';
+            const displayCanvas = document.getElementById('canvasImagen');
+            const optimalWidth = Math.min(300, window.innerWidth - 40);
+            displayCanvas.width = canvas.width;
+            displayCanvas.height = canvas.height;
+            displayCanvas.style.maxWidth = '100%';
+            displayCanvas.style.width = optimalWidth + 'px';
+            displayCanvas.style.height = 'auto';
+            displayCanvas.style.border = '2px solid #0a3d62';
+            displayCanvas.style.borderRadius = '8px';
+            displayCanvas.style.display = 'block';
+            displayCanvas.style.margin = '10px auto';
+            displayCanvas.style.boxShadow = '0 4px 12px rgba(0,0,0,0.15)';
+            const ctx = displayCanvas.getContext('2d');
+            ctx.imageSmoothingEnabled = true;
+            ctx.imageSmoothingQuality = 'high';
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            ctx.drawImage(canvas, 0, 0);
+            document.getElementById('imagenGenerada').style.display = 'block';
             setTimeout(() => {
-                html2canvas(resumen, {
-                    scale: 2,
-                    width: 300,
-                    backgroundColor: '#ffffff',
-                    useCORS: true,
-                    allowTaint: false,
-                    logging: false
-                }).then(canvas => {
-                    resumen.style.display = 'none';
-                    resumen.style.position = 'static';
-
-                    const displayCanvas = document.getElementById('canvasImagen');
-                    const optimalWidth = Math.min(300, window.innerWidth - 40);
-                    displayCanvas.width = canvas.width;
-                    displayCanvas.height = canvas.height;
-                    displayCanvas.style.maxWidth = '100%';
-                    displayCanvas.style.width = optimalWidth + 'px';
-                    displayCanvas.style.height = 'auto';
-                    displayCanvas.style.border = '2px solid #0a3d62';
-                    displayCanvas.style.borderRadius = '8px';
-                    displayCanvas.style.display = 'block';
-                    displayCanvas.style.margin = '10px auto';
-                    displayCanvas.style.boxShadow = '0 4px 12px rgba(0,0,0,0.15)';
-
-                    const ctx = displayCanvas.getContext('2d');
-                    ctx.imageSmoothingEnabled = true;
-                    ctx.imageSmoothingQuality = 'high';
-                    ctx.clearRect(0, 0, canvas.width, canvas.height);
-                    ctx.drawImage(canvas, 0, 0);
-
-                    document.getElementById('imagenGenerada').style.display = 'block';
-
-                    setTimeout(() => {
-                        document.getElementById('imagenGenerada').scrollIntoView({ 
-                            behavior: 'smooth', 
-                            block: 'center' 
-                        });
-                    }, 100);
-
-                    cerrarModal();
-                }).catch(err => {
-                    console.error('Error al generar imagen:', err);
-                    resumen.style.display = 'none';
-                    alert('❌ Error al generar imagen: ' + err.message);
+                document.getElementById('imagenGenerada').scrollIntoView({ 
+                    behavior: 'smooth', 
+                    block: 'center' 
                 });
-            }, 500);
-        }
+            }, 100);
+            cerrarModal();
+        }).catch(err => {
+            console.error('Error al generar imagen:', err);
+            resumen.style.display = 'none';
+            alert('❌ Error al generar imagen: ' + err.message);
+        });
+    }, 500);
+}
 
         function descargarImagen() {
             const link = document.createElement('a');
@@ -1646,5 +1443,4 @@ Quiero solicitar acceso al sistema SADOFE.
   }
 </script>
 </body>
-
 </html>
