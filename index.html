@@ -168,6 +168,12 @@
         .btn-warning:hover {
             background: #e67e22;
         }
+        .btn-danger {
+            background: #c0392b;
+        }
+        .btn-danger:hover {
+            background: #e74c3c;
+        }
         .btn-info {
             background: #2980b9;
         }
@@ -480,11 +486,13 @@
         .fade-out {
             opacity: 0 !important;
         }
+        /* Fuerza mayúsculas visuales en los campos de texto */
+            .uppercase-input { text-transform: uppercase; 
+        }
     </style>
 </head>
 
 <body>
-    <!-- Splash Screen -->
     <div class="splash-screen" id="splashScreen">
         <div class="splash-logo">🩺</div>
         <h1 class="splash-title">SADOFE</h1>
@@ -493,7 +501,6 @@
         <p class="splash-footer">© Lic. Luis C. Parra</p>
     </div>
 
-    <!-- Login Screen -->
     <div class="login-screen" id="loginScreen">
         <div class="login-card">
             <h2>🔐 Iniciar Sesión</h2>
@@ -514,7 +521,7 @@
             <div id="otherNursesSection" style="display: none; margin-top: 15px;">
                 <div class="input-group">
                     <label for="otherNurses">¿Hay otros enfermeros/as en el piso?</label>
-                    <textarea id="otherNurses" placeholder="Nombres separados por coma (opcional)" rows="2"></textarea>
+                    <textarea id="otherNurses" class="uppercase-input" placeholder="Nombres separados por coma o guion (opcional)" rows="2"></textarea>
                 </div>
                 <button class="btn btn-secondary" onclick="completeLogin()">
                     ✅ Continuar
@@ -523,15 +530,14 @@
         </div>
     </div>
 
-    <!-- Main Application -->
     <div class="main-app" id="mainApp">
         <div class="app-header">
             <h1>🩺 SADOFE - Registro de Novedades</h1>
             <h1>🩺 E N F E R M E R I A</h1>
             <div class="nurse-info">
-                <div><strong>🧑‍⚕️ Enfermera/o:</strong> <span id="nurseNameDisplay"></span></div>
+                <div><strong>Enfemeros y/o Enfermeras: 👥</strong> <span id="nurseNameDisplay"></span></div>
                 <div id="otherNursesDisplay" style="display: none;">
-                    <strong>👥 Enfermeros (as):</strong> <span id="otherNursesText"></span>
+                    <strong>👥</strong> <span id="otherNursesText"></span>
                 </div>
             </div>
         </div>
@@ -552,7 +558,6 @@
                 </div>
             </div>
 
-            <!-- Número de piso grande y visible -->
             <div id="pisoDisplay" class="piso-display" style="display: none;">
                 PISO: <span id="pisoNumber">--</span>
             </div>
@@ -567,18 +572,19 @@
                 <button class="btn btn-secondary" onclick="abrirModalNovedades()">
                     📋 Generar NOVEDADES
                 </button>
+                <button class="btn btn-danger" onclick="borrarNotasPiso()">
+                    🗑️ Borrar Novedades
+                </button>
             </div>
             <div class="input-group">
                 <label for="notasPiso">📝 Novedades del Piso:</label>
-                <textarea id="notasPiso" placeholder="Estudios, pases internos, altas, etc." rows="3"></textarea>
+                <textarea id="notasPiso" placeholder="Estudios, pases internos, altas, etc." rows="6"></textarea>
             </div>
             <div class="camas-container" id="camasContainer">
-                <!-- Camas generadas aquí -->
-            </div>
+                </div>
         </div>
     </div>
 
-    <!-- Modal para Seleccionar Camas -->
     <div id="modalNovedades" class="modal">
         <div class="modal-content">
             <div class="modal-header">
@@ -596,7 +602,6 @@
         </div>
     </div>
 
-    <!-- Imagen Generada -->
     <div id="imagenGenerada" style="display: none; text-align: center; margin-top: 20px;">
         <h3>📸 Imagen Generada</h3>
         <canvas id="canvasImagen"></canvas>
@@ -606,7 +611,6 @@
         </div>
     </div>
 
-    <!-- Resumen oculto para imagen -->
     <div class="resumen-imagen" id="resumenImagen"></div>
 
     <script>
@@ -632,10 +636,7 @@
             camasData: {}
         };
 
-        // Datos por piso
         let dataPorPiso = {};
-
-        // Camas marcadas para novedades
         let camasParaNovedades = new Set();
 
         document.addEventListener('DOMContentLoaded', function() {
@@ -724,15 +725,13 @@
             const dni = prompt("🔢 Ahora ingresa tu DNI:");
             if (!dni) return;
             const numeroWhatsApp = '5491124076812';
-            const mensaje = `Hola, soy ${nombre.trim()} (DNI: ${dni.trim()}).
-Quiero solicitar acceso al sistema SADOFE.
-¿Puedes ayudarme?`;
+            const mensaje = `Hola, soy ${nombre.trim()} (DNI: ${dni.trim()}). Quiero solicitar acceso al sistema SADOFE.`;
             const url = `https://wa.me/${numeroWhatsApp}?text=${encodeURIComponent(mensaje)}`;
             window.open(url, '_blank');
         }
 
         function completeLogin() {
-            userData.otherNurses = document.getElementById('otherNurses').value.trim();
+            userData.otherNurses = document.getElementById('otherNurses').value.trim().toUpperCase();
             document.getElementById('loginScreen').style.display = 'none';
             document.getElementById('mainApp').style.display = 'block';
             document.getElementById('nurseNameDisplay').textContent = userData.nurseName;
@@ -781,14 +780,8 @@ Quiero solicitar acceso al sistema SADOFE.
                 return;
             }
             userData.currentFloor = piso;
-
-            dataPorPiso[piso] = dataPorPiso[piso] || {
-                floorNotes: '',
-                camasData: {}
-            };
-
+            dataPorPiso[piso] = dataPorPiso[piso] || { floorNotes: '', camasData: {} };
             document.getElementById('notasPiso').value = dataPorPiso[piso].floorNotes || '';
-
             const container = document.getElementById('camasContainer');
             container.innerHTML = '';
             const config = CONFIG.PISOS[piso];
@@ -1011,6 +1004,7 @@ Quiero solicitar acceso al sistema SADOFE.
             }
         }
 
+
         function mandarANovedad(piso, camaId) {
             const data = dataPorPiso[piso]?.camasData[camaId] || {};
             if (!data.paciente && !data.observaciones && !Object.values(data).some(v => v === true)) {
@@ -1019,7 +1013,7 @@ Quiero solicitar acceso al sistema SADOFE.
             }
 
             const [habitacion, cama] = camaId.split('-');
-            let texto = `📌 HAB ${habitacion}, Cama ${cama} - ${data.paciente || 'Sin paciente'}: `;
+            let texto = `📌 HAB: ${habitacion}-${cama} - ${data.paciente || 'Sin paciente'}: `;
             const detalles = [];
 
             // Aislamiento
@@ -1083,47 +1077,66 @@ Quiero solicitar acceso al sistema SADOFE.
         }
 
         function registrarAlta(piso, camaId) {
-            const data = dataPorPiso[piso]?.camasData[camaId] || {};
-            if (!data.paciente) {
-                alert('Primero debe ingresar el nombre del paciente');
-                return;
+    const data = dataPorPiso[piso]?.camasData[camaId] || {};
+    if (!data.paciente) {
+        alert('Primero debe ingresar el nombre del paciente');
+        return;
+    }
+
+    const tipo = prompt(
+        `🏥 ${data.paciente}\n\n¿Qué tipo de alta?\n\n1. Alta Médica\n2. Alta Voluntaria\n\nIngrese 1 o 2:`
+    );
+
+    let texto = '';
+    // Extraemos habitación y cama para el formato
+    const [hab, cam] = camaId.split('-');
+
+    if (tipo === '1') {
+        // Formato: ✅ CAMA: X-X - ALTA MÉDICA: PACIENTE
+        texto = `✅ HAB: ${camaId} - ALTA MÉDICA: ${data.paciente}`;
+    } else if (tipo === '2') {
+        // Formato: ⚠️ CAMA: X-X - ALTA VOLUNTARIA: PACIENTE
+        texto = `⚠️ HAB: ${camaId} - ALTA VOLUNTARIA: ${data.paciente}`;
+    } else if (tipo === null) {
+        return;
+    } else {
+        alert('Opción no válida');
+        return;
+    }
+
+    const notasActuales = document.getElementById('notasPiso').value || '';
+    if (notasActuales.includes(texto)) {
+        alert('⚠️ Esta alta ya fue registrada');
+        return;
+    }
+
+    const nuevasNotas = notasActuales ? `${notasActuales}\n${texto}` : texto;
+    document.getElementById('notasPiso').value = nuevasNotas;
+    dataPorPiso[piso].floorNotes = nuevasNotas;
+    
+    // Si manejas el Set de novedades
+    if (typeof camasParaNovedades !== 'undefined') {
+        camasParaNovedades.add(`${piso}-${camaId}`);
+    }
+    
+    saveData();
+
+    // Limpiar la cama
+    delete dataPorPiso[piso].camasData[camaId];
+    loadCamas();
+
+    alert('✅ Alta registrada y cama limpiada');
+}
+
+        function borrarNotasPiso() {
+            const piso = userData.currentFloor;
+            if (confirm('¿Borrar todas las novedades de este piso?')) {
+                document.getElementById('notasPiso').value = '';
+                if (dataPorPiso[piso]) dataPorPiso[piso].floorNotes = '';
+                saveData();
             }
-
-            const tipo = prompt(
-                `🏥 ${data.paciente}\n\n¿Qué tipo de alta?\n\n1. Alta Médica\n2. Alta Voluntaria\n\nIngrese 1 o 2:`
-            );
-
-            let texto = '';
-            if (tipo === '1') {
-                texto = `✅ ALTA MÉDICA: ${data.paciente} (Cama ${camaId})`;
-            } else if (tipo === '2') {
-                texto = `⚠️ ALTA VOLUNTARIA: ${data.paciente} (Cama ${camaId})`;
-            } else if (tipo === null) {
-                return;
-            } else {
-                alert('Opción no válida');
-                return;
-            }
-
-            const notasActuales = document.getElementById('notasPiso').value || '';
-            if (notasActuales.includes(texto)) {
-                alert('⚠️ Esta alta ya fue registrada');
-                return;
-            }
-
-            const nuevasNotas = notasActuales ? `${notasActuales}\n${texto}` : texto;
-            document.getElementById('notasPiso').value = nuevasNotas;
-            dataPorPiso[piso].floorNotes = nuevasNotas;
-            camasParaNovedades.add(`${piso}-${camaId}`);
-            saveData();
-
-            // Limpiar la cama
-            delete dataPorPiso[piso].camasData[camaId];
-            loadCamas();
-
-            alert('✅ Alta registrada y cama limpiada');
         }
-
+       
         function registrarObito(piso, camaId) {
             const data = dataPorPiso[piso]?.camasData[camaId] || {};
             if (!data.paciente) {
@@ -1137,11 +1150,12 @@ Quiero solicitar acceso al sistema SADOFE.
 
             if (!causa) return;
 
-            const texto = `❌ ÓBITO: ${data.paciente} (Cama ${camaId}) - Causa: ${causa}`;
+            // Se cambia el orden para poner la cama al principio, igual que en el alta
+            const texto = `⚰️ HAB: ${camaId} - ÓBITO: ${data.paciente} - Causa: ${causa}`;
 
             const notasActuales = document.getElementById('notasPiso').value || '';
             if (notasActuales.includes(texto)) {
-                alert('⚠️ Este óbito ya fue registrado');
+                alert('⚠️ Esta óbito ya fue registrado');
                 return;
             }
 
@@ -1158,7 +1172,7 @@ Quiero solicitar acceso al sistema SADOFE.
             alert('✅ Óbito registrado y cama limpiada');
         }
 
-        function registrarPase(piso, camaId) {
+       function registrarPase(piso, camaId) {
             const data = dataPorPiso[piso]?.camasData[camaId] || {};
             if (!data.paciente) {
                 alert('Primero debe ingresar el nombre del paciente');
@@ -1174,7 +1188,8 @@ Quiero solicitar acceso al sistema SADOFE.
             const destinoCama = prompt(`🛏️ Cama destino:`).trim();
             if (!destinoCama) return;
 
-            const texto = `🔁 PASE INTERNO: ${data.paciente} (Cama ${camaId}) → Piso ${destinoPiso}, Hab ${destinoHab}, Cama ${destinoCama}`;
+            // Se cambia el orden: primero la cama de origen, luego el paciente y el destino
+            const texto = `🔁 HAB: ${camaId} - PASE INTERNO: ${data.paciente} → Piso ${destinoPiso}, Hab ${destinoHab}, Cama ${destinoCama}`;
 
             const notasActuales = document.getElementById('notasPiso').value || '';
             if (notasActuales.includes(texto)) {
@@ -1186,61 +1201,36 @@ Quiero solicitar acceso al sistema SADOFE.
             document.getElementById('notasPiso').value = nuevasNotas;
             dataPorPiso[piso].floorNotes = nuevasNotas;
             camasParaNovedades.add(`${piso}-${camaId}`);
+            delete dataPorPiso[piso].camasData[camaId];
             saveData();
-
+            loadCamas(); // Se añade para refrescar visualmente las camas tras borrarla
             alert('✅ Pase interno registrado');
         }
 
+
+        // Función auxiliar para obtener la línea de enfermeros
+        function getEnfermerosString() {
+            let base = userData.nurseName || 'No especificado';
+            if (userData.otherNurses) {
+                base += `, ${userData.otherNurses}`;
+            }
+            return `Enfemeros y/o Enfermeras: ${base}`;
+        }
+
         function enviarPorWhatsApp() {
-    const piso = userData.currentFloor;
-    const notasPiso = dataPorPiso[piso]?.floorNotes || '';
+            const piso = userData.currentFloor;
+            const notasPiso = dataPorPiso[piso]?.floorNotes || '';
+            if (!notasPiso) return alert('Sin notas');
+            let texto = `📋 *NOVEDADES ENFERMERÍA*\n📅 ${new Date().toLocaleString()}\n🏥 *Piso:* ${piso}\n🧑‍⚕️ *${getEnfermerosString()}*\n\n📌 *NOVEDADES:*\n${notasPiso}`;
+            window.open(`https://wa.me/?text=${encodeURIComponent(texto)}`, '_blank');
+        }
 
-    if (!notasPiso.trim()) {
-        alert('No hay notas del piso para enviar.');
-        return;
-    }
-
-    let texto = `📋 *NOVEDADES DE ENFERMERÍA*\n`;
-    texto += `📅 ${new Date().toLocaleString('es-AR')}\n`;
-    texto += `🏥 *Piso:* ${piso}\n`;
-    texto += `👩‍⚕️ *Enfermero/a:* ${userData.nurseName || 'No especificado'}\n`;
-    if (userData.otherNurses) {
-        texto += `👥 *Enfermeros (as):* ${userData.otherNurses}\n`;
-    }
-    texto += `\n📌 *NOVEDADES DEL PISO:*\n${notasPiso}`;
-
-    const textoCodificado = encodeURIComponent(texto);
-    const url = `https://wa.me/?text=${textoCodificado}`;
-    window.open(url, '_blank');
-    cerrarModal();
-}
-       function copiarNovedades() {
-    const piso = userData.currentFloor;
-    const notasPiso = dataPorPiso[piso]?.floorNotes || '';
-
-    if (!notasPiso.trim()) {
-        alert('No hay notas del piso para copiar.');
-        return;
-    }
-
-    let texto = `📋 NOVEDADES DE ENFERMERÍA\n`;
-    texto += `Fecha: ${new Date().toLocaleString('es-AR')}\n`;
-    texto += `Piso: ${piso}\n`;
-    texto += `Enfermero/a: ${userData.nurseName || 'No especificado'}\n`;
-    if (userData.otherNurses) {
-        texto += `Enfermeros (as): ${userData.otherNurses}\n`;
-    }
-    texto += `\n--- NOVEDADES DEL PISO ---\n`;
-    texto += notasPiso;
-
-    navigator.clipboard.writeText(texto).then(() => {
-        alert('✅ Notas del piso copiadas al portapapeles');
-        cerrarModal();
-    }).catch(err => {
-        console.error('Error al copiar:', err);
-        alert('❌ No se pudo copiar al portapapeles');
-    });
-}
+        function copiarNovedades() {
+            const piso = userData.currentFloor;
+            const notasPiso = dataPorPiso[piso]?.floorNotes || '';
+            let texto = `📋 NOVEDADES ENFERMERÍA\nFecha: ${new Date().toLocaleString()}\nPiso: ${piso}\n${getEnfermerosString()}\n\nNovedades:\n${notasPiso}`;
+            navigator.clipboard.writeText(texto).then(() => alert('Copiado'));
+        }
 
         function generarImagen() {
     const piso = userData.currentFloor;
@@ -1262,30 +1252,30 @@ Quiero solicitar acceso al sistema SADOFE.
     `;
 
     contenidoHTML += `
-        <div style="margin-bottom: 10px; font-size: 11px; line-height: 1.4;">
-            <div style="font-weight: bold; color: #0a3d62; margin-bottom: 4px;">👩‍⚕️ Enfermera/o de turno:</div>
-            <div style="background: #f8f9fa; padding: 6px; border-radius: 4px; border-left: 3px solid #0a3d62;">
+        <div style="margin-bottom: 10px; font-size: 11px; line-height: 1.4; text-align: left;">
+            <div style="font-weight: bold; color: #0a3d62; margin-bottom: 4px;">👩‍⚕️ Enfermeras/os de turno:</div>
+            <div style="background: #f8f9fa; padding: 6px; border-radius: 4px; border-left: 3px solid #0a3d62; text-align: left;">
                 ${userData.nurseName || 'No especificado'}
             </div>
     `;
     if (userData.otherNurses) {
         contenidoHTML += `
             <div style="font-weight: bold; color: #0a3d62; margin-top: 8px; margin-bottom: 4px;">👥 Enfermeros (as):</div>
-            <div style="background: #f8f9fa; padding: 6px; border-radius: 4px; border-left: 3px solid #28a745;">
+            <div style="background: #f8f9fa; padding: 6px; border-radius: 4px; border-left: 3px solid #28a745; text-align: left;">
                 ${userData.otherNurses}
             </div>
         `;
     }
     contenidoHTML += `</div>`;
 
-    // ✅ Solo Notas del Piso (con el número de piso en el título)
+    // ✅ Título centrado y contenido alineado a la izquierda para las notas
     contenidoHTML += `
         <div style="border-top: 2px solid #17a2b8; margin-top: 10px; padding-top: 6px;">
             <div style="background: #fff3cd; padding: 12px; border-radius: 8px; border: 1px solid #ffeaa7;">
-                <div style="font-size: 12px; font-weight: bold; color: #856404; margin-bottom: 6px;">
-                    📝 NOTAS DEL PISO ${piso}:
+                <div style="font-size: 12px; font-weight: bold; color: #856404; margin-bottom: 6px; text-align: center;">
+                    📝 NOTAS DEL PISO ${piso}
                 </div>
-                <div style="font-size: 11px; color: #333; line-height: 1.5; white-space: pre-wrap;">
+                <div style="font-size: 11px; color: #333; line-height: 1.5; white-space: pre-wrap; text-align: left;">
                     ${notasPiso}
                 </div>
             </div>
@@ -1302,25 +1292,29 @@ Quiero solicitar acceso al sistema SADOFE.
     resumen.style.margin = '0';
     resumen.style.backgroundColor = '#ffffff';
     resumen.style.fontFamily = 'Arial, sans-serif';
-    resumen.style.fontSize = '10px';
-    resumen.style.lineHeight = '1.2';
-    resumen.style.color = '#000000';
     resumen.style.boxSizing = 'border-box';
     resumen.style.border = '1px solid #ddd';
     resumen.style.zIndex = '-9999';
 
     setTimeout(() => {
         html2canvas(resumen, {
-            scale: 2,
+            scale: 3, // Aumentado a 3 para mejorar la resolución notablemente
             width: 300,
             backgroundColor: '#ffffff',
             useCORS: true,
             allowTaint: false,
-            logging: false
+            logging: false,
+            imageTimeout: 0,
+            onclone: (clonedDoc) => {
+                // Aseguramos que en el clon el elemento sea visible para la captura
+                clonedDoc.getElementById('resumenImagen').style.display = 'block';
+            }
         }).then(canvas => {
             resumen.style.display = 'none';
             resumen.style.position = 'static';
             const displayCanvas = document.getElementById('canvasImagen');
+            
+            // Ajuste de visualización sin perder calidad de los datos del canvas
             const optimalWidth = Math.min(300, window.innerWidth - 40);
             displayCanvas.width = canvas.width;
             displayCanvas.height = canvas.height;
@@ -1332,11 +1326,11 @@ Quiero solicitar acceso al sistema SADOFE.
             displayCanvas.style.display = 'block';
             displayCanvas.style.margin = '10px auto';
             displayCanvas.style.boxShadow = '0 4px 12px rgba(0,0,0,0.15)';
+            
             const ctx = displayCanvas.getContext('2d');
-            ctx.imageSmoothingEnabled = true;
-            ctx.imageSmoothingQuality = 'high';
-            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            ctx.imageSmoothingEnabled = false; // Ayuda a mantener los bordes de las letras nítidos en escalas altas
             ctx.drawImage(canvas, 0, 0);
+            
             document.getElementById('imagenGenerada').style.display = 'block';
             setTimeout(() => {
                 document.getElementById('imagenGenerada').scrollIntoView({ 
@@ -1351,24 +1345,19 @@ Quiero solicitar acceso al sistema SADOFE.
             alert('❌ Error al generar imagen: ' + err.message);
         });
     }, 500);
-}
 
+}
         function descargarImagen() {
             const link = document.createElement('a');
             link.download = 'novedades.png';
-            link.href = document.getElementById('canvasImagen').toDataURL('image/png');
+            link.href = document.getElementById('canvasImagen').toDataURL();
             link.click();
         }
 
         function compartirImagen() {
-            const canvas = document.getElementById('canvasImagen');
-            canvas.toBlob(blob => {
+            document.getElementById('canvasImagen').toBlob(blob => {
                 const file = new File([blob], 'novedades.png', { type: 'image/png' });
-                if (navigator.canShare && navigator.canShare({ files: [file] })) {
-                    navigator.share({ files: [file] });
-                } else {
-                    alert('Compartir no soportado en este navegador.');
-                }
+                if (navigator.share) navigator.share({ files: [file] });
             });
         }
 
@@ -1404,7 +1393,7 @@ Quiero solicitar acceso al sistema SADOFE.
             document.getElementById('modalNovedades').style.display = 'none';
         }
     </script>
-<script>
+    <script>
   // Registrar el Service Worker
   if ('serviceWorker' in navigator) {
     window.addEventListener('load', () => {
