@@ -1241,6 +1241,12 @@
         return;
     }
 
+    // Unificamos los nombres en una sola cadena: Titular - Adicionales
+    let nombresEnfermeros = (userData.nurseName || 'No especificado').toUpperCase();
+    if (userData.otherNurses) {
+        nombresEnfermeros += ` - ${userData.otherNurses.toUpperCase()}`;
+    }
+
     const resumen = document.getElementById('resumenImagen');
     resumen.innerHTML = '';
     
@@ -1251,24 +1257,17 @@
         <div style="border-bottom: 1px solid #ddd; margin-bottom: 8px;"></div>
     `;
 
+    // Sección unificada de enfermeros
     contenidoHTML += `
         <div style="margin-bottom: 10px; font-size: 11px; line-height: 1.4; text-align: left;">
-            <div style="font-weight: bold; color: #0a3d62; margin-bottom: 4px;">👩‍⚕️ Enfermeras/os de turno:</div>
-            <div style="background: #f8f9fa; padding: 6px; border-radius: 4px; border-left: 3px solid #0a3d62; text-align: left;">
-                ${userData.nurseName || 'No especificado'}
+            <div style="font-weight: bold; color: #0a3d62; margin-bottom: 4px;">👩‍⚕️ ENFERMEROS Y/O ENFERMERAS:</div>
+            <div style="background: #f8f9fa; padding: 6px; border-radius: 4px; border-left: 3px solid #0a3d62; text-align: left; font-weight: bold;">
+                ${nombresEnfermeros}
             </div>
+        </div>
     `;
-    if (userData.otherNurses) {
-        contenidoHTML += `
-            <div style="font-weight: bold; color: #0a3d62; margin-top: 8px; margin-bottom: 4px;">👥 Enfermeros (as):</div>
-            <div style="background: #f8f9fa; padding: 6px; border-radius: 4px; border-left: 3px solid #28a745; text-align: left;">
-                ${userData.otherNurses}
-            </div>
-        `;
-    }
-    contenidoHTML += `</div>`;
 
-    // ✅ Título centrado y contenido alineado a la izquierda para las notas
+    // Sección de Notas del Piso centrada en el título y alineada a la izquierda en el contenido
     contenidoHTML += `
         <div style="border-top: 2px solid #17a2b8; margin-top: 10px; padding-top: 6px;">
             <div style="background: #fff3cd; padding: 12px; border-radius: 8px; border: 1px solid #ffeaa7;">
@@ -1298,23 +1297,18 @@
 
     setTimeout(() => {
         html2canvas(resumen, {
-            scale: 3, // Aumentado a 3 para mejorar la resolución notablemente
+            scale: 3, // Alta resolución
             width: 300,
             backgroundColor: '#ffffff',
             useCORS: true,
             allowTaint: false,
             logging: false,
-            imageTimeout: 0,
-            onclone: (clonedDoc) => {
-                // Aseguramos que en el clon el elemento sea visible para la captura
-                clonedDoc.getElementById('resumenImagen').style.display = 'block';
-            }
+            imageTimeout: 0
         }).then(canvas => {
             resumen.style.display = 'none';
             resumen.style.position = 'static';
             const displayCanvas = document.getElementById('canvasImagen');
             
-            // Ajuste de visualización sin perder calidad de los datos del canvas
             const optimalWidth = Math.min(300, window.innerWidth - 40);
             displayCanvas.width = canvas.width;
             displayCanvas.height = canvas.height;
@@ -1328,7 +1322,7 @@
             displayCanvas.style.boxShadow = '0 4px 12px rgba(0,0,0,0.15)';
             
             const ctx = displayCanvas.getContext('2d');
-            ctx.imageSmoothingEnabled = false; // Ayuda a mantener los bordes de las letras nítidos en escalas altas
+            ctx.imageSmoothingEnabled = false;
             ctx.drawImage(canvas, 0, 0);
             
             document.getElementById('imagenGenerada').style.display = 'block';
@@ -1345,7 +1339,6 @@
             alert('❌ Error al generar imagen: ' + err.message);
         });
     }, 500);
-
 }
         function descargarImagen() {
             const link = document.createElement('a');
