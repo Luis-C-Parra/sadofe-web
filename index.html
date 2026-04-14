@@ -535,9 +535,9 @@
             <h1>🩺 SADOFE - Registro de Novedades</h1>
             <h1>🩺 E N F E R M E R I A</h1>
             <div class="nurse-info">
-                <div><strong>Enfemeros y/o Enfermeras: 👥</strong> <span id="nurseNameDisplay"></span></div>
+                <div><strong>Enfemeros y/o Enfermeras: 👩‍⚕️👥</strong> <span id="nurseNameDisplay"></span></div>
                 <div id="otherNursesDisplay" style="display: none;">
-                    <strong>👥</strong> <span id="otherNursesText"></span>
+                    <strong>👩‍⚕️👥</strong> <span id="otherNursesText"></span>
                 </div>
             </div>
         </div>
@@ -1234,17 +1234,20 @@
 
         function generarImagen() {
     const piso = userData.currentFloor;
-    const notasPiso = dataPorPiso[piso]?.floorNotes || '';
+    let notasPiso = dataPorPiso[piso]?.floorNotes || '';
 
     if (!notasPiso.trim()) {
         alert('No hay notas del piso para mostrar.');
         return;
     }
 
-    // Unificamos los nombres en una sola cadena: Titular - Adicionales
-    let nombresEnfermeros = (userData.nurseName || 'No especificado').toUpperCase();
+    // ELIMINAR SANGRÍA: Quitamos espacios y saltos de línea al inicio y al final
+    notasPiso = notasPiso.replace(/^\s+|\s+$/g, '');
+
+    // Unificamos los nombres en una sola cadena
+    let nombresUnificados = (userData.nurseName || 'No especificado').toUpperCase();
     if (userData.otherNurses) {
-        nombresEnfermeros += ` - ${userData.otherNurses.toUpperCase()}`;
+        nombresUnificados += ` - ${userData.otherNurses.toUpperCase()}`;
     }
 
     const resumen = document.getElementById('resumenImagen');
@@ -1260,23 +1263,21 @@
     // Sección unificada de enfermeros
     contenidoHTML += `
         <div style="margin-bottom: 10px; font-size: 11px; line-height: 1.4; text-align: left;">
-            <div style="font-weight: bold; color: #0a3d62; margin-bottom: 4px;">👩‍⚕️ ENFERMEROS Y/O ENFERMERAS:</div>
-            <div style="background: #f8f9fa; padding: 6px; border-radius: 4px; border-left: 3px solid #0a3d62; text-align: left; font-weight: bold;">
-                ${nombresEnfermeros}
+            <div style="font-weight: bold; color: #0a3d62; margin-bottom: 4px;">👩‍⚕️👩‍⚕️ ENFERMEROS Y/O ENFERMERAS:</div>
+            <div style="background: #f8f9fa; padding: 8px; border-radius: 4px; border-left: 3px solid #0a3d62; font-weight: bold; color: #000;">
+                ${nombresUnificados}
             </div>
         </div>
     `;
 
-    // Sección de Notas del Piso centrada en el título y alineada a la izquierda en el contenido
+    // Sección de Notas del Piso: Agregamos text-indent: 0 para asegurar que no haya sangría
     contenidoHTML += `
         <div style="border-top: 2px solid #17a2b8; margin-top: 10px; padding-top: 6px;">
             <div style="background: #fff3cd; padding: 12px; border-radius: 8px; border: 1px solid #ffeaa7;">
-                <div style="font-size: 12px; font-weight: bold; color: #856404; margin-bottom: 6px; text-align: center;">
+                <div style="font-size: 12px; font-weight: bold; color: #856404; margin-bottom: 8px; text-align: center;">
                     📝 NOTAS DEL PISO ${piso}
                 </div>
-                <div style="font-size: 11px; color: #333; line-height: 1.5; white-space: pre-wrap; text-align: left;">
-                    ${notasPiso}
-                </div>
+                <div style="font-size: 11px; color: #333; line-height: 1.6; white-space: pre-wrap; text-align: left; text-indent: 0; margin: 0; padding: 0;">${notasPiso}</div>
             </div>
         </div>
     `;
@@ -1288,22 +1289,18 @@
     resumen.style.top = '0';
     resumen.style.width = '300px';
     resumen.style.padding = '16px';
-    resumen.style.margin = '0';
     resumen.style.backgroundColor = '#ffffff';
     resumen.style.fontFamily = 'Arial, sans-serif';
     resumen.style.boxSizing = 'border-box';
-    resumen.style.border = '1px solid #ddd';
     resumen.style.zIndex = '-9999';
 
     setTimeout(() => {
         html2canvas(resumen, {
-            scale: 3, // Alta resolución
+            scale: 3, 
             width: 300,
             backgroundColor: '#ffffff',
             useCORS: true,
-            allowTaint: false,
-            logging: false,
-            imageTimeout: 0
+            logging: false
         }).then(canvas => {
             resumen.style.display = 'none';
             resumen.style.position = 'static';
@@ -1334,9 +1331,9 @@
             }, 100);
             cerrarModal();
         }).catch(err => {
-            console.error('Error al generar imagen:', err);
+            console.error('Error:', err);
             resumen.style.display = 'none';
-            alert('❌ Error al generar imagen: ' + err.message);
+            alert('❌ Error al generar imagen.');
         });
     }, 500);
 }
