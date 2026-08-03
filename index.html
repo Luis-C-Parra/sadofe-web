@@ -556,6 +556,10 @@
                         <option value="4C">4C (422-429)</option>
                     </select>
                 </div>
+                <div class="input-group">
+        <label for="fechaSelect">📅 Fecha (vacío = última guardada):</label>
+        <input type="date" id="fechaSelect" onchange="loadCamas()">
+    </div>
             </div>
 
             <div id="pisoDisplay" class="piso-display" style="display: none;">
@@ -575,6 +579,9 @@
                 <button class="btn btn-danger" onclick="borrarNotasPiso()">
                     🗑️ Borrar Novedades
                 </button>
+                <button class="btn btn-danger" onclick="borrarCamposPiso()">
+    🧹 Borrar Campos de Camas
+</button>
             </div>
             <div class="input-group">
                 <label for="notasPiso">📝 Novedades del Piso:</label>
@@ -617,6 +624,7 @@
         const CONFIG = {
             LOGIN_ENDPOINT: 'https://script.google.com/macros/s/AKfycbwBqfRagEUrSM9f9x1WvgLDKByfvfp-VPsDdUjuCNLKiUBcLO1Xb3pYlJ-qDxO_keFY3A/exec',
             DATA_ENDPOINT: 'https://script.google.com/macros/s/AKfycbznONc4J-i6p4yuEfW5hcR8hgnbotrqJZVCrMtACl1YS7sKP7vB2BA39lXBLYBSJ6uUxQ/exec',
+            DATA_ENDPOINT: 'https://script.google.com/macros/s/AKfycbyqHGi7tqm2W5Obj54qpuTsrP07V3uFVMnmC2V7by1EqmLp_v7UGX8v9bPq-WBLqLTn/exec',
             PISOS: {
                 '1B': { desde: 101, hasta: 110, especiales: [110], camas: 3 },
                 '2B': { desde: 201, hasta: 210, especiales: [210], camas: 3 },
@@ -773,25 +781,52 @@
             return camasList;
         }
 
-        function loadCamas() {
-            const piso = document.getElementById('pisoSelect').value;
-            if (!piso) {
-                alert('Seleccione un piso');
-                return;
-            }
-            userData.currentFloor = piso;
-            dataPorPiso[piso] = dataPorPiso[piso] || { floorNotes: '', camasData: {} };
-            document.getElementById('notasPiso').value = dataPorPiso[piso].floorNotes || '';
-            const container = document.getElementById('camasContainer');
-            container.innerHTML = '';
-            const config = CONFIG.PISOS[piso];
-            const camas = generarCamas(config);
-            camas.forEach(camaId => {
-                const camaCard = createCamaCard(piso, camaId);
-                container.appendChild(camaCard);
-            });
-            saveData();
-        }
+        async function loadCamas() {
+    const piso = document.getElementById('pisoSelect').value;
+    if (!piso) {
+        alert('Seleccione un piso');
+        return;
+    }
+    userData.currentFloor = piso;
+    dataPorPiso[piso] = dataPorPiso[piso] || { floorNotes: '', camasData: {} };
+
+    const fechaInput = document.getElementById('fechaSelect');
+    const fechaElegida = fechaInput.value; // puede venir vacío
+
+    const remoto = await cargarDesdeSheets(piso, fechaElegida);
+    if (remoto && remoto.fecha) {
+        dataPorPiso[piso].camasData = remoto.camas || {};
+        dataPorPiso[piso].floorNotes = remoto.notasPiso || '';
+        fechaInput.value = remoto.fecha;
+    }
+
+    document.getElementById('notasPiso').value = dataPorPiso[piso].floorNotes || '';
+    renderCamas(piso);
+    saveData();
+}
+
+function renderCamas(piso) {
+    const container = document.getElementById('camasContainer');
+    container.innerHTML = '';
+    const config = CONFIG.PISOS[piso];
+    const camas = generarCamas(config);
+    camas.forEach(camaId => {
+        container.appendChild(createCamaCard(piso, camaId));
+    });
+}
+
+async function cargarDesdeSheets(piso, fecha) {
+    try {
+        let url = `${CONFIG.SHEET_ENDPOINT}?action=cargar&piso=${encodeURIComponent(piso)}`;
+        if (fecha) url += `&fecha=${encodeURIComponent(fecha)}`;
+        const res = await fetch(url);
+        const data = await res.json();
+        return data.ok ? data : null;
+    } catch (err) {
+        console.log('Sin conexión con la planilla, se usan datos locales', err);
+        return null;
+    }
+}
 
         function createCamaCard(piso, camaId) {
             const data = (dataPorPiso[piso]?.camasData || {})[camaId] || {};
@@ -1136,6 +1171,63 @@
                 saveData();
             }
         }
+
+        async function enviarDatos() {
+    const piso = userData.currentFloor;
+    if (!userData.nurseName || !piso) {
+        alert('⚠️ Faltan datos: enfermero o piso no seleccionado');
+        return;
+    }
+
+    const fechaInput = document.getElementById('fechaSelect');
+    const fecha = fechaInput.value || new Date().toISOString().split('T')[0];
+    fechaInput.value = fecha;
+
+    const camasData = dataPorPiso[piso]?.camasData || {};
+    const floorNotes = document.getElementById('notasPiso').value || '';
+
+    const payload = {
+        action: 'guardar',
+        fecha: fecha,
+        piso: piso,
+        enfermero: userData.nurseName,
+        otrosEnfermeros: userData.otherNurses || '',
+        notasPiso: floorNotes,
+        camas: camasData
+    };
+
+    const btn = document.querySelector('.action-buttons .btn-warning');
+    const textoOriginal = btn ? btn.innerHTML : '';
+    if (btn) { btn.innerHTML = '⏳ Guardando...'; btn.disabled = true; }
+
+    try {
+        await fetch(CONFIG.SHEET_ENDPOINT, {
+            method: 'POST',
+            mode: 'no-cors',
+            headers: { 'Content-Type': 'text/plain' },
+            body: JSON.stringify(payload)
+        });
+        alert('✅ Datos guardados correctamente en la planilla');
+    } catch (err) {
+        alert('❌ Error al guardar en la planilla: ' + err.message);
+    } finally {
+        if (btn) { btn.innerHTML = textoOriginal; btn.disabled = false; }
+    }
+}
+
+function borrarCamposPiso() {
+    const piso = userData.currentFloor;
+    if (!piso) {
+        alert('Seleccione un piso primero');
+        return;
+    }
+    if (!confirm('¿Borrar los campos de las camas en pantalla? (Esto NO borra lo ya guardado en la planilla)')) return;
+
+    dataPorPiso[piso] = dataPorPiso[piso] || {};
+    dataPorPiso[piso].camasData = {};
+    saveData();
+    renderCamas(piso);
+}
        
         function registrarObito(piso, camaId) {
             const data = dataPorPiso[piso]?.camasData[camaId] || {};
@@ -1423,3 +1515,5 @@
 </script>
 </body>
 </html>
+
+
