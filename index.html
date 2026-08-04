@@ -556,6 +556,9 @@
                         <option value="4C">4C (422-429)</option>
                     </select>
                 </div>
+                <div class="loading-message" id="loadingCamas" style="display:none; text-align:center;">
+    ⏳ Cargando novedades guardadas...
+</div>
                 <div class="input-group">
         <label for="fechaSelect">📅 Fecha (vacío = última guardada):</label>
         <input type="date" id="fechaSelect" onchange="loadCamas()">
@@ -624,7 +627,7 @@
         const CONFIG = {
             LOGIN_ENDPOINT: 'https://script.google.com/macros/s/AKfycbwBqfRagEUrSM9f9x1WvgLDKByfvfp-VPsDdUjuCNLKiUBcLO1Xb3pYlJ-qDxO_keFY3A/exec',
             DATA_ENDPOINT: 'https://script.google.com/macros/s/AKfycbznONc4J-i6p4yuEfW5hcR8hgnbotrqJZVCrMtACl1YS7sKP7vB2BA39lXBLYBSJ6uUxQ/exec',
-            SHEET_ENDPOINT: 'https://script.google.com/macros/s/AKfycbzLHUwIrf13NayvgIgTg5z_huz_vW2A473Eii3H61A5SJBImwhWBckA36XscuL_M0e3/exec',
+            SHEET_ENDPOINT: 'https://script.google.com/macros/s/AKfycbykgVn-0DYT0ayUPFbYgsIOA7g26G4VKThA-_rjt8eMz9T4cW2hifco8jBHESf-LKlk/exec',
             PISOS: {
                 '1B': { desde: 101, hasta: 110, especiales: [110], camas: 3 },
                 '2B': { desde: 201, hasta: 210, especiales: [210], camas: 3 },
@@ -791,9 +794,16 @@
     dataPorPiso[piso] = dataPorPiso[piso] || { floorNotes: '', camasData: {} };
 
     const fechaInput = document.getElementById('fechaSelect');
-    const fechaElegida = fechaInput.value; // puede venir vacío
+    const fechaElegida = fechaInput.value;
+
+    const loadingEl = document.getElementById('loadingCamas');
+    loadingEl.style.display = 'block';
+    document.getElementById('camasContainer').innerHTML = '';
 
     const remoto = await cargarDesdeSheets(piso, fechaElegida);
+
+    loadingEl.style.display = 'none';
+
     if (remoto && remoto.fecha) {
         dataPorPiso[piso].camasData = remoto.camas || {};
         dataPorPiso[piso].floorNotes = remoto.notasPiso || '';
@@ -993,7 +1003,7 @@ async function cargarDesdeSheets(piso, fecha) {
                 </div>
 
                 <div class="observaciones">
-                    <label>📝 Obs:</label>
+                    <label>📝 Nov:</label>
                     <textarea onchange="updateCamaData('${piso}', '${camaId}', 'observaciones', this.value)">${data.observaciones || ''}</textarea>
                 </div>
 
@@ -1172,6 +1182,14 @@ async function cargarDesdeSheets(piso, fecha) {
             }
         }
 
+        function obtenerFechaLocal() {
+    const d = new Date();
+    const y = d.getFullYear();
+    const m = String(d.getMonth() + 1).padStart(2, '0');
+    const day = String(d.getDate()).padStart(2, '0');
+    return `${y}-${m}-${day}`;
+}
+
        async function enviarDatos() {
     if (!CONFIG.SHEET_ENDPOINT) {
         alert('⚠️ Error de configuración: falta SHEET_ENDPOINT en CONFIG');
@@ -1184,7 +1202,7 @@ async function cargarDesdeSheets(piso, fecha) {
     }
 
     const fechaInput = document.getElementById('fechaSelect');
-    const fecha = fechaInput.value || new Date().toISOString().split('T')[0];
+    const fecha = fechaInput.value || obtenerFechaLocal();
     fechaInput.value = fecha;
 
     const camasData = dataPorPiso[piso]?.camasData || {};
