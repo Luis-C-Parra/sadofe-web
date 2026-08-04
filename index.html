@@ -64,7 +64,7 @@
             <h1>🩺 SADOFE - Registro de Novedades</h1>
             <h1>🩺 E N F E R M E R I A</h1>
             <div class="nurse-info">
-                <div><strong>Enfemeros y/o Enfermeras: 👩‍⚕️👥</strong> <span id="nurseNameDisplay"></span></div>
+                <div><strong>Enfermeros y/o Enfermeras: 👩‍⚕️👥</strong> <span id="nurseNameDisplay"></span></div>
                 <div id="otherNursesDisplay" style="display: none;">
                     <strong>👩‍⚕️👥</strong> <span id="otherNursesText"></span>
                 </div>
@@ -139,6 +139,73 @@
             </div>
         </div>
     </div>
+
+    <div id="modalPase" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>🔁 Pase Interno de Paciente</h2>
+                <span class="close" onclick="cerrarModalPase()">&times;</span>
+            </div>
+            <p style="margin-bottom: 15px; font-weight: bold; color: #0a3d62;" id="pasePacienteInfo"></p>
+            
+            <div class="input-group">
+                <label for="pasePisoDestino">Piso Destino:</label>
+                <select id="pasePisoDestino" onchange="actualizarCamasDestinoPase()">
+                    <option value="">Seleccione Piso...</option>
+                    <option value="1B">1B</option>
+                    <option value="2B">2B</option>
+                    <option value="4B">4B</option>
+                    <option value="1C">1C</option>
+                    <option value="2C">2C</option>
+                    <option value="3C">3C</option>
+                    <option value="4C">4C</option>
+                </select>
+            </div>
+
+            <div class="input-group">
+                <label for="paseCamaDestino">Cama Destino:</label>
+                <select id="paseCamaDestino">
+                    <option value="">Seleccione primero el piso...</option>
+                </select>
+            </div>
+
+            <div style="text-align: center; margin-top: 20px;">
+                <button class="btn btn-secondary" onclick="confirmarPaseInterno()">✅ Confirmar y Transferir</button>
+                <button class="btn btn-danger" onclick="cerrarModalPase()">❌ Cancelar</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="modalAlta" class="modal">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h2>🏥 Registrar Alta de Paciente</h2>
+            <span class="close" onclick="cerrarModalAlta()">&times;</span>
+        </div>
+        <p style="margin-bottom: 15px; font-weight: bold; color: #0a3d62;" id="altaPacienteInfo"></p>
+        
+        <div class="input-group">
+            <label for="altaTipoSelect">Tipo de Alta:</label>
+            <select id="altaTipoSelect" onchange="evaluarTipoAlta()">
+                <option value="">Seleccione tipo de alta...</option>
+                <option value="Alta Médica">1. Alta Médica</option>
+                <option value="Alta Voluntaria">2. Alta Voluntaria</option>
+                <option value="Paciente se dio a la fuga">3. Paciente se dio a la fuga</option>
+                <option value="Otros">4. Otros</option>
+            </select>
+        </div>
+
+        <div class="input-group" id="altaOtrosGroup" style="display: none;">
+            <label for="altaOtrosInput">Especifique detalle u observación:</label>
+            <input type="text" id="altaOtrosInput" placeholder="EJ: TRASLADO EXTERNO / DERIVACIÓN" class="uppercase-input">
+        </div>
+
+        <div style="text-align: center; margin-top: 20px;">
+            <button class="btn btn-secondary" onclick="confirmarAlta()">✅ Confirmar y Registrar Alta</button>
+            <button class="btn btn-danger" onclick="cerrarModalAlta()">❌ Cancelar</button>
+        </div>
+    </div>
+</div>
 
     <div id="imagenGenerada" style="display: none; text-align: center; margin-top: 20px;">
         <h3>📸 Imagen Generada</h3>

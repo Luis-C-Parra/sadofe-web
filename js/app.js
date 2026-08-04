@@ -1,7 +1,7 @@
 const CONFIG = {
     LOGIN_ENDPOINT: 'https://script.google.com/macros/s/AKfycbwBqfRagEUrSM9f9x1WvgLDKByfvfp-VPsDdUjuCNLKiUBcLO1Xb3pYlJ-qDxO_keFY3A/exec',
     DATA_ENDPOINT: 'https://script.google.com/macros/s/AKfycbznONc4J-i6p4yuEfW5hcR8hgnbotrqJZVCrMtACl1YS7sKP7vB2BA39lXBLYBSJ6uUxQ/exec',
-    SHEET_ENDPOINT: 'https://script.google.com/macros/s/AKfycbykgVn-0DYT0ayUPFbYgsIOA7g26G4VKThA-_rjt8eMz9T4cW2hifco8jBHESf-LKlk/exec',
+    SHEET_ENDPOINT: 'https://script.google.com/macros/s/AKfycbxofTffrlRjyBdZ59WTXYIx1bMX76O9D338PxvN3UJKs5hRYfFyhPeI0FirJALR9fzM/exec',
     PISOS: {
         '1B': { desde: 101, hasta: 110, especiales: [110], camas: 3 },
         '2B': { desde: 201, hasta: 210, especiales: [210], camas: 3 },
@@ -23,73 +23,80 @@ let userData = {
 
 let dataPorPiso = {};
 let camasParaNovedades = new Set();
+let paseOrigen = { piso: '', camaId: '' };
+let altaOrigen = { piso: '', camaId: '' };
 
 document.addEventListener('DOMContentLoaded', function() {
-    loadSavedData();
-    setupEventListeners();
-    showSplashScreen();
-    initServiceWorker();
+    try {
+        setupEventListeners();
+        configurarLimiteFechas();
+        initServiceWorker();
+    } catch (e) {
+        console.error('Error durante la inicialización:', e);
+    } finally {
+        showSplashScreen();
+    }
 });
+
+// Configura el selector de fecha para que solo permita elegir desde hoy hacia atrás
+function configurarLimiteFechas() {
+    const fechaInput = document.getElementById('fechaSelect');
+    if (fechaInput) {
+        const hoy = obtenerFechaLocal();
+        fechaInput.max = hoy; // Bloquea fechas futuras
+        fechaInput.value = hoy; // Se posiciona automáticamente en la fecha actual
+    }
+}
 
 function showSplashScreen() {
     const splash = document.getElementById('splashScreen');
-    splash.style.display = 'flex';
+    const loginScreen = document.getElementById('loginScreen');
+    const mainApp = document.getElementById('mainApp');
+
+    if (splash) splash.style.display = 'flex';
+    if (loginScreen) loginScreen.style.display = 'none';
+    if (mainApp) mainApp.style.display = 'none';
+
     setTimeout(() => {
-        splash.classList.add('fade-out');
-        setTimeout(() => {
-            splash.style.display = 'none';
-            document.getElementById('loginScreen').style.display = 'flex';
-        }, 500);
-    }, 3000);
+        if (splash) {
+            splash.classList.add('fade-out');
+            setTimeout(() => {
+                splash.style.display = 'none';
+                if (loginScreen) loginScreen.style.display = 'flex';
+            }, 500);
+        }
+    }, 2000);
 }
 
 function setupEventListeners() {
-    document.getElementById('dniInput').addEventListener('keypress', e => {
-        if (e.key === 'Enter') login();
-    });
-    document.getElementById('notasPiso').addEventListener('input', () => {
-        if (userData.currentFloor) {
-            dataPorPiso[userData.currentFloor] = dataPorPiso[userData.currentFloor] || {};
-            dataPorPiso[userData.currentFloor].floorNotes = document.getElementById('notasPiso').value;
-            saveData();
-        }
-    });
-}
+    const dniInput = document.getElementById('dniInput');
+    if (dniInput) {
+        dniInput.addEventListener('keypress', e => {
+            if (e.key === 'Enter') login();
+        });
+    }
 
-function loadSavedData() {
-    try {
-        const saved = JSON.parse(localStorage.getItem('sadofe_data') || '{}');
-        if (saved.nurseName) userData = { ...userData, ...saved };
-        if (saved.dataPorPiso) dataPorPiso = saved.dataPorPiso;
-        if (saved.camasParaNovedades) {
-            camasParaNovedades = new Set(saved.camasParaNovedades);
-        }
-        if (userData.currentFloor) {
-            document.getElementById('pisoSelect').value = userData.currentFloor;
-            mostrarNumeroPiso(userData.currentFloor);
-        }
-    } catch (e) { console.log('Error al cargar datos', e); }
-}
-
-function saveData() {
-    try {
-        const dataToSave = {
-            ...userData,
-            dataPorPiso,
-            camasParaNovedades: Array.from(camasParaNovedades)
-        };
-        localStorage.setItem('sadofe_data', JSON.stringify(dataToSave));
-    } catch (e) { console.log('Error al guardar', e); }
+    const notasPiso = document.getElementById('notasPiso');
+    if (notasPiso) {
+        notasPiso.addEventListener('input', () => {
+            if (userData.currentFloor) {
+                dataPorPiso[userData.currentFloor] = dataPorPiso[userData.currentFloor] || {};
+                dataPorPiso[userData.currentFloor].floorNotes = notasPiso.value;
+            }
+        });
+    }
 }
 
 async function login() {
-    const dni = document.getElementById('dniInput').value.trim();
+    const dniInput = document.getElementById('dniInput');
+    const dni = dniInput ? dniInput.value.trim() : '';
     if (!dni) {
         alert('Ingrese un DNI válido');
         return;
     }
     
-    document.getElementById('loadingMessage').style.display = 'block';
+    const loadingMessage = document.getElementById('loadingMessage');
+    if (loadingMessage) loadingMessage.style.display = 'block';
     
     try {
         const res = await fetch(`${CONFIG.LOGIN_ENDPOINT}?dni=${dni}`);
@@ -98,18 +105,21 @@ async function login() {
         if (data.valido) {
             userData.nurseName = data.nombre.toUpperCase();
             
-            // Ocultar sección de DNI
-            document.getElementById('loadingMessage').style.display = 'none';
-            document.getElementById('stepDni').style.display = 'none';
+            if (loadingMessage) loadingMessage.style.display = 'none';
             
-            // Saludar por su nombre y mostrar pregunta
-            document.getElementById('welcomeMessage').innerText = `👋 ¡HOLA, ${userData.nurseName}!`;
-            document.getElementById('otherNursesSection').style.display = 'block';
+            const stepDni = document.getElementById('stepDni');
+            if (stepDni) stepDni.style.display = 'none';
+            
+            const welcomeMsg = document.getElementById('welcomeMessage');
+            if (welcomeMsg) welcomeMsg.innerText = `👋 ¡HOLA, ${userData.nurseName}!`;
+            
+            const otherNursesSec = document.getElementById('otherNursesSection');
+            if (otherNursesSec) otherNursesSec.style.display = 'block';
         } else {
             throw new Error('No autorizado');
         }
     } catch (err) {
-        document.getElementById('loadingMessage').style.display = 'none';
+        if (loadingMessage) loadingMessage.style.display = 'none';
         alert('Error: DNI no válido o sin acceso.');
     }
 }
@@ -126,33 +136,54 @@ function solicitarAccesoPorWhatsApp() {
 }
 
 function completeLogin() {
-    userData.otherNurses = document.getElementById('otherNurses').value.trim().toUpperCase();
-    document.getElementById('loginScreen').style.display = 'none';
-    document.getElementById('mainApp').style.display = 'block';
-    document.getElementById('nurseNameDisplay').textContent = userData.nurseName;
+    const otherNurses = document.getElementById('otherNurses');
+    userData.otherNurses = otherNurses ? otherNurses.value.trim().toUpperCase() : '';
+    
+    const loginScreen = document.getElementById('loginScreen');
+    const mainApp = document.getElementById('mainApp');
+    
+    if (loginScreen) loginScreen.style.display = 'none';
+    if (mainApp) mainApp.style.display = 'block';
+    
+    const nurseDisplay = document.getElementById('nurseNameDisplay');
+    if (nurseDisplay) nurseDisplay.textContent = userData.nurseName;
+    
     if (userData.otherNurses) {
-        document.getElementById('otherNursesDisplay').style.display = 'block';
-        document.getElementById('otherNursesText').textContent = userData.otherNurses;
+        const otherDisplay = document.getElementById('otherNursesDisplay');
+        const otherText = document.getElementById('otherNursesText');
+        if (otherDisplay) otherDisplay.style.display = 'block';
+        if (otherText) otherText.textContent = userData.otherNurses;
     }
-    saveData();
 }
 
 function handlePisoChange() {
-    const piso = document.getElementById('pisoSelect').value;
+    const pisoSelect = document.getElementById('pisoSelect');
+    const piso = pisoSelect ? pisoSelect.value : '';
     if (piso) {
         userData.currentFloor = piso;
         mostrarNumeroPiso(piso);
+        
+        const fechaInput = document.getElementById('fechaSelect');
+        if (fechaInput && !fechaInput.value) {
+            fechaInput.value = obtenerFechaLocal();
+        }
+
         loadCamas();
     } else {
-        document.getElementById('pisoDisplay').style.display = 'none';
-        document.getElementById('camasContainer').innerHTML = '';
+        const pisoDisplay = document.getElementById('pisoDisplay');
+        if (pisoDisplay) pisoDisplay.style.display = 'none';
+        const camasContainer = document.getElementById('camasContainer');
+        if (camasContainer) camasContainer.innerHTML = '';
     }
-    saveData();
 }
 
 function mostrarNumeroPiso(piso) {
-    document.getElementById('pisoNumber').textContent = piso;
-    document.getElementById('pisoDisplay').style.display = 'block';
+    const elNumber = document.getElementById('pisoNumber');
+    const elDisplay = document.getElementById('pisoDisplay');
+    if (elNumber && elDisplay) {
+        elNumber.textContent = piso;
+        elDisplay.style.display = 'block';
+    }
 }
 
 function generarCamas(config) {
@@ -169,7 +200,8 @@ function generarCamas(config) {
 }
 
 async function loadCamas() {
-    const piso = document.getElementById('pisoSelect').value;
+    const pisoSelect = document.getElementById('pisoSelect');
+    const piso = pisoSelect ? pisoSelect.value : '';
     if (!piso) {
         alert('Seleccione un piso');
         return;
@@ -178,31 +210,41 @@ async function loadCamas() {
     dataPorPiso[piso] = dataPorPiso[piso] || { floorNotes: '', camasData: {} };
 
     const fechaInput = document.getElementById('fechaSelect');
-    const fechaElegida = fechaInput.value;
+    if (fechaInput && !fechaInput.value) {
+        fechaInput.value = obtenerFechaLocal();
+    }
+    const fechaElegida = fechaInput ? fechaInput.value : obtenerFechaLocal();
 
     const loadingEl = document.getElementById('loadingCamas');
-    loadingEl.style.display = 'block';
-    document.getElementById('camasContainer').innerHTML = '';
+    if (loadingEl) loadingEl.style.display = 'block';
+    
+    const container = document.getElementById('camasContainer');
+    if (container) container.innerHTML = '';
 
     const remoto = await cargarDesdeSheets(piso, fechaElegida);
 
-    loadingEl.style.display = 'none';
+    if (loadingEl) loadingEl.style.display = 'none';
 
-    if (remoto && remoto.fecha) {
+    if (remoto && remoto.ok) {
         dataPorPiso[piso].camasData = remoto.camas || {};
         dataPorPiso[piso].floorNotes = remoto.notasPiso || '';
-        fechaInput.value = remoto.fecha;
+        if (fechaInput && remoto.fecha) fechaInput.value = remoto.fecha;
+    } else {
+        dataPorPiso[piso].camasData = {};
+        dataPorPiso[piso].floorNotes = '';
     }
 
-    document.getElementById('notasPiso').value = dataPorPiso[piso].floorNotes || '';
+    const notasPiso = document.getElementById('notasPiso');
+    if (notasPiso) notasPiso.value = dataPorPiso[piso].floorNotes || '';
     renderCamas(piso);
-    saveData();
 }
 
 function renderCamas(piso) {
     const container = document.getElementById('camasContainer');
+    if (!container) return;
     container.innerHTML = '';
     const config = CONFIG.PISOS[piso];
+    if (!config) return;
     const camas = generarCamas(config);
     camas.forEach(camaId => {
         container.appendChild(createCamaCard(piso, camaId));
@@ -213,11 +255,12 @@ async function cargarDesdeSheets(piso, fecha) {
     try {
         let url = `${CONFIG.SHEET_ENDPOINT}?action=cargar&piso=${encodeURIComponent(piso)}`;
         if (fecha) url += `&fecha=${encodeURIComponent(fecha)}`;
+
         const res = await fetch(url);
         const data = await res.json();
-        return data.ok ? data : null;
+        return (data && data.ok) ? data : null;
     } catch (err) {
-        console.log('Sin conexión con la planilla, se usan datos locales', err);
+        console.log('Error al recuperar datos del servidor:', err);
         return null;
     }
 }
@@ -402,7 +445,6 @@ function limpiarCamaUnica(piso, camaId) {
     if (confirm(`¿Limpiar todos los datos de la Cama ${camaId}?`)) {
         if (dataPorPiso[piso]?.camasData?.[camaId]) {
             delete dataPorPiso[piso].camasData[camaId];
-            saveData();
             renderCamas(piso);
         }
     }
@@ -413,7 +455,6 @@ function updateCamaData(piso, camaId, field, value) {
     dataPorPiso[piso].camasData = dataPorPiso[piso].camasData || {};
     if (!dataPorPiso[piso].camasData[camaId]) dataPorPiso[piso].camasData[camaId] = {};
     dataPorPiso[piso].camasData[camaId][field] = value;
-    saveData();
 }
 
 function updateAislamiento(piso, camaId, value) {
@@ -421,9 +462,9 @@ function updateAislamiento(piso, camaId, value) {
     dataPorPiso[piso].camasData = dataPorPiso[piso].camasData || {};
     if (!dataPorPiso[piso].camasData[camaId]) dataPorPiso[piso].camasData[camaId] = {};
     dataPorPiso[piso].camasData[camaId].aislamiento = value;
-    saveData();
 
     const container = document.getElementById('camasContainer');
+    if (!container) return;
     const card = Array.from(container.children).find(c => {
         const header = c.querySelector('.cama-header')?.textContent || '';
         return header.includes(camaId);
@@ -487,49 +528,118 @@ function mandarANovedad(piso, camaId) {
     document.getElementById('notasPiso').value = nuevasNotas;
     dataPorPiso[piso].floorNotes = nuevasNotas;
     camasParaNovedades.add(`${piso}-${camaId}`);
-    saveData();
 
     alert('✅ Enviado a "Notas del Piso"');
 }
 
 function registrarAlta(piso, camaId) {
-    const data = dataPorPiso[piso]?.camasData[camaId] || {};
+    const data = dataPorPiso[piso]?.camasData?.[camaId] || {};
     if (!data.paciente) {
         alert('Primero debe ingresar el nombre del paciente');
         return;
     }
 
-    const tipo = prompt(
-        `🏥 ${data.paciente}\n\n¿Qué tipo de alta?\n\n1. Alta Médica\n2. Alta Voluntaria\n\nIngrese 1 o 2:`
-    );
+    altaOrigen = { piso, camaId };
 
-    let texto = '';
-    if (tipo === '1') {
-        texto = `✅ HAB: ${camaId} - ALTA MÉDICA: ${data.paciente}`;
-    } else if (tipo === '2') {
-        texto = `⚠️ HAB: ${camaId} - ALTA VOLUNTARIA: ${data.paciente}`;
-    } else {
+    const elInfo = document.getElementById('altaPacienteInfo');
+    if (elInfo) elInfo.innerText = `👤 Paciente: ${data.paciente} (Cama: ${camaId})`;
+
+    const selectTipo = document.getElementById('altaTipoSelect');
+    if (selectTipo) selectTipo.value = '';
+
+    const otrosGroup = document.getElementById('altaOtrosGroup');
+    if (otrosGroup) otrosGroup.style.display = 'none';
+
+    const otrosInput = document.getElementById('altaOtrosInput');
+    if (otrosInput) otrosInput.value = '';
+
+    const modalAlta = document.getElementById('modalAlta');
+    if (modalAlta) modalAlta.style.display = 'flex';
+}
+
+function cerrarModalAlta() {
+    const modalAlta = document.getElementById('modalAlta');
+    if (modalAlta) modalAlta.style.display = 'none';
+}
+
+function evaluarTipoAlta() {
+    const selectTipo = document.getElementById('altaTipoSelect').value;
+    const otrosGroup = document.getElementById('altaOtrosGroup');
+    if (otrosGroup) {
+        otrosGroup.style.display = (selectTipo === 'Otros') ? 'block' : 'none';
+    }
+}
+
+async function confirmarAlta() {
+    const piso = altaOrigen.piso;
+    const camaId = altaOrigen.camaId;
+    const tipo = document.getElementById('altaTipoSelect').value;
+    const otrosDetalle = document.getElementById('altaOtrosInput').value.trim().toUpperCase();
+
+    if (!tipo) {
+        alert('Seleccione un tipo de alta');
         return;
     }
 
-    const notasActuales = document.getElementById('notasPiso').value || '';
-    if (notasActuales.includes(texto)) {
-        alert('⚠️ Esta alta ya fue registrada');
+    if (tipo === 'Otros' && !otrosDetalle) {
+        alert('Por favor especifique el detalle u observación para la opción "Otros"');
         return;
     }
 
-    const nuevasNotas = notasActuales ? `${notasActuales}\n${texto}` : texto;
-    document.getElementById('notasPiso').value = nuevasNotas;
-    dataPorPiso[piso].floorNotes = nuevasNotas;
-    if (typeof camasParaNovedades !== 'undefined') {
-        camasParaNovedades.add(`${piso}-${camaId}`);
+    const data = dataPorPiso[piso]?.camasData?.[camaId];
+    if (!data || !data.paciente) {
+        alert('Error al recuperar datos del paciente.');
+        return;
     }
-    saveData();
 
+    let emoji = '✅';
+    let motivoTexto = tipo.toUpperCase();
+
+    if (tipo === 'Alta Médica') emoji = '✅';
+    else if (tipo === 'Alta Voluntaria') emoji = '⚠️';
+    else if (tipo === 'Paciente se dio a la fuga') emoji = '🚨';
+    else if (tipo === 'Otros') {
+        emoji = '📌';
+        motivoTexto = `ALTA (${otrosDetalle})`;
+    }
+
+    const textoAlta = `${emoji} HAB: ${camaId} - ${motivoTexto}: ${data.paciente}`;
+
+    const notasOrigen = dataPorPiso[piso].floorNotes || '';
+    if (!notasOrigen.includes(textoAlta)) {
+        const nuevasNotas = notasOrigen ? `${notasOrigen}\n${textoAlta}` : textoAlta;
+        dataPorPiso[piso].floorNotes = nuevasNotas;
+
+        if (userData.currentFloor === piso) {
+            document.getElementById('notasPiso').value = nuevasNotas;
+        }
+    }
+
+    camasParaNovedades.add(`${piso}-${camaId}`);
     delete dataPorPiso[piso].camasData[camaId];
-    loadCamas();
 
-    alert('✅ Alta registrada y cama limpiada');
+    cerrarModalAlta();
+
+    if (userData.currentFloor === piso) {
+        renderCamas(piso);
+    }
+
+    camasParaNovedades.add(`${piso}-${camaId}`);
+    delete dataPorPiso[piso].camasData[camaId];
+
+    cerrarModalAlta();
+
+    if (userData.currentFloor === piso) {
+        renderCamas(piso);
+    }
+
+    const fechaActual = document.getElementById('fechaSelect')?.value || obtenerFechaLocal();
+    await eliminarCamaDelServidor(piso, fechaActual, camaId);
+    await enviarPisoSilencioso(piso);
+
+    await enviarPisoSilencioso(piso);
+
+    alert(`✅ Alta registrada correctamente: ${data.paciente}`);
 }
 
 function borrarNotasPiso() {
@@ -537,7 +647,6 @@ function borrarNotasPiso() {
     if (confirm('¿Borrar todas las novedades de este piso?')) {
         document.getElementById('notasPiso').value = '';
         if (dataPorPiso[piso]) dataPorPiso[piso].floorNotes = '';
-        saveData();
     }
 }
 
@@ -561,25 +670,11 @@ async function enviarDatos() {
     }
 
     const fechaInput = document.getElementById('fechaSelect');
-    const fecha = fechaInput.value || obtenerFechaLocal();
-    fechaInput.value = fecha;
+    const fecha = fechaInput ? fechaInput.value || obtenerFechaLocal() : obtenerFechaLocal();
+    if (fechaInput) fechaInput.value = fecha;
 
     const camasData = dataPorPiso[piso]?.camasData || {};
     const floorNotes = document.getElementById('notasPiso').value || '';
-
-    const hayDatosEnCamas = Object.values(camasData).some(cama => {
-        return cama.paciente?.trim() ||
-               cama.observaciones?.trim() ||
-               (cama.aislamiento && cama.aislamiento !== 'Ninguno') ||
-               Object.entries(cama).some(([key, value]) =>
-                   value === true && !['paciente', 'aislamiento', 'observaciones'].includes(key)
-               );
-    });
-
-    if (!hayDatosEnCamas && !floorNotes) {
-        alert('⚠️ No hay datos cargados para enviar. Complete al menos una cama o las notas del piso.');
-        return;
-    }
 
     const payload = {
         action: 'guardar',
@@ -596,17 +691,46 @@ async function enviarDatos() {
     if (btn) { btn.innerHTML = '⏳ Guardando...'; btn.disabled = true; }
 
     try {
+    const res = await fetch(CONFIG.SHEET_ENDPOINT, {
+        method: 'POST',
+        headers: { 'Content-Type': 'text/plain' },
+        body: JSON.stringify(payload)
+    });
+    const resultado = await res.json();
+    console.log('Respuesta real del servidor:', resultado);
+    if (resultado.ok) {
+        alert('✅ Datos guardados correctamente en la planilla');
+    } else {
+        alert('❌ El servidor respondió con un error: ' + resultado.error);
+    }
+} catch (err) {
+    alert('❌ Error al guardar en la planilla: ' + err.message);
+}
+}
+
+async function enviarPisoSilencioso(piso) {
+    if (!CONFIG.SHEET_ENDPOINT || !piso) return;
+    const fecha = obtenerFechaLocal();
+    const pisoData = dataPorPiso[piso] || {};
+    const payload = {
+        action: 'guardar',
+        fecha: fecha,
+        piso: piso,
+        enfermero: userData.nurseName || 'SADOFE',
+        otrosEnfermeros: userData.otherNurses || '',
+        notasPiso: pisoData.floorNotes || '',
+        camas: pisoData.camasData || {}
+    };
+
+    try {
         await fetch(CONFIG.SHEET_ENDPOINT, {
             method: 'POST',
             mode: 'no-cors',
             headers: { 'Content-Type': 'text/plain' },
             body: JSON.stringify(payload)
         });
-        alert('✅ Datos guardados correctamente en la planilla');
     } catch (err) {
-        alert('❌ Error al guardar en la planilla: ' + err.message);
-    } finally {
-        if (btn) { btn.innerHTML = textoOriginal; btn.disabled = false; }
+        console.error(`Error en guardado automático para el piso ${piso}:`, err);
     }
 }
 
@@ -620,11 +744,10 @@ function borrarCamposPiso() {
 
     dataPorPiso[piso] = dataPorPiso[piso] || {};
     dataPorPiso[piso].camasData = {};
-    saveData();
     renderCamas(piso);
 }
 
-function registrarObito(piso, camaId) {
+async function registrarObito(piso, camaId) {
     const data = dataPorPiso[piso]?.camasData[camaId] || {};
     if (!data.paciente) {
         alert('Primero debe ingresar el nombre del paciente');
@@ -636,55 +759,134 @@ function registrarObito(piso, camaId) {
 
     const texto = `⚰️ HAB: ${camaId} - ÓBITO: ${data.paciente} - Causa: ${causa}`;
     const notasActuales = document.getElementById('notasPiso').value || '';
-    if (notasActuales.includes(texto)) {
-        alert('⚠️ Este óbito ya fue registrado');
-        return;
+    if (!notasActuales.includes(texto)) {
+        const nuevasNotas = notasActuales ? `${notasActuales}\n${texto}` : texto;
+        document.getElementById('notasPiso').value = nuevasNotas;
+        dataPorPiso[piso].floorNotes = nuevasNotas;
     }
-
-    const nuevasNotas = notasActuales ? `${notasActuales}\n${texto}` : texto;
-    document.getElementById('notasPiso').value = nuevasNotas;
-    dataPorPiso[piso].floorNotes = nuevasNotas;
+    
     camasParaNovedades.add(`${piso}-${camaId}`);
-    saveData();
-
     delete dataPorPiso[piso].camasData[camaId];
-    loadCamas();
+    renderCamas(piso);
+
+    camasParaNovedades.add(`${piso}-${camaId}`);
+    delete dataPorPiso[piso].camasData[camaId];
+    renderCamas(piso);
+
+    const fechaActual = document.getElementById('fechaSelect')?.value || obtenerFechaLocal();
+    await eliminarCamaDelServidor(piso, fechaActual, camaId);
+    await enviarPisoSilencioso(piso);
+
+    alert('✅ Óbito registrado y cama limpiada');
+
+    await enviarPisoSilencioso(piso);
 
     alert('✅ Óbito registrado y cama limpiada');
 }
 
 function registrarPase(piso, camaId) {
-    const data = dataPorPiso[piso]?.camasData[camaId] || {};
+    const data = dataPorPiso[piso]?.camasData?.[camaId] || {};
     if (!data.paciente) {
         alert('Primero debe ingresar el nombre del paciente');
         return;
     }
 
-    const destinoPiso = prompt(`🔁 ${data.paciente}\n\n¿A qué piso se traslada? (ej: 1B, 2C, 4B)`).trim();
-    if (!destinoPiso) return;
+    paseOrigen = { piso, camaId };
 
-    const destinoHab = prompt(`🏠 Habitación destino:`).trim();
-    if (!destinoHab) return;
+    const elInfo = document.getElementById('pasePacienteInfo');
+    if (elInfo) elInfo.innerText = `👤 Paciente: ${data.paciente} (Cama origen: ${camaId})`;
+    
+    const elPiso = document.getElementById('pasePisoDestino');
+    if (elPiso) elPiso.value = '';
+    
+    const elCama = document.getElementById('paseCamaDestino');
+    if (elCama) elCama.innerHTML = '<option value="">Seleccione primero el piso...</option>';
+    
+    const modalPase = document.getElementById('modalPase');
+    if (modalPase) modalPase.style.display = 'flex';
+}
 
-    const destinoCama = prompt(`🛏️ Cama destino:`).trim();
-    if (!destinoCama) return;
+function cerrarModalPase() {
+    const modalPase = document.getElementById('modalPase');
+    if (modalPase) modalPase.style.display = 'none';
+}
 
-    const texto = `🔁 HAB: ${camaId} - PASE INTERNO: ${data.paciente} → Piso ${destinoPiso}, Hab ${destinoHab}, Cama ${destinoCama}`;
+function actualizarCamasDestinoPase() {
+    const pisoDestino = document.getElementById('pasePisoDestino').value;
+    const selectCama = document.getElementById('paseCamaDestino');
+    if (!selectCama) return;
+    selectCama.innerHTML = '';
 
-    const notasActuales = document.getElementById('notasPiso').value || '';
-    if (notasActuales.includes(texto)) {
-        alert('⚠️ Este pase ya fue registrado');
+    if (!pisoDestino) {
+        selectCama.innerHTML = '<option value="">Seleccione primero el piso...</option>';
         return;
     }
 
-    const nuevasNotas = notasActuales ? `${notasActuales}\n${texto}` : texto;
-    document.getElementById('notasPiso').value = nuevasNotas;
-    dataPorPiso[piso].floorNotes = nuevasNotas;
-    camasParaNovedades.add(`${piso}-${camaId}`);
-    delete dataPorPiso[piso].camasData[camaId];
-    saveData();
-    loadCamas();
-    alert('✅ Pase interno registrado');
+    const config = CONFIG.PISOS[pisoDestino];
+    if (!config) return;
+
+    const camas = generarCamas(config);
+    camas.forEach(camaId => {
+        if (pisoDestino === paseOrigen.piso && camaId === paseOrigen.camaId) return;
+
+        const pacienteActual = dataPorPiso[pisoDestino]?.camasData?.[camaId]?.paciente;
+        const option = document.createElement('option');
+        option.value = camaId;
+        option.textContent = pacienteActual 
+            ? `Cama ${camaId} (⚠️ Ocupada: ${pacienteActual})` 
+            : `Cama ${camaId} (Disponible)`;
+        selectCama.appendChild(option);
+    });
+}
+
+async function confirmarPaseInterno() {
+    const pisoOrigen = paseOrigen.piso;
+    const camaOrigenId = paseOrigen.camaId;
+    const pisoDestino = document.getElementById('pasePisoDestino').value;
+    const camaDestinoId = document.getElementById('paseCamaDestino').value;
+
+    if (!pisoDestino || !camaDestinoId) {
+        alert('Seleccione un piso y una cama de destino.');
+        return;
+    }
+
+    const datosPaciente = dataPorPiso[pisoOrigen]?.camasData?.[camaOrigenId];
+    if (!datosPaciente || !datosPaciente.paciente) {
+        alert('Error al recuperar datos del paciente.');
+        return;
+    }
+
+    dataPorPiso[pisoDestino] = dataPorPiso[pisoDestino] || { floorNotes: '', camasData: {} };
+    dataPorPiso[pisoDestino].camasData = dataPorPiso[pisoDestino].camasData || {};
+    dataPorPiso[pisoDestino].camasData[camaDestinoId] = JSON.parse(JSON.stringify(datosPaciente));
+
+    const textoPase = `🔁 HAB: ${camaOrigenId} - PASE INTERNO: ${datosPaciente.paciente} → Piso ${pisoDestino}, Cama ${camaDestinoId}`;
+
+    const notasOrigen = dataPorPiso[pisoOrigen].floorNotes || '';
+    if (!notasOrigen.includes(textoPase)) {
+        const nuevasNotasOrigen = notasOrigen ? `${notasOrigen}\n${textoPase}` : textoPase;
+        dataPorPiso[pisoOrigen].floorNotes = nuevasNotasOrigen;
+
+        if (userData.currentFloor === pisoOrigen) {
+            document.getElementById('notasPiso').value = nuevasNotasOrigen;
+        }
+    }
+
+    camasParaNovedades.add(`${pisoOrigen}-${camaOrigenId}`);
+    delete dataPorPiso[pisoOrigen].camasData[camaOrigenId];
+
+    cerrarModalPase();
+
+    if (userData.currentFloor === pisoOrigen) {
+        renderCamas(pisoOrigen);
+    }
+
+    const fechaActual = document.getElementById('fechaSelect')?.value || obtenerFechaLocal();
+    await eliminarCamaDelServidor(pisoOrigen, fechaActual, camaOrigenId);
+    await enviarPisoSilencioso(pisoOrigen);
+    await enviarPisoSilencioso(pisoDestino);
+
+    alert(`✅ Pase interno registrado correctamente:\n${datosPaciente.paciente} trasladado a Cama ${camaDestinoId} (Piso ${pisoDestino})`);
 }
 
 function getEnfermerosString() {
@@ -727,6 +929,7 @@ function generarImagen() {
     }
 
     const resumen = document.getElementById('resumenImagen');
+    if (!resumen) return;
     resumen.innerHTML = '';
     
     let contenidoHTML = `
@@ -779,6 +982,7 @@ function generarImagen() {
             resumen.style.display = 'none';
             resumen.style.position = 'static';
             const displayCanvas = document.getElementById('canvasImagen');
+            if (!displayCanvas) return;
             
             const optimalWidth = Math.min(300, window.innerWidth - 40);
             displayCanvas.width = canvas.width;
@@ -813,14 +1017,18 @@ function generarImagen() {
 }
 
 function descargarImagen() {
+    const canvas = document.getElementById('canvasImagen');
+    if (!canvas) return;
     const link = document.createElement('a');
     link.download = 'novedades.png';
-    link.href = document.getElementById('canvasImagen').toDataURL();
+    link.href = canvas.toDataURL();
     link.click();
 }
 
 function compartirImagen() {
-    document.getElementById('canvasImagen').toBlob(blob => {
+    const canvas = document.getElementById('canvasImagen');
+    if (!canvas) return;
+    canvas.toBlob(blob => {
         const file = new File([blob], 'novedades.png', { type: 'image/png' });
         if (navigator.share) navigator.share({ files: [file] });
     });
@@ -828,6 +1036,7 @@ function compartirImagen() {
 
 function abrirModalNovedades() {
     const container = document.getElementById('camaSelection');
+    if (!container) return;
     container.innerHTML = '';
     const piso = userData.currentFloor;
     if (!piso || !dataPorPiso[piso]) return;
@@ -856,6 +1065,26 @@ function abrirModalNovedades() {
 
 function cerrarModal() {
     document.getElementById('modalNovedades').style.display = 'none';
+}
+
+async function eliminarCamaDelServidor(piso, fecha, camaId) {
+    if (!CONFIG.SHEET_ENDPOINT || !piso || !camaId) return;
+    const payload = {
+        action: 'eliminarCama',
+        piso: piso,
+        fecha: fecha || obtenerFechaLocal(),
+        cama: camaId
+    };
+    try {
+        await fetch(CONFIG.SHEET_ENDPOINT, {
+            method: 'POST',
+            mode: 'no-cors',
+            headers: { 'Content-Type': 'text/plain' },
+            body: JSON.stringify(payload)
+        });
+    } catch (err) {
+        console.error(`Error al eliminar cama ${camaId} del servidor:`, err);
+    }
 }
 
 function initServiceWorker() {
