@@ -6,10 +6,10 @@
     <title>SADOFE - Registro de Novedades</title>
     <meta name="theme-color" content="#0a3d62">
     <link rel="manifest" href="manifest.json">
-<meta name="apple-mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-<meta name="apple-mobile-web-app-title" content="SADOFE">
-<link rel="apple-touch-icon" href="icon-192.png">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="SADOFE">
+    <link rel="apple-touch-icon" href="icon-192.png">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
     <style>
         * {
@@ -223,6 +223,7 @@
             border-radius: 8px;
             margin: 10px 0;
             text-shadow: 1px 1px 2px rgba(0,0,0,0.3);
+            text-align: center;
         }
         .nurse-info {
             background: rgba(255,255,255,0.15);
@@ -487,7 +488,8 @@
             opacity: 0 !important;
         }
         /* Fuerza mayúsculas visuales en los campos de texto */
-            .uppercase-input { text-transform: uppercase; 
+        .uppercase-input { 
+            text-transform: uppercase; 
         }
     </style>
 </head>
@@ -504,27 +506,32 @@
     <div class="login-screen" id="loginScreen">
         <div class="login-card">
             <h2>🔐 Iniciar Sesión</h2>
-            <div class="input-group">
-                <label for="dniInput">Número de DNI:</label>
-                <input type="text" id="dniInput" placeholder="Ingrese su DNI">
-            </div>
-            <button class="btn" onclick="login()">
-                🧑‍⚕️ Iniciar Sesión
-            </button>
-            <div class="loading-message" id="loadingMessage">
-                ⏳ Verificando... Mientras, tomate un mate ☕<br>
-                 o fijate si la gotita no cae
-            </div>
-            <p class="solicitud-link" onclick="solicitarAccesoPorWhatsApp()">
-                ¿Eres nuevo? Solicita acceso por WhatsApp
-            </p>
-            <div id="otherNursesSection" style="display: none; margin-top: 15px;">
+            
+            <div id="stepDni">
                 <div class="input-group">
-                    <label for="otherNurses">¿Hay otros enfermeros/as en el piso?</label>
-                    <textarea id="otherNurses" class="uppercase-input" placeholder="Nombres separados por coma o guion (opcional)" rows="2"></textarea>
+                    <label for="dniInput">Número de DNI:</label>
+                    <input type="text" id="dniInput" placeholder="Ingrese su DNI">
+                </div>
+                <button class="btn" onclick="login()">
+                    🧑‍⚕️ Verificar DNI
+                </button>
+                <div class="loading-message" id="loadingMessage">
+                    ⏳ Verificando... Mientras, tomate un mate ☕<br>
+                     o fijate si la gotita no cae
+                </div>
+                <p class="solicitud-link" onclick="solicitarAccesoPorWhatsApp()">
+                    ¿Eres nuevo? Solicita acceso por WhatsApp
+                </p>
+            </div>
+
+            <div id="otherNursesSection" style="display: none; margin-top: 15px;">
+                <h3 id="welcomeMessage" style="color: #0a3d62; margin-bottom: 15px; font-weight: bold; font-size: 1.1rem;"></h3>
+                <div class="input-group">
+                    <label for="otherNurses">¿Hay otros enfermeros/as trabajando junto a usted?</label>
+                    <textarea id="otherNurses" class="uppercase-input" placeholder="NOMBRES SEPARADOS POR GUIÓN (OPCIONAL)" rows="2"></textarea>
                 </div>
                 <button class="btn btn-secondary" onclick="completeLogin()">
-                    ✅ Continuar
+                    🚀 Iniciar Sesión
                 </button>
             </div>
         </div>
@@ -557,12 +564,12 @@
                     </select>
                 </div>
                 <div class="loading-message" id="loadingCamas" style="display:none; text-align:center;">
-    ⏳ Cargando novedades guardadas...
-</div>
+                    ⏳ Cargando novedades guardadas...
+                </div>
                 <div class="input-group">
-        <label for="fechaSelect">📅 Fecha (vacío = última guardada):</label>
-        <input type="date" id="fechaSelect" onchange="loadCamas()">
-    </div>
+                    <label for="fechaSelect">📅 Fecha (vacío = última guardada):</label>
+                    <input type="date" id="fechaSelect" onchange="loadCamas()">
+                </div>
             </div>
 
             <div id="pisoDisplay" class="piso-display" style="display: none;">
@@ -583,15 +590,14 @@
                     🗑️ Borrar Novedades
                 </button>
                 <button class="btn btn-danger" onclick="borrarCamposPiso()">
-    🧹 Borrar Campos de Camas
-</button>
+                    🧹 Borrar Campos de Camas
+                </button>
             </div>
             <div class="input-group">
                 <label for="notasPiso">📝 Novedades del Piso:</label>
                 <textarea id="notasPiso" placeholder="Estudios, pases internos, altas, etc." rows="6"></textarea>
             </div>
-            <div class="camas-container" id="camasContainer">
-                </div>
+            <div class="camas-container" id="camasContainer"></div>
         </div>
     </div>
 
@@ -713,13 +719,22 @@
                 alert('Ingrese un DNI válido');
                 return;
             }
+            
             document.getElementById('loadingMessage').style.display = 'block';
+            
             try {
                 const res = await fetch(`${CONFIG.LOGIN_ENDPOINT}?dni=${dni}`);
                 const data = await res.json();
+                
                 if (data.valido) {
-                    userData.nurseName = data.nombre;
+                    userData.nurseName = data.nombre.toUpperCase();
+                    
+                    // Ocultar sección de DNI
                     document.getElementById('loadingMessage').style.display = 'none';
+                    document.getElementById('stepDni').style.display = 'none';
+                    
+                    // Saludar por su nombre y mostrar pregunta
+                    document.getElementById('welcomeMessage').innerText = `👋 ¡HOLA, ${userData.nurseName}!`;
                     document.getElementById('otherNursesSection').style.display = 'block';
                 } else {
                     throw new Error('No autorizado');
@@ -785,65 +800,64 @@
         }
 
         async function loadCamas() {
-    const piso = document.getElementById('pisoSelect').value;
-    if (!piso) {
-        alert('Seleccione un piso');
-        return;
-    }
-    userData.currentFloor = piso;
-    dataPorPiso[piso] = dataPorPiso[piso] || { floorNotes: '', camasData: {} };
+            const piso = document.getElementById('pisoSelect').value;
+            if (!piso) {
+                alert('Seleccione un piso');
+                return;
+            }
+            userData.currentFloor = piso;
+            dataPorPiso[piso] = dataPorPiso[piso] || { floorNotes: '', camasData: {} };
 
-    const fechaInput = document.getElementById('fechaSelect');
-    const fechaElegida = fechaInput.value;
+            const fechaInput = document.getElementById('fechaSelect');
+            const fechaElegida = fechaInput.value;
 
-    const loadingEl = document.getElementById('loadingCamas');
-    loadingEl.style.display = 'block';
-    document.getElementById('camasContainer').innerHTML = '';
+            const loadingEl = document.getElementById('loadingCamas');
+            loadingEl.style.display = 'block';
+            document.getElementById('camasContainer').innerHTML = '';
 
-    const remoto = await cargarDesdeSheets(piso, fechaElegida);
+            const remoto = await cargarDesdeSheets(piso, fechaElegida);
 
-    loadingEl.style.display = 'none';
+            loadingEl.style.display = 'none';
 
-    if (remoto && remoto.fecha) {
-        dataPorPiso[piso].camasData = remoto.camas || {};
-        dataPorPiso[piso].floorNotes = remoto.notasPiso || '';
-        fechaInput.value = remoto.fecha;
-    }
+            if (remoto && remoto.fecha) {
+                dataPorPiso[piso].camasData = remoto.camas || {};
+                dataPorPiso[piso].floorNotes = remoto.notasPiso || '';
+                fechaInput.value = remoto.fecha;
+            }
 
-    document.getElementById('notasPiso').value = dataPorPiso[piso].floorNotes || '';
-    renderCamas(piso);
-    saveData();
-}
+            document.getElementById('notasPiso').value = dataPorPiso[piso].floorNotes || '';
+            renderCamas(piso);
+            saveData();
+        }
 
-function renderCamas(piso) {
-    const container = document.getElementById('camasContainer');
-    container.innerHTML = '';
-    const config = CONFIG.PISOS[piso];
-    const camas = generarCamas(config);
-    camas.forEach(camaId => {
-        container.appendChild(createCamaCard(piso, camaId));
-    });
-}
+        function renderCamas(piso) {
+            const container = document.getElementById('camasContainer');
+            container.innerHTML = '';
+            const config = CONFIG.PISOS[piso];
+            const camas = generarCamas(config);
+            camas.forEach(camaId => {
+                container.appendChild(createCamaCard(piso, camaId));
+            });
+        }
 
-async function cargarDesdeSheets(piso, fecha) {
-    try {
-        let url = `${CONFIG.SHEET_ENDPOINT}?action=cargar&piso=${encodeURIComponent(piso)}`;
-        if (fecha) url += `&fecha=${encodeURIComponent(fecha)}`;
-        const res = await fetch(url);
-        const data = await res.json();
-        return data.ok ? data : null;
-    } catch (err) {
-        console.log('Sin conexión con la planilla, se usan datos locales', err);
-        return null;
-    }
-}
+        async function cargarDesdeSheets(piso, fecha) {
+            try {
+                let url = `${CONFIG.SHEET_ENDPOINT}?action=cargar&piso=${encodeURIComponent(piso)}`;
+                if (fecha) url += `&fecha=${encodeURIComponent(fecha)}`;
+                const res = await fetch(url);
+                const data = await res.json();
+                return data.ok ? data : null;
+            } catch (err) {
+                console.log('Sin conexión con la planilla, se usan datos locales', err);
+                return null;
+            }
+        }
 
         function createCamaCard(piso, camaId) {
             const data = (dataPorPiso[piso]?.camasData || {})[camaId] || {};
             const card = document.createElement('div');
             card.className = 'cama-card';
 
-            // Aplicar clase según aislamiento
             if (data.aislamiento === 'Respiratorio') card.classList.add('aislamiento-respiratorio');
             else if (data.aislamiento === 'Contacto') card.classList.add('aislamiento-contacto');
             else if (data.aislamiento === 'Neutropénico') card.classList.add('aislamiento-neutropenico');
@@ -852,7 +866,10 @@ async function cargarDesdeSheets(piso, fecha) {
             card.innerHTML = `
                 <div class="cama-header">Cama ${camaId}</div>
                 <div class="input-group">
-                    <label>👤 Paciente:</label>
+                    <label style="display:flex; justify-content:space-between; align-items:center;">
+                        <span>👤 Paciente:</span>
+                        <button class="btn btn-danger" style="padding: 2px 6px; font-size: 11px; margin:0;" onclick="limpiarCamaUnica('${piso}', '${camaId}')">🗑️ Borrar Cama</button>
+                    </label>
                     <input type="text" value="${data.paciente || ''}" onchange="updateCamaData('${piso}', '${camaId}', 'paciente', this.value.toUpperCase())" style="text-transform:uppercase">
                 </div>
                 <div class="aislamiento-selector">
@@ -866,7 +883,6 @@ async function cargarDesdeSheets(piso, fecha) {
                     </select>
                 </div>
 
-                <!-- Sondas -->
                 <details>
                     <summary style="font-weight: bold; margin: 8px 0; cursor: pointer;">🔧 Sonda</summary>
                     <div class="checkbox-group" style="margin-left: 16px;">
@@ -892,7 +908,6 @@ async function cargarDesdeSheets(piso, fecha) {
                     </div>
                 </details>
 
-                <!-- Drenajes -->
                 <details>
                     <summary style="font-weight: bold; margin: 8px 0; cursor: pointer;">💧 Drenajes</summary>
                     <div class="checkbox-group" style="margin-left: 16px;">
@@ -911,7 +926,6 @@ async function cargarDesdeSheets(piso, fecha) {
                     </div>
                 </details>
 
-                <!-- Acceso Venoso -->
                 <details>
                     <summary style="font-weight: bold; margin: 8px 0; cursor: pointer;">💉 Acceso Venoso</summary>
                     <div class="checkbox-group" style="margin-left: 16px;">
@@ -937,7 +951,6 @@ async function cargarDesdeSheets(piso, fecha) {
                     </div>
                 </details>
 
-                <!-- Oxígeno -->
                 <details>
                     <summary style="font-weight: bold; margin: 8px 0; cursor: pointer;">💨 Oxígeno</summary>
                     <div class="checkbox-group" style="margin-left: 16px;">
@@ -959,7 +972,6 @@ async function cargarDesdeSheets(piso, fecha) {
                     </div>
                 </details>
 
-                <!-- Estado -->
                 <details>
                     <summary style="font-weight: bold; margin: 8px 0; cursor: pointer;">🧠 Estado</summary>
                     <div class="checkbox-group" style="margin-left: 16px;">
@@ -982,7 +994,6 @@ async function cargarDesdeSheets(piso, fecha) {
                     </div>
                 </details>
 
-                <!-- Otros -->
                 <div class="checkbox-group">
                     <div class="checkbox-item">
                         <input type="checkbox" ${data.contencion ? 'checked' : ''} onchange="updateCamaData('${piso}', '${camaId}', 'contencion', this.checked)">
@@ -1007,7 +1018,6 @@ async function cargarDesdeSheets(piso, fecha) {
                     <textarea onchange="updateCamaData('${piso}', '${camaId}', 'observaciones', this.value)">${data.observaciones || ''}</textarea>
                 </div>
 
-                <!-- Botones de acción -->
                 <div style="margin-top: 10px; display: flex; flex-wrap: wrap; gap: 4px; justify-content: center;">
                     <button class="btn btn-warning" style="padding: 5px 8px; font-size: 10px;" onclick="registrarAlta('${piso}', '${camaId}')">🏥 Alta</button>
                     <button class="btn btn-danger" style="padding: 5px 8px; font-size: 10px;" onclick="registrarObito('${piso}', '${camaId}')">⚰️ Óbito</button>
@@ -1017,6 +1027,16 @@ async function cargarDesdeSheets(piso, fecha) {
             `;
 
             return card;
+        }
+
+        function limpiarCamaUnica(piso, camaId) {
+            if (confirm(`¿Limpiar todos los datos de la Cama ${camaId}?`)) {
+                if (dataPorPiso[piso]?.camasData?.[camaId]) {
+                    delete dataPorPiso[piso].camasData[camaId];
+                    saveData();
+                    renderCamas(piso);
+                }
+            }
         }
 
         function updateCamaData(piso, camaId, field, value) {
@@ -1034,7 +1054,6 @@ async function cargarDesdeSheets(piso, fecha) {
             dataPorPiso[piso].camasData[camaId].aislamiento = value;
             saveData();
 
-            // Actualizar color de la tarjeta
             const container = document.getElementById('camasContainer');
             const card = Array.from(container.children).find(c => {
                 const header = c.querySelector('.cama-header')?.textContent || '';
@@ -1049,7 +1068,6 @@ async function cargarDesdeSheets(piso, fecha) {
             }
         }
 
-
         function mandarANovedad(piso, camaId) {
             const data = dataPorPiso[piso]?.camasData[camaId] || {};
             if (!data.paciente && !data.observaciones && !Object.values(data).some(v => v === true)) {
@@ -1061,47 +1079,31 @@ async function cargarDesdeSheets(piso, fecha) {
             let texto = `📌 HAB: ${habitacion}-${cama} - ${data.paciente || 'Sin paciente'}: `;
             const detalles = [];
 
-            // Aislamiento
-            if (data.aislamiento && data.aislamiento !== 'Ninguno') {
-                detalles.push(`Aislamiento: ${data.aislamiento}`);
-            }
-
-            // Sondas
+            if (data.aislamiento && data.aislamiento !== 'Ninguno') detalles.push(`Aislamiento: ${data.aislamiento}`);
             if (data.sonda_vesical) detalles.push('Sonda Vesical');
             if (data.sonda_3vias) detalles.push('Sonda 3 vías');
             if (data.sonda_ng_debito) detalles.push('NG Débito');
             if (data.sonda_ng_alimento) detalles.push('NG Alimento');
-
-            // Drenajes
             if (data.drenaje_pleural) detalles.push('Drenaje Pleural');
             if (data.drenaje_aspirativo) detalles.push('Drenaje Aspirativo');
             if (data.drenaje_percutaneo) detalles.push('Drenaje Percutáneo');
-
-            // Acceso Venoso
             if (data.acceso_periferico) detalles.push('AVP');
             if (data.acceso_central) detalles.push('AVC');
             if (data.avc_yugular) detalles.push('AVC Yugular');
             if (data.avc_femoral) detalles.push('AVC Femoral');
             if (data.avc_subclavia) detalles.push('AVC Subclavia');
-
-            // Oxígeno
             if (data.oxigeno_canula) detalles.push('O2 Cánula');
             if (data.oxigeno_mascara) detalles.push('O2 Máscara');
             if (data.oxigeno_reservorio) detalles.push('O2 Reservorio');
             if (data.oxigeno_venturi) detalles.push('O2 Venturi');
-
-            // Estado
             if (data.estado_lucido) detalles.push('Lúcido');
             if (data.estado_somnoliento) detalles.push('Somnoliento');
             if (data.estado_vigil) detalles.push('Vigil');
             if (data.estado_comatoso) detalles.push('Comatoso');
-
-            // Otros
             if (data.contencion) detalles.push('Contención');
             if (data.rechazo) detalles.push('Rechazo');
             if (data.deambula) detalles.push('Deambula');
             if (data.paniales) detalles.push('Pañales');
-
             if (data.observaciones) detalles.push(`Obs: "${data.observaciones}"`);
 
             texto += detalles.join(', ');
@@ -1122,56 +1124,44 @@ async function cargarDesdeSheets(piso, fecha) {
         }
 
         function registrarAlta(piso, camaId) {
-    const data = dataPorPiso[piso]?.camasData[camaId] || {};
-    if (!data.paciente) {
-        alert('Primero debe ingresar el nombre del paciente');
-        return;
-    }
+            const data = dataPorPiso[piso]?.camasData[camaId] || {};
+            if (!data.paciente) {
+                alert('Primero debe ingresar el nombre del paciente');
+                return;
+            }
 
-    const tipo = prompt(
-        `🏥 ${data.paciente}\n\n¿Qué tipo de alta?\n\n1. Alta Médica\n2. Alta Voluntaria\n\nIngrese 1 o 2:`
-    );
+            const tipo = prompt(
+                `🏥 ${data.paciente}\n\n¿Qué tipo de alta?\n\n1. Alta Médica\n2. Alta Voluntaria\n\nIngrese 1 o 2:`
+            );
 
-    let texto = '';
-    // Extraemos habitación y cama para el formato
-    const [hab, cam] = camaId.split('-');
+            let texto = '';
+            if (tipo === '1') {
+                texto = `✅ HAB: ${camaId} - ALTA MÉDICA: ${data.paciente}`;
+            } else if (tipo === '2') {
+                texto = `⚠️ HAB: ${camaId} - ALTA VOLUNTARIA: ${data.paciente}`;
+            } else {
+                return;
+            }
 
-    if (tipo === '1') {
-        // Formato: ✅ CAMA: X-X - ALTA MÉDICA: PACIENTE
-        texto = `✅ HAB: ${camaId} - ALTA MÉDICA: ${data.paciente}`;
-    } else if (tipo === '2') {
-        // Formato: ⚠️ CAMA: X-X - ALTA VOLUNTARIA: PACIENTE
-        texto = `⚠️ HAB: ${camaId} - ALTA VOLUNTARIA: ${data.paciente}`;
-    } else if (tipo === null) {
-        return;
-    } else {
-        alert('Opción no válida');
-        return;
-    }
+            const notasActuales = document.getElementById('notasPiso').value || '';
+            if (notasActuales.includes(texto)) {
+                alert('⚠️ Esta alta ya fue registrada');
+                return;
+            }
 
-    const notasActuales = document.getElementById('notasPiso').value || '';
-    if (notasActuales.includes(texto)) {
-        alert('⚠️ Esta alta ya fue registrada');
-        return;
-    }
+            const nuevasNotas = notasActuales ? `${notasActuales}\n${texto}` : texto;
+            document.getElementById('notasPiso').value = nuevasNotas;
+            dataPorPiso[piso].floorNotes = nuevasNotas;
+            if (typeof camasParaNovedades !== 'undefined') {
+                camasParaNovedades.add(`${piso}-${camaId}`);
+            }
+            saveData();
 
-    const nuevasNotas = notasActuales ? `${notasActuales}\n${texto}` : texto;
-    document.getElementById('notasPiso').value = nuevasNotas;
-    dataPorPiso[piso].floorNotes = nuevasNotas;
-    
-    // Si manejas el Set de novedades
-    if (typeof camasParaNovedades !== 'undefined') {
-        camasParaNovedades.add(`${piso}-${camaId}`);
-    }
-    
-    saveData();
+            delete dataPorPiso[piso].camasData[camaId];
+            loadCamas();
 
-    // Limpiar la cama
-    delete dataPorPiso[piso].camasData[camaId];
-    loadCamas();
-
-    alert('✅ Alta registrada y cama limpiada');
-}
+            alert('✅ Alta registrada y cama limpiada');
+        }
 
         function borrarNotasPiso() {
             const piso = userData.currentFloor;
@@ -1183,87 +1173,88 @@ async function cargarDesdeSheets(piso, fecha) {
         }
 
         function obtenerFechaLocal() {
-    const d = new Date();
-    const y = d.getFullYear();
-    const m = String(d.getMonth() + 1).padStart(2, '0');
-    const day = String(d.getDate()).padStart(2, '0');
-    return `${y}-${m}-${day}`;
-}
+            const d = new Date();
+            const y = d.getFullYear();
+            const m = String(d.getMonth() + 1).padStart(2, '0');
+            const day = String(d.getDate()).padStart(2, '0');
+            return `${y}-${m}-${day}`;
+        }
 
-       async function enviarDatos() {
-    if (!CONFIG.SHEET_ENDPOINT) {
-        alert('⚠️ Error de configuración: falta SHEET_ENDPOINT en CONFIG');
-        return;
-    }
-    const piso = userData.currentFloor;
-    if (!userData.nurseName || !piso) {
-        alert('⚠️ Faltan datos: enfermero o piso no seleccionado');
-        return;
-    }
+        async function enviarDatos() {
+            if (!CONFIG.SHEET_ENDPOINT) {
+                alert('⚠️ Error de configuración: falta SHEET_ENDPOINT en CONFIG');
+                return;
+            }
+            const piso = userData.currentFloor;
+            if (!userData.nurseName || !piso) {
+                alert('⚠️ Faltan datos: enfermero o piso no seleccionado');
+                return;
+            }
 
-    const fechaInput = document.getElementById('fechaSelect');
-    const fecha = fechaInput.value || obtenerFechaLocal();
-    fechaInput.value = fecha;
+            const fechaInput = document.getElementById('fechaSelect');
+            const fecha = fechaInput.value || obtenerFechaLocal();
+            fechaInput.value = fecha;
 
-    const camasData = dataPorPiso[piso]?.camasData || {};
-    const floorNotes = document.getElementById('notasPiso').value || '';
+            const camasData = dataPorPiso[piso]?.camasData || {};
+            const floorNotes = document.getElementById('notasPiso').value || '';
 
-    const hayDatosEnCamas = Object.values(camasData).some(cama => {
-        return cama.paciente?.trim() ||
-               cama.observaciones?.trim() ||
-               (cama.aislamiento && cama.aislamiento !== 'Ninguno') ||
-               Object.entries(cama).some(([key, value]) =>
-                   value === true && !['paciente', 'aislamiento', 'observaciones'].includes(key)
-               );
-    });
+            const hayDatosEnCamas = Object.values(camasData).some(cama => {
+                return cama.paciente?.trim() ||
+                       cama.observaciones?.trim() ||
+                       (cama.aislamiento && cama.aislamiento !== 'Ninguno') ||
+                       Object.entries(cama).some(([key, value]) =>
+                           value === true && !['paciente', 'aislamiento', 'observaciones'].includes(key)
+                       );
+            });
 
-    if (!hayDatosEnCamas && !floorNotes) {
-        alert('⚠️ No hay datos cargados para enviar. Complete al menos una cama o las notas del piso.');
-        return;
-    }
+            if (!hayDatosEnCamas && !floorNotes) {
+                alert('⚠️ No hay datos cargados para enviar. Complete al menos una cama o las notas del piso.');
+                return;
+            }
 
-    const payload = {
-        action: 'guardar',
-        fecha: fecha,
-        piso: piso,
-        enfermero: userData.nurseName,
-        otrosEnfermeros: userData.otherNurses || '',
-        notasPiso: floorNotes,
-        camas: camasData
-    };
+            const payload = {
+                action: 'guardar',
+                fecha: fecha,
+                piso: piso,
+                enfermero: userData.nurseName,
+                otrosEnfermeros: userData.otherNurses || '',
+                notasPiso: floorNotes,
+                camas: camasData
+            };
 
-    const btn = document.querySelector('.action-buttons .btn-warning');
-    const textoOriginal = btn ? btn.innerHTML : '';
-    if (btn) { btn.innerHTML = '⏳ Guardando...'; btn.disabled = true; }
+            const btn = document.querySelector('.action-buttons .btn-warning');
+            const textoOriginal = btn ? btn.innerHTML : '';
+            if (btn) { btn.innerHTML = '⏳ Guardando...'; btn.disabled = true; }
 
-    try {
-        await fetch(CONFIG.SHEET_ENDPOINT, {
-            method: 'POST',
-            mode: 'no-cors',
-            headers: { 'Content-Type': 'text/plain' },
-            body: JSON.stringify(payload)
-        });
-        alert('✅ Datos guardados correctamente en la planilla');
-    } catch (err) {
-        alert('❌ Error al guardar en la planilla: ' + err.message);
-    } finally {
-        if (btn) { btn.innerHTML = textoOriginal; btn.disabled = false; }
-    }
-}
-function borrarCamposPiso() {
-    const piso = userData.currentFloor;
-    if (!piso) {
-        alert('Seleccione un piso primero');
-        return;
-    }
-    if (!confirm('¿Borrar los campos de las camas en pantalla? (Esto NO borra lo ya guardado en la planilla)')) return;
+            try {
+                await fetch(CONFIG.SHEET_ENDPOINT, {
+                    method: 'POST',
+                    mode: 'no-cors',
+                    headers: { 'Content-Type': 'text/plain' },
+                    body: JSON.stringify(payload)
+                });
+                alert('✅ Datos guardados correctamente en la planilla');
+            } catch (err) {
+                alert('❌ Error al guardar en la planilla: ' + err.message);
+            } finally {
+                if (btn) { btn.innerHTML = textoOriginal; btn.disabled = false; }
+            }
+        }
 
-    dataPorPiso[piso] = dataPorPiso[piso] || {};
-    dataPorPiso[piso].camasData = {};
-    saveData();
-    renderCamas(piso);
-}
-       
+        function borrarCamposPiso() {
+            const piso = userData.currentFloor;
+            if (!piso) {
+                alert('Seleccione un piso primero');
+                return;
+            }
+            if (!confirm('¿Borrar los campos de las camas en pantalla? (Esto NO borra lo ya guardado en la planilla)')) return;
+
+            dataPorPiso[piso] = dataPorPiso[piso] || {};
+            dataPorPiso[piso].camasData = {};
+            saveData();
+            renderCamas(piso);
+        }
+
         function registrarObito(piso, camaId) {
             const data = dataPorPiso[piso]?.camasData[camaId] || {};
             if (!data.paciente) {
@@ -1271,18 +1262,13 @@ function borrarCamposPiso() {
                 return;
             }
 
-            const causa = prompt(
-                `⚰️ ${data.paciente}\n\n¿Causa del óbito?\nEj: Paro cardiorrespiratorio, Sepsis, etc.`
-            );
-
+            const causa = prompt(`⚰️ ${data.paciente}\n\n¿Causa del óbito?\nEj: Paro cardiorrespiratorio, Sepsis, etc.`);
             if (!causa) return;
 
-            // Se cambia el orden para poner la cama al principio, igual que en el alta
             const texto = `⚰️ HAB: ${camaId} - ÓBITO: ${data.paciente} - Causa: ${causa}`;
-
             const notasActuales = document.getElementById('notasPiso').value || '';
             if (notasActuales.includes(texto)) {
-                alert('⚠️ Esta óbito ya fue registrado');
+                alert('⚠️ Este óbito ya fue registrado');
                 return;
             }
 
@@ -1292,14 +1278,13 @@ function borrarCamposPiso() {
             camasParaNovedades.add(`${piso}-${camaId}`);
             saveData();
 
-            // Limpiar la cama
             delete dataPorPiso[piso].camasData[camaId];
             loadCamas();
 
             alert('✅ Óbito registrado y cama limpiada');
         }
 
-       function registrarPase(piso, camaId) {
+        function registrarPase(piso, camaId) {
             const data = dataPorPiso[piso]?.camasData[camaId] || {};
             if (!data.paciente) {
                 alert('Primero debe ingresar el nombre del paciente');
@@ -1315,7 +1300,6 @@ function borrarCamposPiso() {
             const destinoCama = prompt(`🛏️ Cama destino:`).trim();
             if (!destinoCama) return;
 
-            // Se cambia el orden: primero la cama de origen, luego el paciente y el destino
             const texto = `🔁 HAB: ${camaId} - PASE INTERNO: ${data.paciente} → Piso ${destinoPiso}, Hab ${destinoHab}, Cama ${destinoCama}`;
 
             const notasActuales = document.getElementById('notasPiso').value || '';
@@ -1330,18 +1314,16 @@ function borrarCamposPiso() {
             camasParaNovedades.add(`${piso}-${camaId}`);
             delete dataPorPiso[piso].camasData[camaId];
             saveData();
-            loadCamas(); // Se añade para refrescar visualmente las camas tras borrarla
+            loadCamas();
             alert('✅ Pase interno registrado');
         }
 
-
-        // Función auxiliar para obtener la línea de enfermeros
         function getEnfermerosString() {
             let base = userData.nurseName || 'No especificado';
             if (userData.otherNurses) {
                 base += `, ${userData.otherNurses}`;
             }
-            return `Enfemeros y/o Enfermeras: ${base}`;
+            return `Enfermeros y/o Enfermeras: ${base}`;
         }
 
         function enviarPorWhatsApp() {
@@ -1360,110 +1342,108 @@ function borrarCamposPiso() {
         }
 
         function generarImagen() {
-    const piso = userData.currentFloor;
-    let notasPiso = dataPorPiso[piso]?.floorNotes || '';
+            const piso = userData.currentFloor;
+            let notasPiso = dataPorPiso[piso]?.floorNotes || '';
 
-    if (!notasPiso.trim()) {
-        alert('No hay notas del piso para mostrar.');
-        return;
-    }
+            if (!notasPiso.trim()) {
+                alert('No hay notas del piso para mostrar.');
+                return;
+            }
 
-    // ELIMINAR SANGRÍA: Quitamos espacios y saltos de línea al inicio y al final
-    notasPiso = notasPiso.replace(/^\s+|\s+$/g, '');
+            // ELIMINAR SANGRÍA: Quitamos espacios y saltos de línea al inicio y al final
+            notasPiso = notasPiso.replace(/^\s+|\s+$/g, '');
 
-    // Unificamos los nombres en una sola cadena
-    let nombresUnificados = (userData.nurseName || 'No especificado').toUpperCase();
-    if (userData.otherNurses) {
-        nombresUnificados += ` - ${userData.otherNurses.toUpperCase()}`;
-    }
+            let nombresUnificados = (userData.nurseName || 'No especificado').toUpperCase();
+            if (userData.otherNurses) {
+                nombresUnificados += ` - ${userData.otherNurses.toUpperCase()}`;
+            }
 
-    const resumen = document.getElementById('resumenImagen');
-    resumen.innerHTML = '';
-    
-    let contenidoHTML = `
-        <div style="background: #0a3d62; color: white; padding: 12px; margin: -16px -16px 12px -16px; text-align: center;">
-            <h1 style="margin: 0; font-size: 16px; font-weight: bold;">📋 NOVEDADES DE ENFERMERÍA</h1>
-        </div>
-        <div style="border-bottom: 1px solid #ddd; margin-bottom: 8px;"></div>
-    `;
-
-    // Sección unificada de enfermeros
-    contenidoHTML += `
-        <div style="margin-bottom: 10px; font-size: 11px; line-height: 1.4; text-align: left;">
-            <div style="font-weight: bold; color: #0a3d62; margin-bottom: 4px;">👩‍⚕️👩‍⚕️ ENFERMEROS Y/O ENFERMERAS:</div>
-            <div style="background: #f8f9fa; padding: 8px; border-radius: 4px; border-left: 3px solid #0a3d62; font-weight: bold; color: #000;">
-                ${nombresUnificados}
-            </div>
-        </div>
-    `;
-
-    // Sección de Notas del Piso: Agregamos text-indent: 0 para asegurar que no haya sangría
-    contenidoHTML += `
-        <div style="border-top: 2px solid #17a2b8; margin-top: 10px; padding-top: 6px;">
-            <div style="background: #fff3cd; padding: 12px; border-radius: 8px; border: 1px solid #ffeaa7;">
-                <div style="font-size: 12px; font-weight: bold; color: #856404; margin-bottom: 8px; text-align: center;">
-                    📝 NOTAS DEL PISO ${piso}
+            const resumen = document.getElementById('resumenImagen');
+            resumen.innerHTML = '';
+            
+            let contenidoHTML = `
+                <div style="background: #0a3d62; color: white; padding: 12px; margin: -16px -16px 12px -16px; text-align: center;">
+                    <h1 style="margin: 0; font-size: 16px; font-weight: bold;">📋 NOVEDADES DE ENFERMERÍA</h1>
                 </div>
-                <div style="font-size: 11px; color: #333; line-height: 1.6; white-space: pre-wrap; text-align: left; text-indent: 0; margin: 0; padding: 0;">${notasPiso}</div>
-            </div>
-        </div>
-    `;
+                <div style="border-bottom: 1px solid #ddd; margin-bottom: 8px;"></div>
+            `;
 
-    resumen.innerHTML = contenidoHTML;
-    resumen.style.display = 'block';
-    resumen.style.position = 'absolute';
-    resumen.style.left = '-9999px';
-    resumen.style.top = '0';
-    resumen.style.width = '300px';
-    resumen.style.padding = '16px';
-    resumen.style.backgroundColor = '#ffffff';
-    resumen.style.fontFamily = 'Arial, sans-serif';
-    resumen.style.boxSizing = 'border-box';
-    resumen.style.zIndex = '-9999';
+            contenidoHTML += `
+                <div style="margin-bottom: 10px; font-size: 11px; line-height: 1.4; text-align: left;">
+                    <div style="font-weight: bold; color: #0a3d62; margin-bottom: 4px;">👩‍⚕️👩‍⚕️ ENFERMEROS Y/O ENFERMERAS:</div>
+                    <div style="background: #f8f9fa; padding: 8px; border-radius: 4px; border-left: 3px solid #0a3d62; font-weight: bold; color: #000;">
+                        ${nombresUnificados}
+                    </div>
+                </div>
+            `;
 
-    setTimeout(() => {
-        html2canvas(resumen, {
-            scale: 3, 
-            width: 300,
-            backgroundColor: '#ffffff',
-            useCORS: true,
-            logging: false
-        }).then(canvas => {
-            resumen.style.display = 'none';
-            resumen.style.position = 'static';
-            const displayCanvas = document.getElementById('canvasImagen');
-            
-            const optimalWidth = Math.min(300, window.innerWidth - 40);
-            displayCanvas.width = canvas.width;
-            displayCanvas.height = canvas.height;
-            displayCanvas.style.maxWidth = '100%';
-            displayCanvas.style.width = optimalWidth + 'px';
-            displayCanvas.style.height = 'auto';
-            displayCanvas.style.border = '2px solid #0a3d62';
-            displayCanvas.style.borderRadius = '8px';
-            displayCanvas.style.display = 'block';
-            displayCanvas.style.margin = '10px auto';
-            displayCanvas.style.boxShadow = '0 4px 12px rgba(0,0,0,0.15)';
-            
-            const ctx = displayCanvas.getContext('2d');
-            ctx.imageSmoothingEnabled = false;
-            ctx.drawImage(canvas, 0, 0);
-            
-            document.getElementById('imagenGenerada').style.display = 'block';
+            contenidoHTML += `
+                <div style="border-top: 2px solid #17a2b8; margin-top: 10px; padding-top: 6px;">
+                    <div style="background: #fff3cd; padding: 12px; border-radius: 8px; border: 1px solid #ffeaa7;">
+                        <div style="font-size: 12px; font-weight: bold; color: #856404; margin-bottom: 8px; text-align: center;">
+                            📝 NOTAS DEL PISO ${piso}
+                        </div>
+                        <div style="font-size: 11px; color: #333; line-height: 1.6; white-space: pre-wrap; text-align: left; text-indent: 0; margin: 0; padding: 0;">${notasPiso}</div>
+                    </div>
+                </div>
+            `;
+
+            resumen.innerHTML = contenidoHTML;
+            resumen.style.display = 'block';
+            resumen.style.position = 'absolute';
+            resumen.style.left = '-9999px';
+            resumen.style.top = '0';
+            resumen.style.width = '300px';
+            resumen.style.padding = '16px';
+            resumen.style.backgroundColor = '#ffffff';
+            resumen.style.fontFamily = 'Arial, sans-serif';
+            resumen.style.boxSizing = 'border-box';
+            resumen.style.zIndex = '-9999';
+
             setTimeout(() => {
-                document.getElementById('imagenGenerada').scrollIntoView({ 
-                    behavior: 'smooth', 
-                    block: 'center' 
+                html2canvas(resumen, {
+                    scale: 3, 
+                    width: 300,
+                    backgroundColor: '#ffffff',
+                    useCORS: true,
+                    logging: false
+                }).then(canvas => {
+                    resumen.style.display = 'none';
+                    resumen.style.position = 'static';
+                    const displayCanvas = document.getElementById('canvasImagen');
+                    
+                    const optimalWidth = Math.min(300, window.innerWidth - 40);
+                    displayCanvas.width = canvas.width;
+                    displayCanvas.height = canvas.height;
+                    displayCanvas.style.maxWidth = '100%';
+                    displayCanvas.style.width = optimalWidth + 'px';
+                    displayCanvas.style.height = 'auto';
+                    displayCanvas.style.border = '2px solid #0a3d62';
+                    displayCanvas.style.borderRadius = '8px';
+                    displayCanvas.style.display = 'block';
+                    displayCanvas.style.margin = '10px auto';
+                    displayCanvas.style.boxShadow = '0 4px 12px rgba(0,0,0,0.15)';
+                    
+                    const ctx = displayCanvas.getContext('2d');
+                    ctx.imageSmoothingEnabled = false;
+                    ctx.drawImage(canvas, 0, 0);
+                    
+                    document.getElementById('imagenGenerada').style.display = 'block';
+                    setTimeout(() => {
+                        document.getElementById('imagenGenerada').scrollIntoView({ 
+                            behavior: 'smooth', 
+                            block: 'center' 
+                        });
+                    }, 100);
+                    cerrarModal();
+                }).catch(err => {
+                    console.error('Error:', err);
+                    resumen.style.display = 'none';
+                    alert('❌ Error al generar imagen.');
                 });
-            }, 100);
-            cerrarModal();
-        }).catch(err => {
-            console.error('Error:', err);
-            resumen.style.display = 'none';
-            alert('❌ Error al generar imagen.');
-        });
-    }, 500);
-}
+            }, 500);
+        }
+
         function descargarImagen() {
             const link = document.createElement('a');
             link.download = 'novedades.png';
@@ -1511,43 +1491,33 @@ function borrarCamposPiso() {
         }
     </script>
     <script>
-  // Registrar el Service Worker
-  if ('serviceWorker' in navigator) {
-    window.addEventListener('load', () => {
-      navigator.serviceWorker.register('service-worker.js')
-        .then(reg => console.log('SW registrado:', reg))
-        .catch(err => console.log('Error al registrar SW:', err));
-    });
-  }
+        // Registrar el Service Worker
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register('service-worker.js')
+                    .then(reg => console.log('SW registrado:', reg))
+                    .catch(err => console.log('Error al registrar SW:', err));
+            });
+        }
 
-  // Detectar si se puede instalar la PWA
-  let deferredPrompt;
-  window.addEventListener('beforeinstallprompt', (e) => {
-    e.preventDefault();
-    deferredPrompt = e;
-    // Aquí puedes mostrar un botón de "Instalar App"
-    console.log('App lista para instalarse.');
-  });
+        // Detectar si se puede instalar la PWA
+        let deferredPrompt;
+        window.addEventListener('beforeinstallprompt', (e) => {
+            e.preventDefault();
+            deferredPrompt = e;
+            console.log('App lista para instalarse.');
+        });
 
-  // Opcional: Botón de instalación manual
-  window.instalarApp = () => {
-    if (deferredPrompt) {
-      deferredPrompt.prompt();
-      deferredPrompt.userChoice.then(() => {
-        deferredPrompt = null;
-      });
-    }
-  };
-</script>
-<script>
-  if ('serviceWorker' in navigator) {
-    window.addEventListener('load', () => {
-      navigator.serviceWorker.register('service-worker.js')
-        .then(reg => console.log('SW registrado'))
-        .catch(err => console.log('Error:', err));
-    });
-  }
-</script>
+        // Botón de instalación manual
+        window.instalarApp = () => {
+            if (deferredPrompt) {
+                deferredPrompt.prompt();
+                deferredPrompt.userChoice.then(() => {
+                    deferredPrompt = null;
+                });
+            }
+        };
+    </script>
 </body>
 </html>
 
