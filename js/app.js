@@ -691,21 +691,23 @@ async function enviarDatos() {
     if (btn) { btn.innerHTML = '⏳ Guardando...'; btn.disabled = true; }
 
     try {
-    const res = await fetch(CONFIG.SHEET_ENDPOINT, {
-        method: 'POST',
-        headers: { 'Content-Type': 'text/plain' },
-        body: JSON.stringify(payload)
-    });
-    const resultado = await res.json();
-    console.log('Respuesta real del servidor:', resultado);
-    if (resultado.ok) {
-        alert('✅ Datos guardados correctamente en la planilla');
-    } else {
-        alert('❌ El servidor respondió con un error: ' + resultado.error);
+        const res = await fetch(CONFIG.SHEET_ENDPOINT, {
+            method: 'POST',
+            headers: { 'Content-Type': 'text/plain' },
+            body: JSON.stringify(payload)
+        });
+        const resultado = await res.json();
+        console.log('Respuesta real del servidor:', resultado);
+        if (resultado.ok) {
+            alert('✅ Datos guardados correctamente en la planilla');
+        } else {
+            alert('❌ El servidor respondió con un error: ' + resultado.error);
+        }
+    } catch (err) {
+        alert('❌ Error al guardar en la planilla: ' + err.message);
+    } finally {
+        if (btn) { btn.innerHTML = textoOriginal; btn.disabled = false; }
     }
-} catch (err) {
-    alert('❌ Error al guardar en la planilla: ' + err.message);
-}
 }
 
 async function enviarPisoSilencioso(piso) {
