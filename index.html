@@ -624,7 +624,7 @@
         const CONFIG = {
             LOGIN_ENDPOINT: 'https://script.google.com/macros/s/AKfycbwBqfRagEUrSM9f9x1WvgLDKByfvfp-VPsDdUjuCNLKiUBcLO1Xb3pYlJ-qDxO_keFY3A/exec',
             DATA_ENDPOINT: 'https://script.google.com/macros/s/AKfycbznONc4J-i6p4yuEfW5hcR8hgnbotrqJZVCrMtACl1YS7sKP7vB2BA39lXBLYBSJ6uUxQ/exec',
-            DATA_ENDPOINT: 'https://script.google.com/macros/s/AKfycbyqHGi7tqm2W5Obj54qpuTsrP07V3uFVMnmC2V7by1EqmLp_v7UGX8v9bPq-WBLqLTn/exec',
+            SHEET_ENDPOINT: 'https://script.google.com/macros/s/AKfycbzLHUwIrf13NayvgIgTg5z_huz_vW2A473Eii3H61A5SJBImwhWBckA36XscuL_M0e3/exec',
             PISOS: {
                 '1B': { desde: 101, hasta: 110, especiales: [110], camas: 3 },
                 '2B': { desde: 201, hasta: 210, especiales: [210], camas: 3 },
@@ -1172,7 +1172,11 @@ async function cargarDesdeSheets(piso, fecha) {
             }
         }
 
-        async function enviarDatos() {
+       async function enviarDatos() {
+    if (!CONFIG.SHEET_ENDPOINT) {
+        alert('⚠️ Error de configuración: falta SHEET_ENDPOINT en CONFIG');
+        return;
+    }
     const piso = userData.currentFloor;
     if (!userData.nurseName || !piso) {
         alert('⚠️ Faltan datos: enfermero o piso no seleccionado');
@@ -1185,6 +1189,20 @@ async function cargarDesdeSheets(piso, fecha) {
 
     const camasData = dataPorPiso[piso]?.camasData || {};
     const floorNotes = document.getElementById('notasPiso').value || '';
+
+    const hayDatosEnCamas = Object.values(camasData).some(cama => {
+        return cama.paciente?.trim() ||
+               cama.observaciones?.trim() ||
+               (cama.aislamiento && cama.aislamiento !== 'Ninguno') ||
+               Object.entries(cama).some(([key, value]) =>
+                   value === true && !['paciente', 'aislamiento', 'observaciones'].includes(key)
+               );
+    });
+
+    if (!hayDatosEnCamas && !floorNotes) {
+        alert('⚠️ No hay datos cargados para enviar. Complete al menos una cama o las notas del piso.');
+        return;
+    }
 
     const payload = {
         action: 'guardar',
@@ -1214,7 +1232,6 @@ async function cargarDesdeSheets(piso, fecha) {
         if (btn) { btn.innerHTML = textoOriginal; btn.disabled = false; }
     }
 }
-
 function borrarCamposPiso() {
     const piso = userData.currentFloor;
     if (!piso) {
